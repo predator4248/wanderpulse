@@ -4,3 +4,4 @@ data/geoapify_cache.json
 scratch/
 .system_generated/
 *.log
+*.exe
