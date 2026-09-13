@@ -1,0 +1,29 @@
+{
+  "name": "wanderpulse-bali-3d",
+  "version": "1.0.0",
+  "description": "Modern Real-Time 3D Tourism & Transit Platform built with Node.js, Express, Three.js, and Vanilla CSS",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node test_verify.js"
+  },
+  "keywords": [
+    "tourism",
+    "bali",
+    "3d",
+    "webgl",
+    "threejs",
+    "nodejs",
+    "express"
+  ],
+  "author": "WanderPulse Team",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,221 @@
+/* ==========================================================================
+   WANDERPULSE BALI - RESPONSIVE STYLESHEET
+   Breakpoints, Touch Optimizations, Mobile Navigation & Print Styles
+   ========================================================================== */
+
+/* --- Large Desktop / Screens < 1200px --- */
+@media (max-width: 1200px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .hero-visual-card {
+    max-width: 700px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+}
+
+/* --- Screens < 1100px: Hide desktop middle pills to avoid overcrowding --- */
+@media (max-width: 1100px) {
+  .nav-desktop-quick {
+    display: none;
+  }
+}
+
+/* --- Tablets & Medium Screens < 992px --- */
+@media (max-width: 992px) {
+  :root {
+    --header-height: 72px;
+  }
+
+  .section-padding {
+    padding-top: 72px;
+    padding-bottom: 72px;
+  }
+
+  .three-lines-drawer {
+    width: min(440px, 92vw);
+  }
+
+  .nav-actions .currency-picker {
+    display: none; /* Accessible inside Three-Lines Menu */
+  }
+
+  .nav-actions .soundscape-text {
+    display: none; /* Just icon in header */
+  }
+
+  /* Transit Mode Pane */
+  .transit-pane.active {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  /* Transit Mode Pane */
+  .transit-pane.active {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  /* Estimator Layout */
+  .estimator-layout {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  /* Map Layout */
+  .map-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Phablets & Small Tablets < 768px --- */
+@media (max-width: 768px) {
+  .hero-search-box {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .hero-search-box .btn-primary-grad {
+    width: 100%;
+    padding: 14px;
+  }
+
+  .hero-stats {
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .route-input-group {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .route-swap-icon {
+    display: none;
+  }
+
+  .attractions-grid,
+  .hotels-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .transit-highlights-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+}
+
+/* --- Mobile Phones < 480px --- */
+@media (max-width: 480px) {
+  .container {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .three-lines-drawer {
+    width: 100vw;
+    border-left: none;
+  }
+
+  .three-lines-toggle {
+    padding: 7px 12px;
+  }
+
+  .header-quick-action.soundscape-btn,
+  .header-quick-action.theme-btn {
+    display: none; /* Accessible in Three-Lines Menu */
+  }
+
+  .section-title {
+    font-size: 1.85rem;
+  }
+
+  .hero-title {
+    font-size: 2.3rem;
+  }
+
+  .hero-visual-card img {
+    height: 380px;
+  }
+
+  .floating-weather-badge,
+  .floating-transit-badge {
+    position: static;
+    margin: 12px;
+    width: fit-content;
+  }
+
+  .tier-select-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .newsletter-form {
+    flex-direction: column;
+  }
+  .newsletter-form button {
+    width: 100%;
+  }
+
+  .modal-dialog {
+    margin: 10px;
+    max-height: 94vh;
+  }
+  .modal-body {
+    padding: 20px;
+  }
+}
+
+/* --- Accessibility & Reduced Motion --- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- Print Stylesheet --- */
+@media print {
+  .site-header,
+  .theme-btn,
+  .currency-picker,
+  .modal-backdrop,
+  .toast-container,
+  .newsletter-form,
+  .hero-search-box {
+    display: none !important;
+  }
+
+  body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+  }
+
+  .glass-card, .glass-panel {
+    box-shadow: none !important;
+    border: 1px solid #CCCCCC !important;
+    break-inside: avoid;
+  }
+}

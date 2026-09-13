@@ -1,0 +1,25 @@
+{
+  "name": "WanderPulse Bali - 3D Island Tourism & Transit Guide",
+  "short_name": "WanderPulse",
+  "description": "Comprehensive Bali travel guide with 3D terrain maps, famous attractions, verified stays, transit planner, offline guide & live telemetry.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B0F19",
+  "theme_color": "#8B5CF6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23FF5E62'/><stop offset='50%' stop-color='%238B5CF6'/><stop offset='100%' stop-color='%2306B6D4'/></linearGradient></defs><rect width='100' height='100' rx='22' fill='%230B0F19'/><polygon points='20 50 85 15 50 85 45 55 20 50' fill='url(%23g)'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23FF5E62'/><stop offset='50%' stop-color='%238B5CF6'/><stop offset='100%' stop-color='%2306B6D4'/></linearGradient></defs><rect width='100' height='100' rx='22' fill='%230B0F19'/><polygon points='20 50 85 15 50 85 45 55 20 50' fill='url(%23g)'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["travel", "navigation", "lifestyle"]
+}

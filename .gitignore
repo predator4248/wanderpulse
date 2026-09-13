@@ -1,0 +1,6 @@
+node_modules/
+.env
+data/geoapify_cache.json
+scratch/
+.system_generated/
+*.log

@@ -1,0 +1,224 @@
+/* ==========================================================================
+   WANDERPULSE BALI - REAL-TIME 3D DESIGN & DEPTH STYLESHEET
+   Perspective Matrices, Layered Z-Depth, Holographic Glare & 3D WebGL Canvas
+   ========================================================================== */
+
+/* --- 3D Perspective Containers --- */
+.perspective-container {
+  perspective: 1200px;
+  -webkit-perspective: 1200px;
+}
+
+/* --- Real-Time 3D Tilt Card Base --- */
+[data-tilt-3d] {
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transition: transform 0.15s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.2s ease;
+  will-change: transform;
+  position: relative;
+}
+
+/* Layered Z-Depth Pop-Outs */
+[data-tilt-3d] .spot-image-wrapper,
+[data-tilt-3d] .hotel-image-wrapper {
+  transform: translateZ(25px);
+  -webkit-transform: translateZ(25px);
+  border-radius: var(--radius-sm);
+  transition: transform 0.3s ease;
+}
+
+[data-tilt-3d] .spot-category-badge,
+[data-tilt-3d] .hotel-tier-badge {
+  transform: translateZ(55px);
+  -webkit-transform: translateZ(55px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+[data-tilt-3d] .spot-rating-badge {
+  transform: translateZ(50px);
+  -webkit-transform: translateZ(50px);
+}
+
+[data-tilt-3d] .spot-title,
+[data-tilt-3d] .hotel-title {
+  transform: translateZ(35px);
+  -webkit-transform: translateZ(35px);
+}
+
+[data-tilt-3d] .spot-desc,
+[data-tilt-3d] .hotel-proximity {
+  transform: translateZ(20px);
+  -webkit-transform: translateZ(20px);
+}
+
+[data-tilt-3d] .btn-primary-grad,
+[data-tilt-3d] .btn-outline {
+  transform: translateZ(45px);
+  -webkit-transform: translateZ(45px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+}
+
+[data-tilt-3d] .price-amount {
+  transform: translateZ(40px);
+  -webkit-transform: translateZ(40px);
+  display: inline-block;
+}
+
+/* --- Holographic Specular Glare Overlay --- */
+.tilt-glare-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.08) 35%,
+    transparent 70%
+  );
+  opacity: 0;
+  mix-blend-mode: overlay;
+  transition: opacity 0.25s ease;
+  z-index: 15;
+}
+
+/* --- Hero 3D WebGL Canvas --- */
+.hero-3d-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: auto; /* Allows mouse orbit interaction */
+  overflow: hidden;
+}
+
+.hero-3d-bg canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* Ensure Hero Text Stays Crisp Above 3D Canvas */
+.hero-intro {
+  position: relative;
+  z-index: 3;
+}
+
+/* --- 3D Tactile Buttons with Real Depth --- */
+.btn-3d {
+  position: relative;
+  transform: translateY(0);
+  box-shadow: 0 6px 0 rgba(139, 92, 246, 0.4), 0 12px 25px rgba(0, 0, 0, 0.35);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.btn-3d:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 0 rgba(139, 92, 246, 0.4), 0 16px 30px rgba(0, 0, 0, 0.4);
+}
+.btn-3d:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 rgba(139, 92, 246, 0.4), 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* --- 3D Regional Island Topography Canvas --- */
+.map-3d-wrapper {
+  position: relative;
+  width: 100%;
+  height: 480px;
+  background: radial-gradient(circle at 50% 50%, rgba(17, 24, 39, 0.95) 0%, #0B0F19 100%);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg), 0 0 50px rgba(139, 92, 246, 0.15);
+}
+[data-theme="light"] .map-3d-wrapper {
+  background: radial-gradient(circle at 50% 50%, #E2E8F0 0%, #F1F5F9 100%);
+}
+
+.map-3d-wrapper canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  cursor: grab;
+}
+.map-3d-wrapper canvas:active {
+  cursor: grabbing;
+}
+
+.map-3d-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 10;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+.map-3d-hint-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--grad-aurora);
+  color: #fff;
+  font-size: 11px;
+}
+
+.map-3d-reset-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--trans-fast);
+}
+.map-3d-reset-btn:hover {
+  border-color: var(--accent-violet);
+  color: var(--accent-violet);
+}
+
+/* 3D Floating Badges in Hero */
+.floating-3d-element {
+  animation: float3d 6s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+@keyframes float3d {
+  0%, 100% {
+    transform: translateY(0) rotateX(0deg) rotateY(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotateX(4deg) rotateY(-4deg);
+  }
+}
+
+/* 3D Embossed Multi-Color Rim */
+.emboss-3d-rim {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+/* Responsive adjustments for 3D */
+@media (max-width: 768px) {
+  .map-3d-wrapper {
+    height: 380px;
+  }
+  [data-tilt-3d] {
+    transform: none !important; /* Disable on mobile touch to avoid jitter */
+  }
+}
