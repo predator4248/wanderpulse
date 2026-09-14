@@ -2165,11 +2165,11 @@
 
         <!-- Main Large Photo Viewport with Prev/Next Navigation -->
         <div class="gallery-viewport">
-          <button type="button" class="gallery-nav-btn nav-prev" id="galleryPrevBtn" aria-label="Previous Photo">❮</button>
+          <button type="button" class="gallery-nav-btn nav-prev" id="galleryPrevBtn" onclick="window.galleryPrevPhoto(event)" aria-label="Previous Photo">❮</button>
           <div class="gallery-main-img-wrap">
             <img id="galleryMainImg" src="" alt="Location Photo" />
           </div>
-          <button type="button" class="gallery-nav-btn nav-next" id="galleryNextBtn" aria-label="Next Photo">❯</button>
+          <button type="button" class="gallery-nav-btn nav-next" id="galleryNextBtn" onclick="window.galleryNextPhoto(event)" aria-label="Next Photo">❯</button>
         </div>
 
         <!-- Photo Caption & Photography Tip Bar -->
@@ -2204,8 +2204,10 @@
           <!-- Left Column: Hotel Gallery Slider -->
           <div class="hotel-detail-left">
             <div class="hotel-hero-img-wrap">
+              <button type="button" class="gallery-nav-btn nav-prev" id="hotelPrevBtn" onclick="window.hotelPrevPhoto(event)" aria-label="Previous Hotel Photo" style="width: 38px; height: 38px; font-size: 1rem; left: 12px;">❮</button>
               <img id="hotelDetailMainImg" src="" alt="Hotel Property" />
               <div class="hotel-photo-badge" id="hotelPhotoCounter">1 of 4 Photos</div>
+              <button type="button" class="gallery-nav-btn nav-next" id="hotelNextBtn" onclick="window.hotelNextPhoto(event)" aria-label="Next Hotel Photo" style="width: 38px; height: 38px; font-size: 1rem; right: 12px;">❯</button>
             </div>
             <div class="hotel-thumbs-strip" id="hotelThumbsStrip">
               <!-- Rendered dynamically via JS -->

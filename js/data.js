@@ -955,6 +955,8 @@ let TRANSIT_DATA = {
   }
 };
 
+const TRANSIT_ROUTES_PRESETS = TRANSIT_DATA.presets;
+
 let FAQ_DATA = [
   {
     q: 'What is the best time of year to visit Bali?',
@@ -1197,6 +1199,7 @@ if (typeof module !== 'undefined' && module.exports) {
     ATTRACTIONS_DATA,
     HOTELS_DATA,
     TRANSIT_DATA,
+    TRANSIT_ROUTES_PRESETS,
     FAQ_DATA,
     GEOAPIFY_VERIFIED_PLACES,
     formatPrice

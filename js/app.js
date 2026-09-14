@@ -4,33 +4,43 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  initTheme();
-  initBaliClock();
-  initNavbar();
-  initCurrency();
-  initHeroSearch();
-  loadApiDataAndRender();
-  initAttractionFilters();
-  initHotelFilters();
-  initTransitHub();
-  initRouteCalculator();
-  initBudgetEstimator();
-  initMapInteractions();
-  initGeoapifyPlacesExplorer();
-  initItineraryBuilder();
-  initCurrencyCalculator();
-  initChecklist();
-  initPhrasebook();
-  initAmbientSoundscape();
-  initFAQ();
-  initNewsletter();
-  initGalleryModal();
-  initTransitBooking();
-  initRentalBooking();
-  initVisaChecker();
-  initSkySimulator();
-  initCommunityReviews();
-  registerServiceWorker();
+  const inits = [
+    ['Theme', initTheme],
+    ['BaliClock', initBaliClock],
+    ['Navbar', initNavbar],
+    ['Currency', initCurrency],
+    ['HeroSearch', initHeroSearch],
+    ['ApiData', loadApiDataAndRender],
+    ['AttractionFilters', initAttractionFilters],
+    ['HotelFilters', initHotelFilters],
+    ['TransitHub', initTransitHub],
+    ['RouteCalculator', initRouteCalculator],
+    ['BudgetEstimator', initBudgetEstimator],
+    ['MapInteractions', initMapInteractions],
+    ['GeoapifyPlaces', initGeoapifyPlacesExplorer],
+    ['ItineraryBuilder', initItineraryBuilder],
+    ['CurrencyCalculator', initCurrencyCalculator],
+    ['Checklist', initChecklist],
+    ['Phrasebook', initPhrasebook],
+    ['AmbientSoundscape', initAmbientSoundscape],
+    ['FAQ', initFAQ],
+    ['Newsletter', initNewsletter],
+    ['GalleryModal', initGalleryModal],
+    ['TransitBooking', initTransitBooking],
+    ['RentalBooking', initRentalBooking],
+    ['VisaChecker', initVisaChecker],
+    ['SkySimulator', initSkySimulator],
+    ['CommunityReviews', initCommunityReviews],
+    ['ServiceWorker', registerServiceWorker]
+  ];
+
+  inits.forEach(([name, fn]) => {
+    try {
+      if (typeof fn === 'function') fn();
+    } catch (err) {
+      console.warn(`[WanderPulse Init Warning] ${name}:`, err);
+    }
+  });
 });
 
 /* ==========================================================================
@@ -453,6 +463,29 @@ function filterAttractionsBySearch(query) {
   `).join('');
 }
 
+let currentAttractionModalPhotoIdx = 0;
+window.attractionModalNextPhoto = function(spotId, e) {
+  if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+  const spot = ATTRACTIONS_DATA.find(s => s.id === spotId);
+  if (!spot || !Array.isArray(spot.gallery) || spot.gallery.length <= 1) return;
+  currentAttractionModalPhotoIdx = (currentAttractionModalPhotoIdx + 1) % spot.gallery.length;
+  const imgEl = document.getElementById('attractionModalMainImg');
+  const counterEl = document.getElementById('attractionModalCounter');
+  if (imgEl) imgEl.src = spot.gallery[currentAttractionModalPhotoIdx].url;
+  if (counterEl) counterEl.textContent = `${currentAttractionModalPhotoIdx + 1} of ${spot.gallery.length} Photos`;
+};
+
+window.attractionModalPrevPhoto = function(spotId, e) {
+  if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+  const spot = ATTRACTIONS_DATA.find(s => s.id === spotId);
+  if (!spot || !Array.isArray(spot.gallery) || spot.gallery.length <= 1) return;
+  currentAttractionModalPhotoIdx = (currentAttractionModalPhotoIdx - 1 + spot.gallery.length) % spot.gallery.length;
+  const imgEl = document.getElementById('attractionModalMainImg');
+  const counterEl = document.getElementById('attractionModalCounter');
+  if (imgEl) imgEl.src = spot.gallery[currentAttractionModalPhotoIdx].url;
+  if (counterEl) counterEl.textContent = `${currentAttractionModalPhotoIdx + 1} of ${spot.gallery.length} Photos`;
+};
+
 window.openAttractionModal = function(spotId) {
   const spot = ATTRACTIONS_DATA.find(s => s.id === spotId);
   if (!spot) return;
@@ -461,9 +494,19 @@ window.openAttractionModal = function(spotId) {
   const modalContent = document.getElementById('attractionModalContent');
   if (!modalBackdrop || !modalContent) return;
 
+  currentAttractionModalPhotoIdx = 0;
+  const hasGallery = Array.isArray(spot.gallery) && spot.gallery.length > 1;
+
   modalContent.innerHTML = `
-    <div style="border-radius: var(--radius-md); overflow: hidden; height: 260px; margin-bottom: 24px;">
-      <img src="${spot.image}" alt="${spot.name}" style="width: 100%; height: 100%; object-fit: cover;" />
+    <div style="border-radius: var(--radius-md); overflow: hidden; height: 280px; margin-bottom: 24px; position: relative; background: #0B0F19;">
+      ${hasGallery ? `
+        <button type="button" class="gallery-nav-btn nav-prev" onclick="window.attractionModalPrevPhoto('${spot.id}', event)" aria-label="Previous Photo" style="width: 38px; height: 38px; font-size: 1rem; left: 12px;">❮</button>
+      ` : ''}
+      <img id="attractionModalMainImg" src="${spot.image}" alt="${spot.name}" style="width: 100%; height: 100%; object-fit: cover;" />
+      ${hasGallery ? `
+        <button type="button" class="gallery-nav-btn nav-next" onclick="window.attractionModalNextPhoto('${spot.id}', event)" aria-label="Next Photo" style="width: 38px; height: 38px; font-size: 1rem; right: 12px;">❯</button>
+        <div id="attractionModalCounter" class="hotel-photo-badge" style="bottom: 12px; right: 12px;">1 of ${spot.gallery.length} Photos</div>
+      ` : ''}
     </div>
     <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 12px;">
       <div>
@@ -805,7 +848,32 @@ function initRouteCalculator() {
 }
 
 function updateRouteResults(cityKey) {
-  const data = TRANSIT_ROUTES_PRESETS[cityKey] || TRANSIT_ROUTES_PRESETS['new-york'];
+  const presets = (typeof TRANSIT_ROUTES_PRESETS !== 'undefined' && TRANSIT_ROUTES_PRESETS)
+    || (typeof TRANSIT_DATA !== 'undefined' && TRANSIT_DATA.presets)
+    || {};
+  const rawData = presets[cityKey] || presets['new-york'] || {};
+  const data = {
+    city: rawData.city || 'Origin City',
+    flight: {
+      duration: rawData.flight?.duration || '12 hrs',
+      airlines: rawData.flight?.airlines || rawData.flight?.airline || 'Singapore Airlines / Emirates',
+      stops: rawData.flight?.stops || '1 Stop',
+      tip: rawData.flight?.tip || 'Book 4-6 weeks ahead for best fares.',
+      priceUSD: rawData.flight?.priceUSD || rawData.flight?.costUSD || 650
+    },
+    train: {
+      available: rawData.train?.available ?? rawData.trainOption?.available ?? true,
+      duration: rawData.train?.duration || rawData.trainOption?.duration || 'Scenic Rail',
+      route: rawData.train?.route || rawData.trainOption?.summary || 'Trans-Java Executive Rail',
+      note: rawData.train?.note || rawData.trainOption?.summary || 'Scenic rail crossing available.',
+      priceUSD: rawData.train?.priceUSD || rawData.trainOption?.costUSD || 50
+    },
+    bus: {
+      available: rawData.bus?.available ?? rawData.busOption?.available ?? true,
+      duration: rawData.bus?.duration || rawData.busOption?.duration || 'Island Coach',
+      priceUSD: rawData.bus?.priceUSD || rawData.busOption?.costUSD || 35
+    }
+  };
   const displayContainer = document.getElementById('routeResultDisplay');
   if (!displayContainer) return;
 
@@ -2085,20 +2153,26 @@ let currentGalleryData = {
   type: 'attraction'
 };
 
+window.galleryNextPhoto = function(e) {
+  if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+  window.setGalleryIndex(currentGalleryData.currentIndex + 1);
+};
+
+window.galleryPrevPhoto = function(e) {
+  if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+  window.setGalleryIndex(currentGalleryData.currentIndex - 1);
+};
+
 function initGalleryModal() {
   const prevBtn = document.getElementById('galleryPrevBtn');
   const nextBtn = document.getElementById('galleryNextBtn');
 
   if (prevBtn) {
-    prevBtn.addEventListener('click', () => {
-      window.setGalleryIndex(currentGalleryData.currentIndex - 1);
-    });
+    prevBtn.onclick = (e) => window.galleryPrevPhoto(e);
   }
 
   if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-      window.setGalleryIndex(currentGalleryData.currentIndex + 1);
-    });
+    nextBtn.onclick = (e) => window.galleryNextPhoto(e);
   }
 
   // Keyboard navigation for gallery
@@ -2236,14 +2310,18 @@ window.setGalleryIndex = function(idx) {
 
   // Update thumbnail active indicators
   const thumbs = document.querySelectorAll('#galleryThumbsRow .gallery-thumb');
-  thumbs.forEach((t, i) => {
-    if (i === idx) {
-      t.classList.add('active');
-      t.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    } else {
-      t.classList.remove('active');
-    }
-  });
+  if (thumbs && typeof thumbs.forEach === 'function') {
+    thumbs.forEach((t, i) => {
+      if (i === idx) {
+        t.classList.add('active');
+        if (typeof t.scrollIntoView === 'function') {
+          t.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+      } else {
+        t.classList.remove('active');
+      }
+    });
+  }
 };
 
 /* ==========================================================================
@@ -2251,6 +2329,48 @@ window.setGalleryIndex = function(idx) {
    ========================================================================== */
 let activeHotelForDetail = null;
 let activeRoomForDetail = null;
+let currentHotelPhotoIdx = 0;
+
+window.setHotelPhotoIndex = function(idx) {
+  if (!activeHotelForDetail) return;
+  const gallery = Array.isArray(activeHotelForDetail.gallery) && activeHotelForDetail.gallery.length > 0
+    ? activeHotelForDetail.gallery
+    : [{ url: activeHotelForDetail.image, title: activeHotelForDetail.name }];
+  const count = gallery.length;
+  if (idx < 0) idx = count - 1;
+  if (idx >= count) idx = 0;
+  currentHotelPhotoIdx = idx;
+
+  const mainImg = document.getElementById('hotelDetailMainImg');
+  const photoCounter = document.getElementById('hotelPhotoCounter');
+  const thumbsStrip = document.getElementById('hotelThumbsStrip');
+
+  if (mainImg) mainImg.src = gallery[idx].url;
+  if (photoCounter) photoCounter.textContent = `${idx + 1} of ${count} Photos`;
+
+  if (thumbsStrip && typeof thumbsStrip.querySelectorAll === 'function') {
+    thumbsStrip.querySelectorAll('.hotel-thumb').forEach((thumb, i) => {
+      if (i === idx) {
+        thumb.classList.add('active');
+        if (typeof thumb.scrollIntoView === 'function') {
+          thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+      } else {
+        thumb.classList.remove('active');
+      }
+    });
+  }
+};
+
+window.hotelNextPhoto = function(e) {
+  if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+  window.setHotelPhotoIndex(currentHotelPhotoIdx + 1);
+};
+
+window.hotelPrevPhoto = function(e) {
+  if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+  window.setHotelPhotoIndex(currentHotelPhotoIdx - 1);
+};
 
 window.openHotelDetail = function(hotelId, defaultRoomId = null) {
   const hotel = HOTELS_DATA.find(h => h.id === hotelId);
@@ -2306,28 +2426,16 @@ window.openHotelDetail = function(hotelId, defaultRoomId = null) {
     ? hotel.gallery
     : [{ url: hotel.image, title: hotel.name, caption: hotel.description }];
 
-  const mainImg = document.getElementById('hotelDetailMainImg');
-  const photoCounter = document.getElementById('hotelPhotoCounter');
   const thumbsStrip = document.getElementById('hotelThumbsStrip');
-
-  if (mainImg) mainImg.src = gallery[0].url;
-  if (photoCounter) photoCounter.textContent = `1 of ${gallery.length} Photos`;
+  currentHotelPhotoIdx = 0;
+  window.setHotelPhotoIndex(0);
 
   if (thumbsStrip) {
     thumbsStrip.innerHTML = gallery.map((g, i) => `
-      <div class="hotel-thumb ${i === 0 ? 'active' : ''}" data-idx="${i}">
+      <div class="hotel-thumb ${i === 0 ? 'active' : ''}" data-idx="${i}" onclick="window.setHotelPhotoIndex(${i})">
         <img src="${g.url}" alt="${g.title || hotel.name}" loading="lazy" />
       </div>
     `).join('');
-
-    thumbsStrip.querySelectorAll('.hotel-thumb').forEach((thumb, idx) => {
-      thumb.addEventListener('click', () => {
-        thumbsStrip.querySelectorAll('.hotel-thumb').forEach(t => t.classList.remove('active'));
-        thumb.classList.add('active');
-        if (mainImg) mainImg.src = gallery[idx].url;
-        if (photoCounter) photoCounter.textContent = `${idx + 1} of ${gallery.length} Photos`;
-      });
-    });
   }
 
   // Amenities Chips
