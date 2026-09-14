@@ -4,7 +4,7 @@
  * Cache-First with background revalidation for static assets.
  */
 
-const CACHE_NAME = 'wanderpulse-bali-v3.0';
+const CACHE_NAME = 'wanderpulse-v4.0';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

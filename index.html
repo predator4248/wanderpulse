@@ -184,6 +184,41 @@
     </div>
   </header>
 
+  <!-- DEDICATED MULTI-LAYER DESTINATION DISCOVERY BAR (STEPPER NAVIGATION) -->
+  <div class="destination-bar-wrapper" id="destinationBarWrapper">
+    <div class="container dest-bar-container">
+      <div class="dest-stepper-left">
+        <span class="dest-bar-label">🌍 Explore Destination:</span>
+        <div class="destination-breadcrumbs-bar" id="destinationBreadcrumbsBar">
+          <button type="button" class="dest-crumb-btn crumb-country" id="destCrumbCountry" onclick="window.openDestinationExplorerModal('country')" title="Click to Change Country">
+            <span class="crumb-flag" id="crumbCountryFlag">🇮🇳</span>
+            <span class="crumb-name" id="crumbCountryName">India (Bharat)</span>
+            <span class="crumb-arrow">▾</span>
+          </button>
+          <span class="dest-crumb-sep">›</span>
+          <button type="button" class="dest-crumb-btn crumb-state" id="destCrumbState" onclick="window.openDestinationExplorerModal('state')" title="Click to Change State">
+            <span class="crumb-icon" id="crumbStateIcon">🏰</span>
+            <span class="crumb-name" id="crumbStateName">Rajasthan</span>
+            <span class="crumb-arrow">▾</span>
+          </button>
+          <span class="dest-crumb-sep">›</span>
+          <button type="button" class="dest-crumb-btn crumb-district active" id="destCrumbDistrict" onclick="window.openDestinationExplorerModal('district')" title="Click to Change District">
+            <span class="crumb-pin" id="crumbDistrictIcon">🌸</span>
+            <span class="crumb-name" id="crumbDistrictName">Jaipur</span>
+            <span class="crumb-arrow">▾</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="dest-stepper-right">
+        <button type="button" class="btn-change-dest-modal" onclick="window.openDestinationExplorerModal()" title="Open Complete Destination Hierarchy Explorer">
+          <span class="pulse-dot-sm"></span>
+          <span>🗺️ Change Destination</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ==========================================================================
        DEDICATED SCROLLABLE "THREE LINES" (☰) NAVIGATION & ISLAND HUB SECTION
        Houses all top tools, telemetry, controls, quick launchpad, directory, and SOS
@@ -492,19 +527,19 @@
         <div class="hero-intro">
           <div class="hero-badge-live">
             <span class="pulse-dot"></span>
-            <span class="hero-badge-item">Bali Live: <span id="baliTimeClock">12:00:00 PM</span> (WITA)</span>
+            <span class="hero-badge-item"><span id="heroLiveCityLabel">Jaipur</span> Live: <span id="baliTimeClock">12:00:00 PM</span> (<span id="heroTzLabel">IST</span>)</span>
             <span class="hero-badge-sep">•</span>
-            <span class="hero-badge-item"><span id="baliWeatherTemp">29°C</span> <span id="baliWeatherCond">☀️ Warm Tropical Sun</span></span>
+            <span class="hero-badge-item"><span id="baliWeatherTemp">27°C</span> <span id="baliWeatherCond">☀️ Warm Sunshine</span></span>
             <span class="hero-badge-sep">•</span>
-            <span class="hero-badge-item" id="baliSunsetItem"><span id="baliSunsetCountdown">🌅 Calculating Sunset...</span></span>
+            <span class="hero-badge-item" id="baliSunsetItem"><span id="baliSunsetCountdown">🌅 Sunset: 18:25</span></span>
           </div>
 
-          <h1 class="hero-title">
-            Experience the Magic of <span class="text-grad-aurora">Bali</span> — Where Myth Meets Paradise
+          <h1 class="hero-title" id="heroMainTitle">
+            Experience the Royal Splendor of <span class="text-grad-aurora" id="heroHighlightText">Jaipur, Rajasthan</span> — The Pink City
           </h1>
 
-          <p class="hero-lead">
-            From cliffside sunset temples and emerald terraced valleys to luxury rainforest villas. Discover top tourist attractions, nearby accommodations, and complete transit guides by flights, scenic trains, and express sleeper coaches.
+          <p class="hero-lead" id="heroLeadText">
+            From majestic hillforts like Amer Fort and Hawa Mahal to royal heritage havelis and palaces. Discover top tourist attractions, verified luxury stays, and complete transit guides by high-speed Vande Bharat Express trains, flights, and express sleeper buses.
           </p>
 
           <!-- Quick Travel Search Widget -->
@@ -570,26 +605,26 @@
 
         <!-- Right: Floating Visual Card with Weather & Transit Badge -->
         <div class="hero-visual-card" data-tilt-3d>
-          <img src="/images/attractions/tanah-lot/main.jpg" 
-               alt="Scenic Balinese ancient seaside temple Tanah Lot at sunset with glowing vibrant sky" 
+          <img id="heroVisualImg" src="https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80" 
+               alt="Scenic destination landmark view" 
                loading="eager" />
           
           <div class="floating-weather-badge">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF9900" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
             <div>
-              <span class="weather-temp" id="heroFloatingTemp">29°C</span>
-              <span style="font-size: 0.75rem; display: block; color: #CBD5E1;" id="heroFloatingCond">Sunny Golden Hour</span>
+              <span class="weather-temp" id="heroFloatingTemp">27°C</span>
+              <span style="font-size: 0.75rem; display: block; color: #CBD5E1;" id="heroFloatingCity">Jaipur, India</span>
             </div>
           </div>
 
           <div class="hero-visual-overlay">
             <div class="floating-transit-badge">
-              <div class="transit-badge-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5"><path d="M22 2L11 13"></path><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              <div class="transit-badge-icon" id="heroTransitBadgeIcon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5"><rect x="4" y="3" width="16" height="16" rx="2"></rect><path d="M4 11h16"></path><path d="M12 3v8"></path><path d="M8 19l-2 3"></path><path d="M16 19l2 3"></path></svg>
               </div>
               <div>
-                <strong style="font-size: 0.95rem; display: block;">Seamless Island Access</strong>
-                <span style="font-size: 0.8rem; color: #E2E8F0;">Direct flights to DPS + Scenic Java Rail Overland</span>
+                <strong style="font-size: 0.95rem; display: block;" id="heroTransitBadgeTitle">Vande Bharat & Air Links</strong>
+                <span style="font-size: 0.8rem; color: #E2E8F0;" id="heroTransitBadgeSub">High-speed rail from Delhi + Non-stop domestic flights</span>
               </div>
             </div>
           </div>
@@ -604,10 +639,10 @@
         <div class="section-header">
           <span class="section-tag tag-coral">Iconic Destinations</span>
           <h2 id="attractions-heading" class="section-title">
-            Famous Tourist Spots & Cultural Sanctuaries
+            Famous Tourist Spots & Cultural Sanctuaries in <span id="attractionsHeadingDistrict" class="text-grad-aurora">Jaipur</span>
           </h2>
-          <p class="section-subtitle">
-            Immerse yourself in millennium-old cliffside sea shrines, UNESCO-protected emerald rice cascades, volcanic dawn summits, and secret seven-plume gorges.
+          <p class="section-subtitle" id="attractionsHeadingSub">
+            Immerse yourself in world-renowned architectural wonders, ancient hilltop citadels, sacred shrines, and royal palaces with verified GPS coordinates and turn-by-turn navigation.
           </p>
           <div class="rainbow-divider"></div>
         </div>
@@ -638,10 +673,10 @@
         <div class="section-header">
           <span class="section-tag tag-violet">Rest & Rejuvenation</span>
           <h2 id="hotels-heading" class="section-title">
-            Nearby Hotels, Luxury Villas & Eco-Lodges
+            Nearby Stays, Luxury Palaces & Heritage Lodges in <span id="hotelsHeadingDistrict" class="text-grad-aurora">Jaipur</span>
           </h2>
-          <p class="section-subtitle">
-            From world-renowned cliffside estates in Uluwatu to serene rainforest bamboo sanctuaries in Ubud. Select and reserve with instant price conversion in your chosen currency.
+          <p class="section-subtitle" id="hotelsHeadingSub">
+            From world-renowned royal palace estates to serene boutique havelis and eco-retreats. Select and reserve with instant price conversion in your chosen currency.
           </p>
           <div class="rainbow-divider"></div>
         </div>
@@ -794,10 +829,10 @@
         <div class="section-header">
           <span class="section-tag tag-cyan">Multi-Modal Transit Hub</span>
           <h2 id="transit-heading" class="section-title">
-            How to Reach Bali: Flights, Trains & Sleeper Buses
+            How to Reach <span id="transitHeadingDistrict">Jaipur</span>: Flights, Vande Bharat Express & Sleeper Buses
           </h2>
-          <p class="section-subtitle">
-            Plan your complete journey from your home city to Bali. Whether flying non-stop into Ngurah Rai Airport, boarding the scenic Trans-Java Executive Express train across volcanic landscapes, or riding luxury sleeper coaches.
+          <p class="section-subtitle" id="transitHeadingSub">
+            Plan your complete journey from your departure city. Whether flying into regional and international airport hubs, boarding semi-high-speed Vande Bharat Express trains, or riding luxury Volvo sleeper coaches.
           </p>
           <div class="rainbow-divider"></div>
         </div>
@@ -1267,14 +1302,14 @@
         <div class="commute-calculator-panel" id="island-commute-calc">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
             <div>
-              <span class="section-tag tag-emerald">Live Bali Transit Intelligence</span>
-              <h3 style="font-size: 1.6rem; font-weight: 800; margin: 6px 0 4px;">Point-to-Point Island Commute & Fare Calculator</h3>
-              <p style="color: var(--text-secondary); max-width: 720px; font-size: 0.92rem; line-height: 1.6;">
-                Plan your intra-island travel between Bali’s distinct regions. Compare realistic travel times, narrow road bottlenecks, private driver rates, scooter speeds, and Grab/Gojek zone permissions with 1-click Google Maps turn-by-turn navigation.
+              <span class="section-tag tag-emerald" id="commuteTagBadge">Live Transit Intelligence</span>
+              <h3 style="font-size: 1.6rem; font-weight: 800; margin: 6px 0 4px;">Point-to-Point <span id="commuteHeadingDistrict">Jaipur</span> Commute & Fare Calculator</h3>
+              <p style="color: var(--text-secondary); max-width: 720px; font-size: 0.92rem; line-height: 1.6;" id="commuteHeadingSub">
+                Plan your travel between distinct regional hubs and monuments. Compare realistic travel times, chauffeur cab rates, auto-rickshaw/scooter speeds, and app booking permissions with 1-click Google Maps turn-by-turn navigation.
               </p>
             </div>
             <div style="display: flex; gap: 8px; align-items: center;">
-              <span class="co2-badge">📍 Verified Bali GIS Routing</span>
+              <span class="co2-badge" id="commuteGisBadge">📍 Verified Regional GIS Routing</span>
             </div>
           </div>
 
@@ -3263,13 +3298,109 @@
     </div>
   </div>
 
+  <!-- 9. MULTI-LAYER DESTINATION DISCOVERY EXPLORER MODAL (COUNTRY > STATE > DISTRICT) -->
+  <div class="modal-backdrop" id="destinationExplorerModal" role="dialog" aria-modal="true" aria-labelledby="destExplorerTitle">
+    <div class="modal-dialog modal-dest-dialog">
+      <button class="modal-close-btn" onclick="closeModal('destinationExplorerModal')" aria-label="Close destination explorer">✕</button>
+      <div class="modal-body dest-modal-body">
+        
+        <!-- Header -->
+        <div class="dest-explorer-header">
+          <div class="dest-explorer-badge">
+            <span class="pulse-dot-sm"></span>
+            <span>Multi-Layer Destination Discovery Engine</span>
+          </div>
+          <h2 id="destExplorerTitle" class="dest-explorer-title">
+            Choose Where You Want to Travel
+          </h2>
+          <p class="dest-explorer-desc">
+            Explore world-renowned destinations with interactive multi-layer discovery. Select your country, choose a state, pick your district or city, and instantly unlock complete sightseeing spots, verified hotels, Vande Bharat & flight transit hubs, and fare calculators.
+          </p>
+        </div>
+
+        <!-- Real-Time Destination Search Bar -->
+        <div class="dest-search-wrapper">
+          <span class="dest-search-icon">🔍</span>
+          <input type="text" id="destLiveSearchInput" class="dest-search-input" placeholder="Quick search any landmark, city, state, or country (e.g., Jaipur, Amer Fort, Alleppey, Goa, Taj Mahal, Bali)..." aria-label="Quick search destinations" />
+          <button type="button" id="destSearchClearBtn" class="dest-search-clear" onclick="window.clearDestSearch()" style="display: none;" title="Clear search">✕</button>
+        </div>
+
+        <!-- Search Autocomplete Results Container (Hidden when not searching) -->
+        <div id="destSearchResultsGrid" class="dest-search-results-grid" style="display: none;">
+          <!-- Dynamically populated via JS search -->
+        </div>
+
+        <!-- 3-Phase Stepper Tabs -->
+        <div class="dest-stepper-tabs" id="destStepperTabs">
+          <button type="button" class="dest-step-tab active" data-phase="country" id="destStepTabCountry" onclick="window.switchDestPhase('country')">
+            <span class="step-num">1</span>
+            <span class="step-text">Choose Country</span>
+            <span class="step-badge" id="stepCountryBadge">4 Countries</span>
+          </button>
+          <button type="button" class="dest-step-tab" data-phase="state" id="destStepTabState" onclick="window.switchDestPhase('state')">
+            <span class="step-num">2</span>
+            <span class="step-text">Choose State</span>
+            <span class="step-badge" id="stepStateBadge">Select State</span>
+          </button>
+          <button type="button" class="dest-step-tab" data-phase="district" id="destStepTabDistrict" onclick="window.switchDestPhase('district')">
+            <span class="step-num">3</span>
+            <span class="step-text">Choose District / City</span>
+            <span class="step-badge" id="stepDistrictBadge">Select District</span>
+          </button>
+        </div>
+
+        <!-- Phase 1: Country Selection View -->
+        <div class="dest-phase-view active" id="destPhaseCountry">
+          <div class="dest-phase-heading-row">
+            <div>
+              <h3 class="dest-phase-title">Select Destination Country</h3>
+              <p class="dest-phase-sub">Featured with primary focus on India (Bharat) alongside international travel hubs.</p>
+            </div>
+          </div>
+          <div class="dest-countries-grid" id="destCountriesGrid">
+            <!-- Populated dynamically from DESTINATION_HIERARCHY -->
+          </div>
+        </div>
+
+        <!-- Phase 2: State Selection View -->
+        <div class="dest-phase-view" id="destPhaseState">
+          <div class="dest-phase-heading-row">
+            <div>
+              <button type="button" class="btn-dest-back" onclick="window.switchDestPhase('country')">‹ Back to Countries</button>
+              <h3 class="dest-phase-title">Available States in <span id="stateViewCountryName" class="text-grad-aurora">India</span></h3>
+              <p class="dest-phase-sub">Select a state or province to see famous districts and cities.</p>
+            </div>
+          </div>
+          <div class="dest-states-grid" id="destStatesGrid">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Phase 3: District / City Selection View -->
+        <div class="dest-phase-view" id="destPhaseDistrict">
+          <div class="dest-phase-heading-row">
+            <div>
+              <button type="button" class="btn-dest-back" onclick="window.switchDestPhase('state')">‹ Back to States</button>
+              <h3 class="dest-phase-title">Districts & Travel Hubs in <span id="districtViewStateName" class="text-grad-aurora">Rajasthan</span></h3>
+              <p class="dest-phase-sub">Click any district or city to re-render the entire platform experience.</p>
+            </div>
+          </div>
+          <div class="dest-districts-grid" id="destDistrictsGrid">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <!-- Dynamic Toast Container -->
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts (Cache-busted) -->
-  <script src="js/data.js?v=3.0.0"></script>
-  <script src="js/app.js?v=3.0.0"></script>
-  <script src="js/tilt3d.js?v=3.0.0"></script>
-  <script src="js/three-scene.js?v=3.0.0"></script>
+  <script src="js/data.js?v=4.0.0"></script>
+  <script src="js/app.js?v=4.0.0"></script>
+  <script src="js/tilt3d.js?v=4.0.0"></script>
+  <script src="js/three-scene.js?v=4.0.0"></script>
 </body>
 </html>

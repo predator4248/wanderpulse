@@ -452,6 +452,67 @@
   }
 }
 
+/* --- Destination Discovery Bar & Modal Responsive --- */
+@media (max-width: 768px) {
+  .destination-bar-wrapper {
+    top: 60px;
+    padding: 6px 0;
+  }
+
+  .dest-bar-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .dest-stepper-left {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .destination-breadcrumbs-bar {
+    width: 100%;
+    justify-content: space-between;
+    padding: 4px 6px;
+  }
+
+  .dest-crumb-btn {
+    font-size: 0.78rem;
+    padding: 3px 6px;
+  }
+
+  .btn-change-dest-modal {
+    width: 100%;
+    justify-content: center;
+    padding: 8px;
+    font-size: 0.82rem;
+  }
+
+  .modal-dest-dialog {
+    width: 98%;
+    max-height: 95vh;
+  }
+
+  .dest-modal-body {
+    padding: 18px 14px;
+  }
+
+  .dest-stepper-tabs {
+    gap: 4px;
+  }
+
+  .dest-step-tab {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+
+  .dest-countries-grid,
+  .dest-states-grid,
+  .dest-districts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* --- Accessibility & Reduced Motion --- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
