@@ -62,7 +62,9 @@ async function runTests() {
     }
   });
 
-  test('All hotels have 6-decimal coordinates and Google Maps links', () => {
+  test('All hotels have 6-decimal coordinates, Google Maps links, and authentic local photos', () => {
+    const fs = require('fs');
+    const path = require('path');
     assert(HOTELS_DATA.length >= 6, `Expected at least 6 hotels, got ${HOTELS_DATA.length}`);
     for (const h of HOTELS_DATA) {
       assert(typeof h.lat === 'number', `${h.id} missing numeric lat`);
@@ -72,16 +74,40 @@ async function runTests() {
       assert(h.formattedAddress && h.formattedAddress.length > 10, `${h.id} missing formattedAddress`);
       assert(h.googleMapsUrl && h.googleMapsUrl.includes(h.lat.toFixed(6)), `${h.id} googleMapsUrl does not contain lat`);
       assert(h.googleMapsDirectionsUrl && h.googleMapsDirectionsUrl.includes(h.lat.toFixed(6)), `${h.id} directions URL does not contain lat`);
+      
+      // Verify local photos
+      assert(h.image && h.image.startsWith('/images/hotels/'), `${h.id} image must be local (/images/hotels/...)`);
+      const mainPath = path.join(__dirname, h.image);
+      assert(fs.existsSync(mainPath), `${h.id} main image file does not exist at ${mainPath}`);
+      assert(fs.statSync(mainPath).size > 20000, `${h.id} main image file too small (<20KB)`);
+
+      assert(Array.isArray(h.gallery) && h.gallery.length >= 3, `${h.id} must have at least 3 gallery photos`);
+      for (const g of h.gallery) {
+        assert(g.url && g.url.startsWith('/images/hotels/'), `${h.id} gallery image ${g.url} must be local`);
+        const gPath = path.join(__dirname, g.url);
+        assert(fs.existsSync(gPath), `${h.id} gallery image not found: ${gPath}`);
+      }
+
+      assert(Array.isArray(h.rooms) && h.rooms.length >= 2, `${h.id} must have at least 2 room configurations`);
+      for (const r of h.rooms) {
+        assert(r.image && r.image.startsWith('/images/hotels/'), `${h.id} room image ${r.image} must be local`);
+        const rPath = path.join(__dirname, r.image);
+        assert(fs.existsSync(rPath), `${h.id} room image not found: ${rPath}`);
+      }
     }
   });
 
-  test('GEOAPIFY_VERIFIED_PLACES dictionary has 15 verified entries', () => {
+  test('GEOAPIFY_VERIFIED_PLACES dictionary has 15 verified entries with photos and Plus Codes', () => {
     const keys = Object.keys(GEOAPIFY_VERIFIED_PLACES);
     assert(keys.length >= 15, `Expected 15 entries, got ${keys.length}`);
     for (const [id, place] of Object.entries(GEOAPIFY_VERIFIED_PLACES)) {
       assert(place.lat && place.lng, `${id} missing lat/lng`);
       assert(place.formattedAddress, `${id} missing formattedAddress`);
       assert(place.googleMapsUrl, `${id} missing googleMapsUrl`);
+      assert(place.plusCode, `${id} missing plusCode`);
+      if (place.category !== 'airport') {
+        assert(place.image && place.image.startsWith('/images/'), `${id} missing local image`);
+      }
     }
   });
 

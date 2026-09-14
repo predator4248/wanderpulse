@@ -1,5 +1,21 @@
 [
   {
+    "voucherCode": "BALI-JOG4YX",
+    "status": "CONFIRMED",
+    "guestName": "Jordan Taylor",
+    "hotelId": "viceroy-bali",
+    "hotelName": "Viceroy Bali (Luxury Valley Resort & Villas)",
+    "roomType": "Premier Forest View",
+    "checkin": "2026-10-01",
+    "checkout": "2026-10-05",
+    "nights": 4,
+    "guests": 2,
+    "ratePerNightUSD": 480,
+    "totalPriceUSD": 1920,
+    "createdAt": "2026-09-14T10:08:53.352Z",
+    "freeCancellationUntil": "2026-10-01"
+  },
+  {
     "voucherCode": "BALI-1TJW2G",
     "status": "CONFIRMED",
     "guestName": "Jordan Taylor",

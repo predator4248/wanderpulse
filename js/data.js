@@ -430,7 +430,7 @@ let ATTRACTIONS_DATA = [
 let HOTELS_DATA = [
   {
     id: 'viceroy-bali',
-    name: 'Viceroy Bali Valley Sanctuary',
+    name: 'Viceroy Bali (Luxury Valley Resort & Villas)',
     tier: 'luxury',
     tierLabel: '5-Star Luxury Villa',
     stars: 5,
@@ -443,24 +443,25 @@ let HOTELS_DATA = [
     regency: 'Gianyar Regency',
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=-8.498425,115.275811',
     googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=-8.498425,115.275811',
+    plusCode: 'G72G+J8 Petulu, Gianyar Regency, Bali',
     geoapifyCategory: 'accommodation.hotel',
     distanceToSpot: '4 km to Monkey Forest & Rice Terraces',
-    image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=85',
+    image: '/images/hotels/viceroy-bali/main.jpg',
     description: 'Private heated infinity pool villas overlooking the Petanu River ravine, offering Michelin-grade dining and helipad arrival.',
     amenities: ['Private Heated Infinity Pool', 'Cascades French Dining', 'Lembah Spa Overlook', 'Helipad Arrival', 'High-Speed Wi-Fi', '24/7 Butler Service'],
     gallery: [
       {
-        url: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=85',
+        url: '/images/hotels/viceroy-bali/spa-overlook.jpg',
         title: 'Lembah Spa Overlook',
         caption: 'Open-air botanical treatment pavilion listening to gentle river ravine waters.'
       },
       {
-        url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85',
+        url: '/images/hotels/viceroy-bali/cascades-terrace.jpg',
         title: 'Cascades Fine Dining Terrace',
         caption: 'Award-winning European degustation menus beneath soaring thatched alang-alang ceilings.'
       },
       {
-        url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85',
+        url: '/images/hotels/viceroy-bali/villa-grounds.jpg',
         title: 'Private Pool Villa Grounds',
         caption: 'Secluded stone sun deck with traditional shaded daybed bale pavilion.'
       }
@@ -474,7 +475,7 @@ let HOTELS_DATA = [
         capacity: '2 Guests',
         bed: '1 King Bed',
         priceUSD: 480,
-        image: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80',
+        image: '/images/hotels/viceroy-bali/terrace-pool-villa.jpg',
         highlights: ['Private heated plunge pool', 'Open-air bale pavilion', 'Marble bath with rain shower', 'Espresso bar & exotic fruit basket']
       },
       {
@@ -484,7 +485,7 @@ let HOTELS_DATA = [
         capacity: '2-3 Guests',
         bed: '1 Super King Bed',
         priceUSD: 680,
-        image: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80',
+        image: '/images/hotels/viceroy-bali/vice-regal-villa.jpg',
         highlights: ['Expansive cliff-edge heated pool', 'Outdoor sun deck with valley panorama', 'Jacuzzi spa tub', 'Dedicated 24/7 butler service']
       },
       {
@@ -494,14 +495,14 @@ let HOTELS_DATA = [
         capacity: '4 Guests',
         bed: '2 King Beds',
         priceUSD: 1100,
-        image: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=800&q=80',
+        image: '/images/hotels/viceroy-bali/presidential-suite.jpg',
         highlights: ['18-meter private infinity pool', 'Dual master bedroom wings', 'Full chef kitchen & private dining', 'Complimentary helicopter transfer']
       }
     ]
   },
   {
     id: 'the-edge-bali',
-    name: 'The Edge Uluwatu Cliff Resort',
+    name: 'The Edge Bali (Uluwatu Cliff Luxury Resort)',
     tier: 'luxury',
     tierLabel: '5-Star Luxury Villa',
     stars: 5,
@@ -514,24 +515,25 @@ let HOTELS_DATA = [
     regency: 'Badung Regency',
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=-8.847952,115.124538',
     googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=-8.847952,115.124538',
+    plusCode: '542F+RM Pecatu, Badung Regency, Bali',
     geoapifyCategory: 'accommodation.hotel',
     distanceToSpot: '2.5 km to Uluwatu Temple & Kecak Dance',
-    image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1200&q=85',
+    image: '/images/hotels/the-edge-bali/main.jpg',
     description: 'Perched on the extreme edge of a 530-foot cliff with glass-bottom cantilevered sky pools hovering over the ocean surf.',
     amenities: ['Glass-Bottom Sky Pool', 'Oneeighty Cliff Club', '24/7 Dedicated Butler', 'Subterranean Wine Cellar', 'Oceanfront Dining', 'Private Cinema'],
     gallery: [
       {
-        url: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?auto=format&fit=crop&w=1200&q=85',
+        url: '/images/hotels/the-edge-bali/cliff-club.jpg',
         title: 'Oneeighty Cliff Club VIP Cabanas',
         caption: 'Plush daybeds perched along the edge of the limestone promontory.'
       },
       {
-        url: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=85',
+        url: '/images/hotels/the-edge-bali/sunset-terrace.jpg',
         title: 'Ocean Sunset Terrace',
         caption: '180-degree panoramic vantage point for golden sunset cocktails.'
       },
       {
-        url: 'https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?auto=format&fit=crop&w=1200&q=85',
+        url: '/images/hotels/the-edge-bali/cliff-bath.jpg',
         title: 'Cliffside Freestanding Bath',
         caption: 'Panoramic circular marble bathtub looking out to endless ocean horizon.'
       }
@@ -545,7 +547,7 @@ let HOTELS_DATA = [
         capacity: '2 Guests',
         bed: '1 Emperor Bed',
         priceUSD: 650,
-        image: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=800&q=80',
+        image: '/images/hotels/the-edge-bali/the-villa.jpg',
         highlights: ['Private ocean cliff plunge pool', 'Glass bathroom floor with ocean views', 'Personal 24-hour butler', 'Complimentary VIP club access']
       },
       {
@@ -555,14 +557,14 @@ let HOTELS_DATA = [
         capacity: '6 Guests',
         bed: '3 King Beds',
         priceUSD: 1450,
-        image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80',
+        image: '/images/hotels/the-edge-bali/the-view-estate.jpg',
         highlights: ['Huge cliffside wrap-around infinity pool', 'Private bowling alley & cinema', 'Full bar with mixologist', 'Spectacular sunset deck']
       }
     ]
   },
   {
     id: 'padma-resort',
-    name: 'Padma Resort Rainforest Ubud',
+    name: 'Padma Resort Ubud (Rainforest Resort & Spa)',
     tier: 'eco',
     tierLabel: 'Eco Rainforest Haven',
     stars: 5,
@@ -575,24 +577,25 @@ let HOTELS_DATA = [
     regency: 'Gianyar Regency',
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=-8.356411,115.247833',
     googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=-8.356411,115.247833',
+    plusCode: 'J6VP+C4 Puhu, Gianyar Regency, Bali',
     geoapifyCategory: 'accommodation.hotel',
     distanceToSpot: '12 km to Tegallalang & Mount Batur',
-    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=85',
+    image: '/images/hotels/padma-resort/main.jpg',
     description: 'Sprawling 11-hectare tranquil sanctuary immersed in bamboo forests with an 89-meter heated outdoor mountain lagoon pool.',
     amenities: ['89m Heated Lagoon Pool', 'Jungle Agroforestry', 'Complimentary Yoga', 'Kids Farm & Garden', 'Shuttle to Ubud Hub', 'Spa Pavilion'],
     gallery: [
       {
-        url: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=85',
+        url: '/images/hotels/padma-resort/bamboo-sanctuary.jpg',
         title: 'Agroforestry Bamboo Sanctuaries',
         caption: 'Peaceful bamboo bridges and organic fruit gardens along Ayung river tributaries.'
       },
       {
-        url: 'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&w=1200&q=85',
+        url: '/images/hotels/padma-resort/rainforest-spa.jpg',
         title: 'Rainforest Spa Soaking Bath',
         caption: 'Botanical herbal bath treatments overlooking lush emerald ravine foliage.'
       },
       {
-        url: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=1200&q=85',
+        url: '/images/hotels/padma-resort/timber-lounge.jpg',
         title: 'Open-Air Timber Lobby Lounge',
         caption: 'Cathedral-scale bamboo architectural lounge welcoming guests with ginger lemongrass tea.'
       }
@@ -606,7 +609,7 @@ let HOTELS_DATA = [
         capacity: '2 Guests',
         bed: '1 King or 2 Twins',
         priceUSD: 240,
-        image: 'https://images.unsplash.com/photo-1561501900-3701fa6a0864?auto=format&fit=crop&w=800&q=80',
+        image: '/images/hotels/padma-resort/premier-deluxe.jpg',
         highlights: ['Private forest balcony', 'Freestanding soaking bathtub', 'Complimentary afternoon tea', 'Heated pool access']
       },
       {
@@ -616,14 +619,14 @@ let HOTELS_DATA = [
         capacity: '2-3 Guests',
         bed: '1 King Bed',
         priceUSD: 390,
-        image: 'https://images.unsplash.com/photo-1587985064135-0366536eab42?auto=format&fit=crop&w=800&q=80',
+        image: '/images/hotels/padma-resort/rainforest-suite.jpg',
         highlights: ['Expansive living room & dining lounge', 'Panoramic valley view terrace', 'Club lounge cocktail access', 'Complimentary laundry service']
       }
     ]
   },
   {
     id: 'munduk-moding',
-    name: 'Munduk Moding Plantation Eco Lodge',
+    name: 'Munduk Moding Plantation Nature Resort & Spa',
     tier: 'eco',
     tierLabel: 'Boutique Eco Mountain Lodge',
     stars: 4,
@@ -636,24 +639,25 @@ let HOTELS_DATA = [
     regency: 'Buleleng Regency',
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=-8.261822,115.076319',
     googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=-8.261822,115.076319',
+    plusCode: 'P3QG+7G Gobleg, Buleleng Regency, Bali',
     geoapifyCategory: 'accommodation.hotel',
     distanceToSpot: '15 km to Sekumpul Waterfall & Lake Tamblingan',
-    image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1200&q=85',
+    image: '/images/hotels/munduk-moding/main.jpg',
     description: 'Organic working coffee plantation with an iconic "Infinity Pool in the Clouds" offering sunsets that blend with highland mist.',
     amenities: ['Cloudline Infinity Pool', 'Coffee Processing Tours', 'Horseback Riding Trails', 'Organic Farm Dining', 'Bird Watching Treks'],
     gallery: [
       {
-        url: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=85',
+        url: '/images/hotels/munduk-moding/fireplace-cottage.jpg',
         title: 'Plantation Timber Fireplace Cottage',
         caption: 'Warm mountain cottage warmed by real wood-burning stone fireplaces.'
       },
       {
-        url: 'https://images.unsplash.com/photo-1549294413-26f195200c16?auto=format&fit=crop&w=1200&q=85',
+        url: '/images/hotels/munduk-moding/coffee-terraces.jpg',
         title: 'Organic Arabica Coffee Terraces',
         caption: 'Private wooden veranda overlooking clove trees and rolling green hills.'
       },
       {
-        url: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=1200&q=85',
+        url: '/images/hotels/munduk-moding/highland-sunset.jpg',
         title: 'Highland Sunset Deck Panorama',
         caption: 'Misty evening vistas stretching toward the Java sea horizon.'
       }
@@ -667,7 +671,7 @@ let HOTELS_DATA = [
         capacity: '2 Guests',
         bed: '1 King Bed',
         priceUSD: 175,
-        image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80',
+        image: '/images/hotels/munduk-moding/garden-suite.jpg',
         highlights: ['Coffee plantation view veranda', 'Artisan hand-ground coffee bar', 'Heated bed pads for cool nights', 'Rain shower with skylight']
       },
       {
@@ -677,14 +681,14 @@ let HOTELS_DATA = [
         capacity: '2 Guests',
         bed: '1 King Bed',
         priceUSD: 260,
-        image: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80',
+        image: '/images/hotels/munduk-moding/jacuzzi-villa.jpg',
         highlights: ['Outdoor heated volcanic stone jacuzzi', 'Private garden gazebo', 'Wood burning fireplace', 'Panoramic sunset deck']
       }
     ]
   },
   {
     id: 'maya-sanur',
-    name: 'Maya Sanur Coastal Family Resort',
+    name: 'Maya Sanur Resort & Spa',
     tier: 'family',
     tierLabel: 'Family Coastal Suites',
     stars: 5,
@@ -697,24 +701,25 @@ let HOTELS_DATA = [
     regency: 'Denpasar City',
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=-8.694628,115.263189',
     googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=-8.694628,115.263189',
+    plusCode: '8747+47 Sanur, Denpasar City, Bali',
     geoapifyCategory: 'accommodation.hotel',
     distanceToSpot: '1.2 km to Nusa Penida Fast Ferry Pier',
-    image: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=1200&q=85',
+    image: '/images/hotels/maya-sanur/main.jpg',
     description: 'Eco-conscious beachfront luxury resort with tranquil calm swimmable waters, 158m lagoon pool, and rooftop garden yoga pavilion.',
     amenities: ['158m Lagoon Pools', 'Beach Promenade Access', 'Complimentary Bicycles', 'Reef Kids Club', 'Rooftop Lounge', 'Spa Wellness'],
     gallery: [
       {
-        url: 'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=1200&q=85',
+        url: '/images/hotels/maya-sanur/beach-promenade.jpg',
         title: 'Sanur Beach Promenade Deck',
         caption: 'Paved beachside bicycle paths lined with vibrant hibiscus flowers.'
       },
       {
-        url: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?auto=format&fit=crop&w=1200&q=85',
+        url: '/images/hotels/maya-sanur/rooftop-lounge.jpg',
         title: 'Rooftop Garden Sunset Lounge',
         caption: 'Panoramic oceanfront daybeds for evening tapas and cocktails.'
       },
       {
-        url: 'https://images.unsplash.com/photo-1573052905904-34ad8c27f0cc?auto=format&fit=crop&w=1200&q=85',
+        url: '/images/hotels/maya-sanur/calm-waters.jpg',
         title: 'Reef-Protected Calm Waters',
         caption: 'Gentle swimmable ocean shallows ideal for young families and paddleboarding.'
       }
@@ -728,7 +733,7 @@ let HOTELS_DATA = [
         capacity: '2 Adults, 1 Child',
         bed: '1 King or 2 Twins',
         priceUSD: 190,
-        image: 'https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=800&q=80',
+        image: '/images/hotels/maya-sanur/deluxe-lagoon-view.jpg',
         highlights: ['Overlooking 158m lagoon', 'Deep soaking circular bathtub', 'Sanur beach promenade steps away', 'Free bicycle rental']
       },
       {
@@ -738,14 +743,14 @@ let HOTELS_DATA = [
         capacity: '2 Adults, 1 Child',
         bed: '1 King Bed',
         priceUSD: 250,
-        image: 'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=800&q=80',
+        image: '/images/hotels/maya-sanur/deluxe-lagoon-access.jpg',
         highlights: ['Direct swim-in pool deck', 'Private daybed cabana', 'Evening cocktail discount', 'Kids club free entry']
       }
     ]
   },
   {
     id: 'kos-one-hostel',
-    name: 'Kos One Chic Nomad Oasis',
+    name: 'Kos One Hostel Canggu (Chic Nomad Hub)',
     tier: 'budget',
     tierLabel: 'Backpacker & Co-Work Hub',
     stars: 4,
@@ -758,24 +763,25 @@ let HOTELS_DATA = [
     regency: 'Badung Regency',
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=-8.653421,115.132890',
     googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=-8.653421,115.132890',
+    plusCode: '84WH+J5 Canggu, Badung Regency, Bali',
     geoapifyCategory: 'accommodation.hotel',
     distanceToSpot: '15 km to Tanah Lot & Batu Bolong',
-    image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1200&q=85',
+    image: '/images/hotels/kos-one-hostel/main.jpg',
     description: 'Award-winning luxury social hostel featuring Mediterranean pool slides, coworking cabanas, artisan café, and sunset rooftop.',
     amenities: ['Resort Pool with Jacuzzi', 'High-Speed Fiber Wi-Fi', 'Air Conditioned Pods', 'Personal Safe', 'Onsite Surfboard Rental', 'Community Dinners'],
     gallery: [
       {
-        url: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=85',
+        url: '/images/hotels/kos-one-hostel/coworking-hub.jpg',
         title: 'Artisan Coworking Hub',
         caption: 'High-speed fiber connectivity with ergonomic desks and cold-brew espresso.'
       },
       {
-        url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=85',
+        url: '/images/hotels/kos-one-hostel/rooftop-deck.jpg',
         title: 'Sunset Rooftop Lounge',
         caption: 'Rooftop cocktail deck overlooking Canggu surf breaks and rice fields.'
       },
       {
-        url: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&w=1200&q=85',
+        url: '/images/hotels/kos-one-hostel/cafe-social.jpg',
         title: 'Organic Café & Social Common',
         caption: 'Fresh smoothie bowls and daily communal family dinners for solo travelers.'
       }
@@ -789,7 +795,7 @@ let HOTELS_DATA = [
         capacity: '1 Guest',
         bed: '1 Single Pod',
         priceUSD: 38,
-        image: 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=800&q=80',
+        image: '/images/hotels/kos-one-hostel/single-pod.jpg',
         highlights: ['Blackout acoustic curtain', 'Personal security safe', 'Individual AC ventilation', 'High-speed coworking pass included']
       },
       {
@@ -799,7 +805,7 @@ let HOTELS_DATA = [
         capacity: '2 Guests',
         bed: '1 Queen Bed',
         priceUSD: 85,
-        image: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80',
+        image: '/images/hotels/kos-one-hostel/private-queen.jpg',
         highlights: ['Private ensuite rain shower', 'Balcony with pool view', 'Workstation desk', 'Smart TV with streaming']
       }
     ]
@@ -1092,69 +1098,81 @@ const GEOAPIFY_VERIFIED_PLACES = {
   },
   'viceroy-bali': {
     id: 'viceroy-bali',
-    name: 'Viceroy Bali Valley Sanctuary',
+    name: 'Viceroy Bali (Luxury Valley Resort & Villas)',
     lat: -8.498425,
     lon: 115.275811,
     formattedAddress: 'Jl. Lanyahan, Petulu, Ubud, Gianyar Regency, Bali 80571, Indonesia',
     regency: 'Gianyar Regency',
     category: 'accommodation.hotel',
+    image: '/images/hotels/viceroy-bali/main.jpg',
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=-8.498425,115.275811',
-    googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=-8.498425,115.275811'
+    googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=-8.498425,115.275811',
+    plusCode: 'G72G+J8 Petulu, Gianyar Regency, Bali'
   },
   'the-edge-bali': {
     id: 'the-edge-bali',
-    name: 'The Edge Uluwatu Cliff Resort',
+    name: 'The Edge Bali (Uluwatu Cliff Luxury Resort)',
     lat: -8.847952,
     lon: 115.124538,
     formattedAddress: 'Jl. Pura Goa Lempeh, Banjar Dinas Kangin, Pecatu, Uluwatu, Badung Regency, Bali 80361, Indonesia',
     regency: 'Badung Regency',
     category: 'accommodation.hotel',
+    image: '/images/hotels/the-edge-bali/main.jpg',
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=-8.847952,115.124538',
-    googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=-8.847952,115.124538'
+    googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=-8.847952,115.124538',
+    plusCode: '542F+RM Pecatu, Badung Regency, Bali'
   },
   'padma-resort': {
     id: 'padma-resort',
-    name: 'Padma Resort Rainforest Ubud',
+    name: 'Padma Resort Ubud (Rainforest Resort & Spa)',
     lat: -8.356411,
     lon: 115.247833,
     formattedAddress: 'Banjar Carik, Desa Puhu, Payangan, Gianyar Regency, Bali 80572, Indonesia',
     regency: 'Gianyar Regency',
     category: 'accommodation.hotel',
+    image: '/images/hotels/padma-resort/main.jpg',
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=-8.356411,115.247833',
-    googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=-8.356411,115.247833'
+    googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=-8.356411,115.247833',
+    plusCode: 'J6VP+C4 Puhu, Gianyar Regency, Bali'
   },
   'munduk-moding': {
     id: 'munduk-moding',
-    name: 'Munduk Moding Plantation Eco Lodge',
+    name: 'Munduk Moding Plantation Nature Resort & Spa',
     lat: -8.261822,
     lon: 115.076319,
     formattedAddress: 'Jl. Raya Desa Gobleg, Buleleng Regency, Bali 81152, Indonesia',
     regency: 'Buleleng Regency',
     category: 'accommodation.hotel',
+    image: '/images/hotels/munduk-moding/main.jpg',
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=-8.261822,115.076319',
-    googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=-8.261822,115.076319'
+    googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=-8.261822,115.076319',
+    plusCode: 'P3QG+7G Gobleg, Buleleng Regency, Bali'
   },
   'maya-sanur': {
     id: 'maya-sanur',
-    name: 'Maya Sanur Coastal Family Resort',
+    name: 'Maya Sanur Resort & Spa',
     lat: -8.694628,
     lon: 115.263189,
     formattedAddress: 'Jl. Danau Tamblingan No.89M, Sanur, Denpasar, Bali 80228, Indonesia',
     regency: 'Denpasar City',
     category: 'accommodation.hotel',
+    image: '/images/hotels/maya-sanur/main.jpg',
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=-8.694628,115.263189',
-    googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=-8.694628,115.263189'
+    googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=-8.694628,115.263189',
+    plusCode: '8747+47 Sanur, Denpasar City, Bali'
   },
   'kos-one-hostel': {
     id: 'kos-one-hostel',
-    name: 'Kos One Chic Nomad Oasis',
+    name: 'Kos One Hostel Canggu (Chic Nomad Hub)',
     lat: -8.653421,
     lon: 115.132890,
     formattedAddress: 'Jl. Pantai Batu Bolong No.78, Canggu, Badung Regency, Bali 80361, Indonesia',
     regency: 'Badung Regency',
     category: 'accommodation.hotel',
+    image: '/images/hotels/kos-one-hostel/main.jpg',
     googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=-8.653421,115.132890',
-    googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=-8.653421,115.132890'
+    googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=-8.653421,115.132890',
+    plusCode: '84WH+J5 Canggu, Badung Regency, Bali'
   },
   'airport': {
     id: 'airport',
