@@ -114,14 +114,26 @@
   <!-- SITE HEADER & NAVIGATION -->
   <header class="site-header" role="banner">
     <div class="container nav-container">
-      <a href="#hero" class="brand-logo" aria-label="WanderPulse Bali Home">
-        <span class="logo-badge">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
-          </svg>
-        </span>
-        <span>Wander<span class="text-grad-aurora">Pulse</span></span>
-      </a>
+      <div class="nav-left">
+        <!-- Prominent "Three Lines" Menu Button (Shifted to Left Corner) -->
+        <button class="three-lines-toggle" id="threeLinesMenuToggle" aria-label="Open Island Hub and Complete Navigation" aria-expanded="false" title="Explore All Bali Guides, Tools & Directory">
+          <span class="three-lines-icon" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+          <span class="three-lines-label">Menu</span>
+        </button>
+
+        <a href="#hero" class="brand-logo" aria-label="WanderPulse Bali Home">
+          <span class="logo-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+            </svg>
+          </span>
+          <span>Wander<span class="text-grad-aurora">Pulse</span></span>
+        </a>
+      </div>
 
       <!-- Desktop Clean Quick Navigation Links (Non-overflowing) -->
       <nav class="nav-desktop-quick" aria-label="Quick Highlights">
@@ -132,7 +144,7 @@
         <a href="#regional-map" class="quick-pill-link">🗺️ 3D Map</a>
       </nav>
 
-      <!-- Nav Actions (Soundscape, Wishlist, Currency, Theme & Three Lines Button) -->
+      <!-- Nav Actions (Soundscape, Wishlist, Currency, Theme) -->
       <div class="nav-actions">
         <!-- Ambient Soundscape Toggle (Desktop Quick) -->
         <button id="soundscapeToggleBtn" class="soundscape-btn header-quick-action" aria-label="Toggle Island Soundscape" title="Play gentle ocean surf & Balinese gamelan chime">
@@ -161,16 +173,6 @@
         <!-- Dark/Light Theme Toggle -->
         <button id="themeToggleBtn" class="theme-btn header-quick-action" aria-label="Switch Theme">
           <!-- Filled dynamically via JS -->
-        </button>
-
-        <!-- Prominent "Three Lines" Menu Button (All Devices) -->
-        <button class="three-lines-toggle" id="threeLinesMenuToggle" aria-label="Open Island Hub and Complete Navigation" aria-expanded="false" title="Explore All Bali Guides, Tools & Directory">
-          <span class="three-lines-icon" aria-hidden="true">
-            <span></span>
-            <span></span>
-            <span></span>
-          </span>
-          <span class="three-lines-label">Menu</span>
         </button>
 
         <!-- Hidden anchor for backward compatibility if any legacy code queries #mobileMenuToggle -->

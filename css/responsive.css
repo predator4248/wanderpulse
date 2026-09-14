@@ -136,10 +136,30 @@
   .three-lines-drawer {
     width: 100vw;
     border-left: none;
+    border-right: none;
+  }
+
+  .nav-left {
+    gap: 10px;
+  }
+
+  .brand-logo {
+    font-size: 1.25rem;
+    gap: 8px;
+  }
+
+  .logo-badge {
+    width: 34px;
+    height: 34px;
+  }
+
+  .logo-badge svg {
+    width: 18px;
+    height: 18px;
   }
 
   .three-lines-toggle {
-    padding: 7px 12px;
+    padding: 7px 11px;
   }
 
   .header-quick-action.soundscape-btn,
@@ -183,6 +203,16 @@
   }
   .modal-body {
     padding: 20px;
+  }
+}
+
+/* --- Ultra-Narrow Mobile Screens < 380px --- */
+@media (max-width: 380px) {
+  .three-lines-label {
+    display: none;
+  }
+  .three-lines-toggle {
+    padding: 8px 10px;
   }
 }
 

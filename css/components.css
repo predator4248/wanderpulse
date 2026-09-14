@@ -156,6 +156,13 @@
   height: 100%;
 }
 
+/* Nav Left Group (Menu Button & Brand Logo) */
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 /* Brand Logo */
 .brand-logo {
   display: flex;
@@ -342,22 +349,22 @@
 .three-lines-drawer {
   position: fixed;
   top: 0;
-  right: -105%;
+  left: -105%;
   width: min(480px, 94vw);
   height: 100vh;
   height: 100dvh;
   background: rgba(11, 15, 25, 0.96);
   backdrop-filter: blur(32px);
   -webkit-backdrop-filter: blur(32px);
-  border-left: 1px solid var(--border-medium);
+  border-right: 1px solid var(--border-medium);
   z-index: 2110;
   display: flex;
   flex-direction: column;
-  box-shadow: -15px 0 60px rgba(0, 0, 0, 0.75);
-  transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 15px 0 60px rgba(0, 0, 0, 0.75);
+  transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .three-lines-drawer.open {
-  right: 0;
+  left: 0;
 }
 
 .drawer-header {
