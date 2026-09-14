@@ -41,7 +41,7 @@
   }
 
   .three-lines-drawer {
-    width: min(440px, 92vw);
+    width: min(440px, 92%);
   }
 
   .nav-actions .currency-picker {
@@ -76,6 +76,8 @@
   .container {
     padding-left: 16px;
     padding-right: 16px;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   /* Header adjustments */
@@ -98,6 +100,31 @@
     flex-wrap: wrap;
     gap: 16px;
     justify-content: center;
+  }
+
+  .hero-badge-live {
+    font-size: 0.82rem;
+    padding: 6px 14px;
+    gap: 6px;
+  }
+
+  .floating-weather-badge {
+    top: 12px;
+    right: 12px;
+    padding: 6px 12px;
+    font-size: 0.82rem;
+  }
+
+  .floating-transit-badge {
+    position: static;
+    margin: 10px auto 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .hero-visual-overlay {
+    padding: 16px;
   }
 
   .route-input-group {
@@ -141,6 +168,7 @@
   .map-3d-wrapper {
     min-height: 320px;
     height: 320px;
+    width: 100%;
     max-width: 100%;
     overflow: hidden;
   }
@@ -148,6 +176,7 @@
   /* Modal responsiveness */
   .modal-backdrop {
     padding: 14px 10px;
+    overflow-x: hidden;
   }
 
   .modal-dialog {
@@ -155,6 +184,7 @@
     max-width: 100%;
     margin: 0 auto;
     max-height: 92vh;
+    box-sizing: border-box;
   }
 
   .modal-body {
@@ -162,7 +192,8 @@
   }
 
   .gallery-modal-dialog {
-    max-width: 100vw;
+    width: 100%;
+    max-width: 100%;
     margin: 0;
   }
 
@@ -217,6 +248,23 @@
   .three-lines-toggle {
     padding: 7px 11px;
   }
+
+  .hero-badge-live {
+    font-size: 0.78rem;
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    line-height: 1.4;
+    gap: 6px;
+    justify-content: center;
+  }
+
+  .hero-badge-sep {
+    display: none;
+  }
+
+  .hero-badge-item {
+    display: inline-block;
+  }
 }
 
 /* --- Mobile Phones < 480px --- */
@@ -224,12 +272,20 @@
   .container {
     padding-left: 14px;
     padding-right: 14px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .three-lines-drawer {
-    width: 100vw;
+    width: 100%;
+    max-width: 100%;
     border-left: none;
     border-right: none;
+  }
+
+  #baliSunsetItem {
+    display: none; /* Keep time and weather only on very narrow screens */
   }
 
   .section-title {
@@ -254,14 +310,6 @@
 
   .hero-stat-pill {
     padding: 8px 14px;
-  }
-
-  .floating-weather-badge,
-  .floating-transit-badge {
-    position: static;
-    margin: 8px auto;
-    width: fit-content;
-    max-width: 100%;
   }
 
   .tier-select-grid {
@@ -317,7 +365,9 @@
     left: 12px;
     right: 12px;
     bottom: 14px;
-    max-width: calc(100vw - 24px);
+    max-width: calc(100% - 24px);
+    width: calc(100% - 24px);
+    box-sizing: border-box;
   }
 
   .toast-notification {
@@ -326,6 +376,7 @@
     max-width: 100%;
     padding: 12px 14px;
     font-size: 0.85rem;
+    box-sizing: border-box;
   }
 }
 

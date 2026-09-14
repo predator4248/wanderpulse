@@ -36,11 +36,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/main.css" />
-  <link rel="stylesheet" href="css/components.css" />
-  <link rel="stylesheet" href="css/3d-effects.css" />
-  <link rel="stylesheet" href="css/responsive.css" />
+  <!-- Stylesheets (Cache-busted for instant edge update) -->
+  <link rel="stylesheet" href="css/main.css?v=2.2.0" />
+  <link rel="stylesheet" href="css/components.css?v=2.2.0" />
+  <link rel="stylesheet" href="css/3d-effects.css?v=2.2.0" />
+  <link rel="stylesheet" href="css/responsive.css?v=2.2.0" />
 
   <!-- Three.js Real-Time 3D WebGL Engine -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -472,7 +472,11 @@
         <div class="hero-intro">
           <div class="hero-badge-live">
             <span class="pulse-dot"></span>
-            <span>Bali Live: <span id="baliTimeClock">12:00:00 PM</span> (WITA) • <span id="baliWeatherTemp">29°C</span> <span id="baliWeatherCond">☀️ Warm Tropical Sun</span> • <span id="baliSunsetCountdown">🌅 Calculating Sunset...</span></span>
+            <span class="hero-badge-item">Bali Live: <span id="baliTimeClock">12:00:00 PM</span> (WITA)</span>
+            <span class="hero-badge-sep">•</span>
+            <span class="hero-badge-item"><span id="baliWeatherTemp">29°C</span> <span id="baliWeatherCond">☀️ Warm Tropical Sun</span></span>
+            <span class="hero-badge-sep">•</span>
+            <span class="hero-badge-item" id="baliSunsetItem"><span id="baliSunsetCountdown">🌅 Calculating Sunset...</span></span>
           </div>
 
           <h1 class="hero-title">
@@ -2760,10 +2764,10 @@
   <!-- Dynamic Toast Container -->
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
-  <!-- Scripts -->
-  <script src="js/data.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/tilt3d.js"></script>
-  <script src="js/three-scene.js"></script>
+  <!-- Scripts (Cache-busted) -->
+  <script src="js/data.js?v=2.2.0"></script>
+  <script src="js/app.js?v=2.2.0"></script>
+  <script src="js/tilt3d.js?v=2.2.0"></script>
+  <script src="js/three-scene.js?v=2.2.0"></script>
 </body>
 </html>

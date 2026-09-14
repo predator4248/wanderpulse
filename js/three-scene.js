@@ -32,6 +32,9 @@ function initHero3DScene() {
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
   renderer.setSize(width, height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.domElement.style.width = '100%';
+  renderer.domElement.style.maxWidth = '100%';
+  renderer.domElement.style.height = '100%';
   container.appendChild(renderer.domElement);
 
   // Group for all globe elements
@@ -320,8 +323,8 @@ function initRegionalMap3DScene() {
   const container = document.getElementById('regionalMap3dContainer');
   if (!container) return;
 
-  const width = container.clientWidth || 800;
-  const height = container.clientHeight || 480;
+  const width = container.clientWidth || (container.parentElement ? container.parentElement.clientWidth : 0) || Math.min(window.innerWidth - 32, 700);
+  const height = container.clientHeight || 380;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
@@ -331,6 +334,9 @@ function initRegionalMap3DScene() {
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   renderer.setSize(width, height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.domElement.style.width = '100%';
+  renderer.domElement.style.maxWidth = '100%';
+  renderer.domElement.style.height = '100%';
   container.appendChild(renderer.domElement);
 
   // 3D Topography Group
@@ -610,11 +616,13 @@ function initRegionalMap3DScene() {
 
   // Resize listener
   window.addEventListener('resize', () => {
-    const newW = container.clientWidth || 800;
-    const newH = container.clientHeight || 480;
+    const newW = container.clientWidth || Math.min(window.innerWidth - 32, 700);
+    const newH = container.clientHeight || 380;
     camera.aspect = newW / newH;
     camera.updateProjectionMatrix();
     renderer.setSize(newW, newH);
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.maxWidth = '100%';
   });
 }
 
