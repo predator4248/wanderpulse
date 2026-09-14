@@ -71,13 +71,25 @@ function rateLimit(limitCount = 20, windowMs = 60000) {
   };
 }
 
-// Serve static frontend files (HTML, CSS, JS, Assets)
-app.use(express.static(path.join(__dirname)));
+// Critical: sw.js must never be cached by CDN or browser
+app.get('/sw.js', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Content-Type', 'application/javascript');
+  res.sendFile(path.join(__dirname, 'sw.js'));
+});
 
-// Explicit root route for index.html (guarantees 200 OK on Vercel and local)
-app.get('/', (req, res) => {
+// Explicit root route for index.html with no-cache header (guarantees latest release on Vercel)
+app.get(['/', '/index.html'], (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.sendFile(path.join(__dirname, 'index.html'));
 });
+
+// Serve static frontend files (HTML, CSS, JS, Assets)
+app.use(express.static(path.join(__dirname)));
 
 /* ==========================================================================
    MOCK / REAL-TIME DATA SOURCES (Synchronized with js/data.js)

@@ -1009,27 +1009,59 @@ if (bookingForm) {
 }
 
 /* ==========================================================================
-   7. HOW TO REACH TRANSIT HUB (FLIGHT, TRAIN, BUS TABS)
+   7. HOW TO REACH TRANSIT HUB (FLIGHT, TRAIN, BUS, FAST BOAT TABS)
    ========================================================================== */
-function initTransitHub() {
+window.switchTransitTab = function(mode, smoothScroll = true) {
   const modeTabs = document.querySelectorAll('.transit-tab-btn');
   const panes = document.querySelectorAll('.transit-pane');
+  const targetTab = document.querySelector(`.transit-tab-btn[data-mode="${mode}"]`);
+  const targetPane = document.getElementById(`transit-${mode}`);
+
+  if (targetTab && targetPane) {
+    modeTabs.forEach(t => {
+      t.classList.remove('active-flight', 'active-train', 'active-bus', 'active-boat');
+      t.setAttribute('aria-selected', 'false');
+    });
+    panes.forEach(p => p.classList.remove('active'));
+
+    targetTab.classList.add(`active-${mode}`);
+    targetTab.setAttribute('aria-selected', 'true');
+    targetPane.classList.add('active');
+
+    if (smoothScroll) {
+      const section = document.getElementById('how-to-reach');
+      if (section) section.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+};
+
+function initTransitHub() {
+  const modeTabs = document.querySelectorAll('.transit-tab-btn');
 
   modeTabs.forEach(tab => {
     tab.addEventListener('click', () => {
-      modeTabs.forEach(t => {
-        t.classList.remove('active-flight', 'active-train', 'active-bus', 'active-boat');
-        t.setAttribute('aria-selected', 'false');
-      });
-      panes.forEach(p => p.classList.remove('active'));
-
       const mode = tab.dataset.mode;
-      tab.classList.add(`active-${mode}`);
-      tab.setAttribute('aria-selected', 'true');
-      const targetPane = document.getElementById(`transit-${mode}`);
-      if (targetPane) targetPane.classList.add('active');
+      window.switchTransitTab(mode, false);
     });
   });
+
+  // Handle URL hash deep-links (e.g. #transit-boat, #boat, #fast-boat, #transit-flight, etc.)
+  function handleTransitHash() {
+    const hash = (window.location.hash || '').toLowerCase();
+    if (hash === '#transit-boat' || hash === '#boat' || hash === '#fast-boat' || hash === '#ferries') {
+      window.switchTransitTab('boat', true);
+    } else if (hash === '#transit-train' || hash === '#train') {
+      window.switchTransitTab('train', true);
+    } else if (hash === '#transit-bus' || hash === '#bus') {
+      window.switchTransitTab('bus', true);
+    } else if (hash === '#transit-flight' || hash === '#flight') {
+      window.switchTransitTab('flight', true);
+    }
+  }
+
+  window.addEventListener('hashchange', handleTransitHash);
+  // Check hash on page load
+  setTimeout(handleTransitHash, 250);
 }
 
 /* ==========================================================================
@@ -2740,7 +2772,22 @@ function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('WanderPulse PWA Service Worker active:', reg.scope))
+        .then(reg => {
+          console.log('WanderPulse PWA Service Worker active:', reg.scope);
+          // Check for immediate updates on Vercel deployment
+          reg.update().catch(() => {});
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  console.log('New WanderPulse version installed. Activating...');
+                  newWorker.postMessage({ action: 'skipWaiting' });
+                }
+              });
+            }
+          });
+        })
         .catch(err => console.warn('Service Worker registration skipped:', err));
     });
   }

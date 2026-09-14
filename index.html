@@ -37,10 +37,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
   <!-- Stylesheets (Cache-busted for instant edge update) -->
-  <link rel="stylesheet" href="css/main.css?v=2.3.0" />
-  <link rel="stylesheet" href="css/components.css?v=2.3.0" />
-  <link rel="stylesheet" href="css/3d-effects.css?v=2.3.0" />
-  <link rel="stylesheet" href="css/responsive.css?v=2.3.0" />
+  <link rel="stylesheet" href="css/main.css?v=3.0.0" />
+  <link rel="stylesheet" href="css/components.css?v=3.0.0" />
+  <link rel="stylesheet" href="css/3d-effects.css?v=3.0.0" />
+  <link rel="stylesheet" href="css/responsive.css?v=3.0.0" />
 
   <!-- Three.js Real-Time 3D WebGL Engine -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -142,6 +142,7 @@
         <a href="#attractions" class="quick-pill-link">⛩️ Attractions</a>
         <a href="#hotels" class="quick-pill-link">🏨 Stays</a>
         <a href="#how-to-reach" class="quick-pill-link">✈️ Transit</a>
+        <a href="#transit-boat" class="quick-pill-link" onclick="window.switchTransitTab('boat')">🛥️ Fast Boats</a>
         <a href="#island-rentals" class="quick-pill-link">🚗 Rentals</a>
         <a href="#regional-map" class="quick-pill-link">🗺️ 3D Map</a>
       </nav>
@@ -325,6 +326,11 @@
             <span class="launchpad-title">Scooter Rental Hub</span>
             <span class="launchpad-hint">Scoopy $7/d • NMAX $12/d</span>
           </button>
+          <button type="button" class="launchpad-btn" onclick="window.closeThreeLinesMenu(); window.switchTransitTab('boat');">
+            <span class="launchpad-icon">🛥️</span>
+            <span class="launchpad-title">Fast Boat & Ferries</span>
+            <span class="launchpad-hint">Penida, Lembongan, Gilis</span>
+          </button>
           <button type="button" class="launchpad-btn" onclick="window.closeThreeLinesMenu(); window.openTripDossierModal();">
             <span class="launchpad-icon">📄</span>
             <span class="launchpad-title">1-Click Offline Dossier</span>
@@ -374,6 +380,20 @@
             <div class="link-text">
               <span class="link-title">How to Reach Bali</span>
               <span class="link-sub">Flights to DPS, Trans-Java trains & Gilimanuk ferry</span>
+            </div>
+          </a>
+          <a href="#transit-boat" class="drawer-nav-link nav-link drawer-close-on-click" onclick="window.switchTransitTab('boat');">
+            <span class="link-icon">🛥️</span>
+            <div class="link-text">
+              <span class="link-title">Fast Boats & Island Ferries</span>
+              <span class="link-sub">Sanur Harbor, Padang Bai & Nusa Penida crossings</span>
+            </div>
+          </a>
+          <a href="#island-commute-calc" class="drawer-nav-link nav-link drawer-close-on-click">
+            <span class="link-icon">🧭</span>
+            <div class="link-text">
+              <span class="link-title">Intra-Island Commute Calculator</span>
+              <span class="link-sub">Turn-by-turn Google Maps & Grab cartel zones</span>
             </div>
           </a>
           <a href="#island-rentals" class="drawer-nav-link nav-link drawer-close-on-click">
@@ -3247,9 +3267,9 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts (Cache-busted) -->
-  <script src="js/data.js?v=2.3.0"></script>
-  <script src="js/app.js?v=2.3.0"></script>
-  <script src="js/tilt3d.js?v=2.3.0"></script>
-  <script src="js/three-scene.js?v=2.3.0"></script>
+  <script src="js/data.js?v=3.0.0"></script>
+  <script src="js/app.js?v=3.0.0"></script>
+  <script src="js/tilt3d.js?v=3.0.0"></script>
+  <script src="js/three-scene.js?v=3.0.0"></script>
 </body>
 </html>
