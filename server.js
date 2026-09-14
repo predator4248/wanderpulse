@@ -74,6 +74,11 @@ function rateLimit(limitCount = 20, windowMs = 60000) {
 // Serve static frontend files (HTML, CSS, JS, Assets)
 app.use(express.static(path.join(__dirname)));
 
+// Explicit root route for index.html (guarantees 200 OK on Vercel and local)
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 /* ==========================================================================
    MOCK / REAL-TIME DATA SOURCES (Synchronized with js/data.js)
    ========================================================================== */
@@ -940,6 +945,18 @@ app.post('/api/places/config', (req, res) => {
     });
   }
   res.status(400).json({ success: false, error: 'apiKey must be a string' });
+});
+
+// Explicit fallback for SPA and static asset routing (prevents Cannot GET 404 errors)
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ success: false, error: `Endpoint ${req.path} not found` });
+  }
+  const staticPath = path.join(__dirname, req.path);
+  if (fs.existsSync(staticPath) && fs.statSync(staticPath).isFile()) {
+    return res.sendFile(staticPath);
+  }
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Start Server if executed directly, export for serverless environments (Vercel, Render)
