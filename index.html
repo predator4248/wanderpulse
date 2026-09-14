@@ -37,10 +37,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
   <!-- Stylesheets (Cache-busted for instant edge update) -->
-  <link rel="stylesheet" href="css/main.css?v=2.2.0" />
-  <link rel="stylesheet" href="css/components.css?v=2.2.0" />
-  <link rel="stylesheet" href="css/3d-effects.css?v=2.2.0" />
-  <link rel="stylesheet" href="css/responsive.css?v=2.2.0" />
+  <link rel="stylesheet" href="css/main.css?v=2.3.0" />
+  <link rel="stylesheet" href="css/components.css?v=2.3.0" />
+  <link rel="stylesheet" href="css/3d-effects.css?v=2.3.0" />
+  <link rel="stylesheet" href="css/responsive.css?v=2.3.0" />
 
   <!-- Three.js Real-Time 3D WebGL Engine -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -624,6 +624,61 @@
             From world-renowned cliffside estates in Uluwatu to serene rainforest bamboo sanctuaries in Ubud. Select and reserve with instant price conversion in your chosen currency.
           </p>
           <div class="rainbow-divider"></div>
+        </div>
+
+        <!-- Live Hotel Search & Geoapify/Amadeus Intelligence Bar -->
+        <div class="hotels-api-search-bar" id="hotelsApiSearchBar">
+          <div class="api-search-row">
+            <div class="api-search-field field-query">
+              <label for="hotelSearchInput" class="api-field-label">🔍 Search Stays / Area</label>
+              <input type="text" id="hotelSearchInput" class="api-input" placeholder="e.g. Ubud, Cliff Villa, Pool..." aria-label="Search hotels by name or location" />
+            </div>
+
+            <div class="api-search-field field-proximity">
+              <label for="hotelProximitySelect" class="api-field-label">📍 Proximity to Sight (Geoapify GIS)</label>
+              <select id="hotelProximitySelect" class="api-select" aria-label="Filter proximity to landmark">
+                <option value="">All Bali Regions</option>
+                <option value="tanah-lot">Near Tanah Lot Temple</option>
+                <option value="uluwatu-temple">Near Uluwatu Temple</option>
+                <option value="ubud">Near Sacred Monkey Forest</option>
+                <option value="tegallalang">Near Tegallalang Rice Terrace</option>
+                <option value="batur">Near Mount Batur</option>
+                <option value="sekumpul">Near Sekumpul Waterfall</option>
+                <option value="tirta-empul">Near Tirta Empul Temple</option>
+                <option value="kelingking">Near Kelingking Beach</option>
+              </select>
+            </div>
+
+            <div class="api-search-field field-date">
+              <label for="hotelCheckInDate" class="api-field-label">📅 Check-In (Amadeus GDS)</label>
+              <input type="date" id="hotelCheckInDate" class="api-input" aria-label="Check-in Date" />
+            </div>
+
+            <div class="api-search-field field-date">
+              <label for="hotelCheckOutDate" class="api-field-label">📅 Check-Out</label>
+              <input type="date" id="hotelCheckOutDate" class="api-input" aria-label="Check-out Date" />
+            </div>
+
+            <div class="api-search-field field-guests">
+              <label for="hotelGuestsSelect" class="api-field-label">👥 Guests</label>
+              <select id="hotelGuestsSelect" class="api-select" aria-label="Guests count">
+                <option value="1">1 Guest</option>
+                <option value="2" selected>2 Guests</option>
+                <option value="3">3 Guests</option>
+                <option value="4">4 Guests</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="api-status-strip">
+            <div class="api-status-badge" id="hotelsApiBadge" title="Live multi-source integration active">
+              <span class="api-status-dot"></span>
+              <span>🛰️ Geoapify Places GIS & Amadeus GDS Connected</span>
+            </div>
+            <div class="api-summary-text" id="hotelsSearchSummary">
+              Showing 6 handpicked Bali stays • Live Amadeus 3-night rates
+            </div>
+          </div>
         </div>
 
         <!-- Controls: Filters & Sorter -->
@@ -2262,6 +2317,24 @@
               </div>
             </div>
 
+            <!-- Amadeus GDS Live Offer Details Card -->
+            <div class="hotel-amadeus-gds-card" id="hotelAmadeusGdsCard" style="margin-top: 14px;">
+              <div class="gds-card-header">
+                <div class="gds-card-title">
+                  <span>🛰️ Amadeus GDS Live Offer Rate</span>
+                  <span class="amadeus-rate-badge" id="modalGdsRateCode">RATE: BAR1</span>
+                </div>
+                <span style="font-size: 0.74rem; color: #34D399; font-weight: 700;">✓ Instant GDS Voucher</span>
+              </div>
+              <div style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45;" id="modalGdsPolicyText">
+                Free cancellation up to 48 hours before check-in. Verified Best Available Rate via Amadeus Global Distribution System.
+              </div>
+              <div class="gds-pricing-row">
+                <span style="font-size: 0.78rem; color: var(--text-muted);">Stay Total (<span id="modalStayNights">3 nights</span>, incl. 11% VAT):</span>
+                <span style="font-size: 1.1rem; font-weight: 900; color: var(--accent-cyan);" id="modalStayTotalUSD">$1,598</span>
+              </div>
+            </div>
+
             <!-- Action Buttons -->
             <div class="hotel-action-buttons" style="display: flex; gap: 10px; margin-top: 16px;">
               <button type="button" class="btn btn-outline" onclick="closeModal('hotelDetailModal')" style="flex: 1;">Close</button>
@@ -2765,9 +2838,9 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts (Cache-busted) -->
-  <script src="js/data.js?v=2.2.0"></script>
-  <script src="js/app.js?v=2.2.0"></script>
-  <script src="js/tilt3d.js?v=2.2.0"></script>
-  <script src="js/three-scene.js?v=2.2.0"></script>
+  <script src="js/data.js?v=2.3.0"></script>
+  <script src="js/app.js?v=2.3.0"></script>
+  <script src="js/tilt3d.js?v=2.3.0"></script>
+  <script src="js/three-scene.js?v=2.3.0"></script>
 </body>
 </html>
