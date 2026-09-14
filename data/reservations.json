@@ -1,5 +1,21 @@
 [
   {
+    "voucherCode": "BALI-1TJW2G",
+    "status": "CONFIRMED",
+    "guestName": "Jordan Taylor",
+    "hotelId": "viceroy-bali",
+    "hotelName": "Viceroy Bali Valley Sanctuary",
+    "roomType": "Premier Forest View",
+    "checkin": "2026-10-01",
+    "checkout": "2026-10-05",
+    "nights": 4,
+    "guests": 2,
+    "ratePerNightUSD": 480,
+    "totalPriceUSD": 1920,
+    "createdAt": "2026-09-13T21:47:00.318Z",
+    "freeCancellationUntil": "2026-10-01"
+  },
+  {
     "voucherCode": "BALI-2YCP6K",
     "status": "CONFIRMED",
     "guestName": "Jordan Taylor",
