@@ -4008,18 +4008,36 @@
 }
 
 /* Hotel Card Proximity & Amadeus Badges */
+.hotel-proximity-pill,
 .geoapify-proximity-pill {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #34D399;
+  background: rgba(0, 240, 255, 0.09);
+  border: 1px solid rgba(0, 240, 255, 0.28);
+  color: var(--accent-cyan);
   font-size: 0.74rem;
   font-weight: 700;
-  padding: 3px 8px;
+  padding: 4px 9px;
   border-radius: 6px;
-  margin-top: 4px;
+  margin-top: 6px;
+  max-width: 100%;
+}
+
+.hotel-gds-pill,
+.amadeus-card-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #34D399;
+  font-size: 0.73rem;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 6px;
+  margin-top: 6px;
 }
 
 .amadeus-rate-badge {
