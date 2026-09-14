@@ -183,11 +183,24 @@ function initDestinationHierarchy() {
     BALI_HOTELS_ORIGINAL = [...HOTELS_DATA];
   }
 
-  // Check initial hash
+  // Check URL search parameters first, then hash
+  const urlParams = new URLSearchParams(window.location.search);
+  const qCountry = (urlParams.get('country') || '').toLowerCase().trim();
+  const qState = (urlParams.get('state') || '').toLowerCase().trim();
+  const qDistrict = (urlParams.get('district') || '').toLowerCase().trim();
+
   const initialHash = (window.location.hash || '').replace('#', '').toLowerCase();
-  const matched = findDistrictBySlug(initialHash);
+  const slugTarget = qDistrict || initialHash;
+  const matched = findDistrictBySlug(slugTarget);
+
   if (matched) {
-    activeDestination = { country: matched.countryId, state: matched.stateId, district: matched.districtId };
+    activeDestination = {
+      country: qCountry || matched.countryId,
+      state: qState || matched.stateId,
+      district: matched.districtId
+    };
+  } else if (qCountry && qState && qDistrict) {
+    activeDestination = { country: qCountry, state: qState, district: qDistrict };
   } else {
     // Default to India - Jaipur (Primary Focus)
     activeDestination = { country: 'india', state: 'rajasthan', district: 'jaipur' };
@@ -620,12 +633,22 @@ window.switchActiveDestination = function(countryId, stateId, districtId, skipSc
   const crumbDistrictIcon = document.getElementById('crumbDistrictIcon');
   const crumbDistrictName = document.getElementById('crumbDistrictName');
 
+  const crumbCountryLink = document.getElementById('destCrumbCountry');
+  const crumbStateLink = document.getElementById('destCrumbState');
+  const crumbDistrictLink = document.getElementById('destCrumbDistrict');
+  const btnChangeDistrictPage = document.getElementById('btnChangeDistrictPage');
+
   if (crumbCountryFlag) crumbCountryFlag.textContent = country.flag || '🌍';
   if (crumbCountryName) crumbCountryName.textContent = country.name;
   if (crumbStateIcon) crumbStateIcon.textContent = state.icon || '📍';
   if (crumbStateName) crumbStateName.textContent = state.name;
   if (crumbDistrictIcon) crumbDistrictIcon.textContent = district.icon || '🌸';
   if (crumbDistrictName) crumbDistrictName.textContent = district.name;
+
+  if (crumbCountryLink && crumbCountryLink.tagName === 'A') crumbCountryLink.href = 'index.html';
+  if (crumbStateLink && crumbStateLink.tagName === 'A') crumbStateLink.href = `states.html?country=${countryId}`;
+  if (crumbDistrictLink && crumbDistrictLink.tagName === 'A') crumbDistrictLink.href = `districts.html?country=${countryId}&state=${stateId}`;
+  if (btnChangeDistrictPage && btnChangeDistrictPage.tagName === 'A') btnChangeDistrictPage.href = `districts.html?country=${countryId}&state=${stateId}`;
 
   // 2. Update Hero Section
   const heroLiveCityLabel = document.getElementById('heroLiveCityLabel');

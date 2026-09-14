@@ -80,12 +80,33 @@ app.get('/sw.js', (req, res) => {
   res.sendFile(path.join(__dirname, 'sw.js'));
 });
 
-// Explicit root route for index.html with no-cache header (guarantees latest release on Vercel)
+// Explicit routes for multi-page discovery with no-cache header (guarantees latest release on Vercel)
 app.get(['/', '/index.html'], (req, res) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
   res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.get(['/states', '/states.html'], (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.sendFile(path.join(__dirname, 'states.html'));
+});
+
+app.get(['/districts', '/districts.html'], (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.sendFile(path.join(__dirname, 'districts.html'));
+});
+
+app.get(['/destination', '/destination.html'], (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.sendFile(path.join(__dirname, 'destination.html'));
 });
 
 // Serve static frontend files (HTML, CSS, JS, Assets)
