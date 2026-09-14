@@ -80,33 +80,12 @@ app.get('/sw.js', (req, res) => {
   res.sendFile(path.join(__dirname, 'sw.js'));
 });
 
-// Explicit routes for multi-page discovery with no-cache header (guarantees latest release on Vercel)
+// Explicit root route for index.html with no-cache header (guarantees latest release on Vercel)
 app.get(['/', '/index.html'], (req, res) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
   res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-app.get(['/states', '/states.html'], (req, res) => {
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '0');
-  res.sendFile(path.join(__dirname, 'states.html'));
-});
-
-app.get(['/districts', '/districts.html'], (req, res) => {
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '0');
-  res.sendFile(path.join(__dirname, 'districts.html'));
-});
-
-app.get(['/destination', '/destination.html'], (req, res) => {
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '0');
-  res.sendFile(path.join(__dirname, 'destination.html'));
 });
 
 // Serve static frontend files (HTML, CSS, JS, Assets)
@@ -124,13 +103,6 @@ const TRANSIT_PRESETS = (dataModule.TRANSIT_DATA && dataModule.TRANSIT_DATA.pres
 const BALI_REGIONS = dataModule.BALI_REGIONS || {};
 const LOCAL_TRAVEL_MODES = dataModule.LOCAL_TRAVEL_MODES || [];
 const BALI_MARINE_HARBORS = dataModule.BALI_MARINE_HARBORS || [];
-const DESTINATION_HIERARCHY = dataModule.DESTINATION_HIERARCHY || {};
-const INDIA_ATTRACTIONS = dataModule.INDIA_ATTRACTIONS_DATA || [];
-const INDIA_HOTELS = dataModule.INDIA_HOTELS_DATA || [];
-const INDIA_REGIONS = dataModule.INDIA_REGIONS || {};
-const INDIA_LOCAL_TRAVEL_MODES = dataModule.INDIA_LOCAL_TRAVEL_MODES || [];
-const INDIA_DISTRICT_TRANSIT = dataModule.INDIA_DISTRICT_TRANSIT || {};
-const INDIA_TRAVEL_GUIDES = dataModule.INDIA_TRAVEL_GUIDES || {};
 
 let GEOAPIFY_API_KEY = process.env.GEOAPIFY_API_KEY || '';
 const GEOAPIFY_CACHE_FILE = path.join(DATA_DIR, 'geoapify_cache.json');
@@ -301,34 +273,10 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// 1b. Multi-Layer Destination Discovery Hierarchy API
-app.get('/api/hierarchy', (req, res) => {
-  res.json({
-    success: true,
-    data: DESTINATION_HIERARCHY
-  });
-});
-
-// 2. Attractions API (with country, state, district, category & search filtering)
+// 2. Attractions API (with category & search filtering)
 app.get('/api/attractions', (req, res) => {
-  const { category, search, country, state, district } = req.query;
-  let sourceList = ATTRACTIONS;
-
-  if (country === 'india' || (district && district !== 'all-bali') || (state && state !== 'bali')) {
-    sourceList = INDIA_ATTRACTIONS;
-    if (district && district !== 'all') {
-      sourceList = sourceList.filter(item => item.district === district);
-    }
-    if (state && state !== 'all') {
-      sourceList = sourceList.filter(item => item.state === state);
-    }
-  } else if (country === 'indonesia' || country === 'bali') {
-    sourceList = ATTRACTIONS;
-  } else if (country === 'all') {
-    sourceList = [...ATTRACTIONS, ...INDIA_ATTRACTIONS];
-  }
-
-  let results = [...sourceList];
+  const { category, search } = req.query;
+  let results = [...ATTRACTIONS];
 
   if (category && category !== 'all') {
     results = results.filter(item => item.category === category);
@@ -338,8 +286,8 @@ app.get('/api/attractions', (req, res) => {
     const q = search.toLowerCase().trim();
     results = results.filter(item =>
       item.name.toLowerCase().includes(q) ||
-      (item.location && item.location.toLowerCase().includes(q)) ||
-      (item.description && item.description.toLowerCase().includes(q))
+      item.location.toLowerCase().includes(q) ||
+      item.description.toLowerCase().includes(q)
     );
   }
 
@@ -352,28 +300,13 @@ app.get('/api/attractions', (req, res) => {
 
 // 3. Hotels API — Multi-Source Engine (Geoapify Places GIS & Amadeus GDS Live Offers)
 app.get('/api/hotels', async (req, res) => {
-  const { tier, sort, query, checkIn, checkOut, guests, proximitySpot, source, country, state, district } = req.query;
-  
-  let sourceHotels = HOTELS;
-  if (country === 'india' || (district && district !== 'all-bali' && !district.startsWith('bali')) || (state && state !== 'bali')) {
-    sourceHotels = INDIA_HOTELS;
-    if (district && district !== 'all') {
-      const filteredByDistrict = sourceHotels.filter(h => h.district === district);
-      if (filteredByDistrict.length > 0) sourceHotels = filteredByDistrict;
-    }
-    if (state && state !== 'all') {
-      const filteredByState = sourceHotels.filter(h => h.state === state);
-      if (filteredByState.length > 0) sourceHotels = filteredByState;
-    }
-  }
-
-  let results = sourceHotels.map(h => ({ ...h }));
+  const { tier, sort, query, checkIn, checkOut, guests, proximitySpot, source } = req.query;
+  let results = HOTELS.map(h => ({ ...h }));
 
   // A. Geoapify Proximity & GIS Math
   let targetSpot = null;
   if (proximitySpot) {
-    const allSpots = [...ATTRACTIONS, ...INDIA_ATTRACTIONS];
-    targetSpot = allSpots.find(a => a.id === proximitySpot || a.id.toLowerCase() === proximitySpot.toLowerCase());
+    targetSpot = ATTRACTIONS.find(a => a.id === proximitySpot || a.id.toLowerCase() === proximitySpot.toLowerCase());
     if (targetSpot && (targetSpot.lat || targetSpot.coordinates)) {
       const spotLat = targetSpot.lat || targetSpot.coordinates.lat;
       const spotLng = targetSpot.lng || targetSpot.lon || targetSpot.coordinates.lng;
@@ -866,37 +799,28 @@ app.post('/api/transit/route', (req, res) => {
   });
 });
 
-// 4b. Point-to-Point Commute & Fare Engine API (Bali & India Districts)
+// 4b. Intra-Island Point-to-Point Commute & Fare Engine API
 app.post('/api/transit/commute', (req, res) => {
   const { origin, destination } = req.body;
   const origKey = (origin || 'airport').toLowerCase().trim();
   const destKey = (destination || 'ubud').toLowerCase().trim();
 
-  const orig = INDIA_REGIONS[origKey] || BALI_REGIONS[origKey] || BALI_REGIONS['airport'];
-  const dest = INDIA_REGIONS[destKey] || BALI_REGIONS[destKey] || BALI_REGIONS['ubud'];
-  const isIndia = !!(INDIA_REGIONS[origKey] || INDIA_REGIONS[destKey]);
+  const orig = BALI_REGIONS[origKey] || BALI_REGIONS['airport'];
+  const dest = BALI_REGIONS[destKey] || BALI_REGIONS['ubud'];
 
   // Calculate realistic distance
   const straightMeters = haversineDistance(orig.lat, orig.lng, dest.lat, dest.lng);
-  const isMarine = !isIndia && !!(orig.isIsland || dest.isIsland);
-  const roadKm = Math.max(3, Math.round((straightMeters / 1000) * (isMarine ? 1.15 : (isIndia ? 1.32 : 1.38))));
+  const isMarine = !!(orig.isIsland || dest.isIsland);
+  const roadKm = Math.max(4, Math.round((straightMeters / 1000) * (isMarine ? 1.15 : 1.38)));
 
-  let carMins = Math.round((roadKm / (isIndia ? 32 : 28)) * 60);
-  let scooterMins = Math.round((roadKm / (isIndia ? 38 : 42)) * 60);
+  let carMins = Math.round((roadKm / 28) * 60);
+  let scooterMins = Math.round((roadKm / 42) * 60);
 
-  if (!isIndia) {
-    if (['canggu', 'kuta-seminyak'].includes(origKey) || ['canggu', 'kuta-seminyak'].includes(destKey)) {
-      carMins += 20;
-    }
-    if (origKey === 'ubud' || destKey === 'ubud') {
-      carMins += 15;
-    }
-  } else {
-    // City center traffic padding in India
-    if (['hawa-mahal', 'city-palace-jaipur', 'dashashwamedh-ghat', 'fort-kochi'].includes(origKey) || 
-        ['hawa-mahal', 'city-palace-jaipur', 'dashashwamedh-ghat', 'fort-kochi'].includes(destKey)) {
-      carMins += 12;
-    }
+  if (['canggu', 'kuta-seminyak'].includes(origKey) || ['canggu', 'kuta-seminyak'].includes(destKey)) {
+    carMins += 20;
+  }
+  if (origKey === 'ubud' || destKey === 'ubud') {
+    carMins += 15;
   }
 
   const formatDuration = (mins) => {
@@ -906,49 +830,22 @@ app.post('/api/transit/commute', (req, res) => {
     return `${h} hr ${m > 0 ? m + 'm' : ''}`.trim();
   };
 
-  let carPriceUSD, scooterRideUSD, grabCarUSD, grabZoneStatus, grabNotice, roadAlert;
-  let carPriceINR = 0;
-  let autoRickshawINR = 0;
+  let carPriceUSD = Math.max(14, Math.round(roadKm * 0.55 + 8));
+  let scooterRideUSD = Math.max(4, Math.round(roadKm * 0.22 + 2));
+  let grabCarUSD = Math.max(10, Math.round(roadKm * 0.45 + 5));
 
-  if (isIndia) {
-    carPriceINR = Math.max(200, Math.round(roadKm * 15 + 120));
-    autoRickshawINR = Math.max(50, Math.round(roadKm * 11 + 30));
-    carPriceUSD = Math.max(3, Math.round(carPriceINR / 83.2));
-    scooterRideUSD = Math.max(1, Math.round(autoRickshawINR / 83.2));
-    grabCarUSD = Math.max(2, Math.round(carPriceUSD * 0.9));
+  if (origKey === 'airport') {
+    carPriceUSD = Math.max(18, carPriceUSD);
+  }
 
-    grabZoneStatus = 'App Cabs (Ola / Uber) & Auto-Rickshaws Active';
-    grabNotice = 'Book via Ola, Uber, or Rapido for transparent metered fares, or negotiate standard fare before boarding street auto-rickshaws.';
-    roadAlert = 'Smooth transit. Watch for vibrant street life, heritage bazaar traffic, and scenic bypass roads.';
-  } else {
-    carPriceUSD = Math.max(14, Math.round(roadKm * 0.55 + 8));
-    scooterRideUSD = Math.max(4, Math.round(roadKm * 0.22 + 2));
-    grabCarUSD = Math.max(10, Math.round(roadKm * 0.45 + 5));
-
-    if (origKey === 'airport') {
-      carPriceUSD = Math.max(18, carPriceUSD);
-    }
-
-    grabZoneStatus = 'Green Zone (Normal App Pick-up & Drop-off)';
-    grabNotice = 'Grab & Gojek cars can drop-off and pick-up freely.';
-    if (['ubud', 'uluwatu', 'padang-bai'].includes(destKey)) {
-      grabZoneStatus = 'Drop-off Allowed / Pick-up Restricted';
-      grabNotice = 'Grab can drop you off here without issues. For return journeys, walk 200m away from temple/village centers to avoid local taxi cartel protests, or pre-book a private chauffeur.';
-    } else if (['canggu'].includes(destKey)) {
-      grabZoneStatus = 'High Traffic Zone';
-      grabNotice = 'Cars face severe delays on the narrow Canggu shortcut. Gojek motorbikes (GoRide) or scooter rentals are 2x faster.';
-    }
-
-    roadAlert = 'Smooth driving conditions. Snaking tropical village roads with occasional ceremonial processions.';
-    if (isMarine) {
-      roadAlert = 'Overwater marine crossing required. Fast boats depart Sanur New Harbor regularly. Check sea swell conditions.';
-    } else if ((origKey === 'canggu' && destKey === 'kuta-seminyak') || (origKey === 'kuta-seminyak' && destKey === 'canggu')) {
-      roadAlert = 'Canggu Shortcut Warning: The narrow shortcut through rice fields is strictly for motorbikes and scooters. Cars will be rerouted via Raya Kerobokan (+35 mins).';
-    } else if (origKey === 'airport' && ['nusa-dua', 'sanur'].includes(destKey)) {
-      roadAlert = 'Time-Saver: Ask your driver to take the Bali Mandara Overwater Toll Road (Jalan Tol). Bypasses South Bali gridlock in 8 minutes!';
-    } else if (destKey === 'bedugul-lovina') {
-      roadAlert = 'Highland Switchbacks: Steep mountain grades and afternoon fog near Lake Beratan. Drive cautiously on wet asphalt.';
-    }
+  let grabZoneStatus = 'Green Zone (Normal App Pick-up & Drop-off)';
+  let grabNotice = 'Grab & Gojek cars can drop-off and pick-up freely.';
+  if (['ubud', 'uluwatu', 'padang-bai'].includes(destKey)) {
+    grabZoneStatus = 'Drop-off Allowed / Pick-up Restricted';
+    grabNotice = 'Grab can drop you off here without issues. For return journeys, walk 200m away from temple/village centers to avoid local taxi cartel protests, or pre-book a private chauffeur.';
+  } else if (['canggu'].includes(destKey)) {
+    grabZoneStatus = 'High Traffic Zone';
+    grabNotice = 'Cars face severe delays on the narrow Canggu shortcut. Gojek motorbikes (GoRide) or scooter rentals are 2x faster.';
   }
 
   let boatDetails = null;
@@ -963,27 +860,35 @@ app.post('/api/transit/commute', (req, res) => {
     };
   }
 
+  let roadAlert = 'Smooth driving conditions. Snaking tropical village roads with occasional ceremonial processions.';
+  if (isMarine) {
+    roadAlert = 'Overwater marine crossing required. Fast boats depart Sanur New Harbor regularly. Check sea swell conditions.';
+  } else if ((origKey === 'canggu' && destKey === 'kuta-seminyak') || (origKey === 'kuta-seminyak' && destKey === 'canggu')) {
+    roadAlert = 'Canggu Shortcut Warning: The narrow shortcut through rice fields is strictly for motorbikes and scooters. Cars will be rerouted via Raya Kerobokan (+35 mins).';
+  } else if (origKey === 'airport' && ['nusa-dua', 'sanur'].includes(destKey)) {
+    roadAlert = 'Time-Saver: Ask your driver to take the Bali Mandara Overwater Toll Road (Jalan Tol). Bypasses South Bali gridlock in 8 minutes!';
+  } else if (destKey === 'bedugul-lovina') {
+    roadAlert = 'Highland Switchbacks: Steep mountain grades and afternoon fog near Lake Beratan. Drive cautiously on wet asphalt.';
+  }
+
   const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${orig.lat},${orig.lng}&destination=${dest.lat},${dest.lng}&travelmode=${isMarine ? 'transit' : 'driving'}`;
 
   res.json({
     success: true,
     origin: orig,
     destination: dest,
-    isIndia,
     distanceKm: roadKm,
     durationCar: formatDuration(carMins),
     durationScooter: formatDuration(scooterMins),
     carPriceUSD,
     scooterRideUSD,
-    carPriceINR,
-    autoRickshawINR,
     grabCarUSD,
     grabZoneStatus,
     grabNotice,
     boatDetails,
     roadAlert,
     googleMapsUrl,
-    recommendation: isMarine ? 'fast-boat' : (isIndia ? (roadKm > 15 ? 'car-driver' : 'auto-rickshaw') : (carMins > 60 || origKey === 'airport' ? 'car-driver' : 'scooter'))
+    recommendation: isMarine ? 'fast-boat' : (carMins > 60 || origKey === 'airport' ? 'car-driver' : 'scooter')
   });
 });
 
@@ -1106,11 +1011,10 @@ app.post('/api/transit/book', rateLimit(20, 60000), (req, res) => {
   let stationGate = 'Terminal 1 - Gate 4B';
 
   if (transitType === 'train') {
-    const isIndiaTrain = req.body.isIndia || (destinationHub && (destinationHub.includes('Jaipur') || destinationHub.includes('Delhi') || destinationHub.includes('Agra') || destinationHub.includes('Varanasi') || destinationHub.includes('Goa') || destinationHub.includes('Kerala') || destinationHub.includes('Manali')));
-    basePriceUSD = isIndiaTrain ? 22 : 35;
-    pnrPrefix = isIndiaTrain ? 'IRCTC-VBE' : 'KAI-TRN';
-    operatorName = isIndiaTrain ? 'Indian Railways (IRCTC) - Vande Bharat Express' : 'Kereta Api Indonesia (KAI) Eksekutif';
-    stationGate = isIndiaTrain ? 'Platform 1 - Coach C2 (Executive Chair Car)' : 'Gambir Station - Platform 3';
+    basePriceUSD = 35;
+    pnrPrefix = 'KAI-TRN';
+    operatorName = 'Kereta Api Indonesia (KAI) Eksekutif';
+    stationGate = 'Gambir Station - Platform 3';
   } else if (transitType === 'bus') {
     basePriceUSD = 25;
     pnrPrefix = 'DPS-BUS';
@@ -1365,39 +1269,10 @@ function decodeWMOCode(code) {
   return { condition: 'Warm Golden Hour', icon: '☀️' };
 }
 
-let weatherCacheMap = {};
-
 app.get('/api/weather', async (req, res) => {
-  const { district, city, country } = req.query;
-  const distKey = (district || city || '').toLowerCase().trim();
-
-  let targetLocation = {
-    name: 'Denpasar & Ubud, Bali, Indonesia',
-    timeZone: 'Asia/Makassar',
-    tzLabel: 'WITA (UTC+8)',
-    lat: -8.4095,
-    lon: 115.1889
-  };
-
-  if (distKey === 'jaipur') {
-    targetLocation = { name: 'Jaipur, Rajasthan, India', timeZone: 'Asia/Kolkata', tzLabel: 'IST (UTC+5:30)', lat: 26.9124, lon: 75.7873 };
-  } else if (distKey === 'udaipur') {
-    targetLocation = { name: 'Udaipur, Rajasthan, India', timeZone: 'Asia/Kolkata', tzLabel: 'IST (UTC+5:30)', lat: 24.5854, lon: 73.7125 };
-  } else if (distKey === 'alleppey' || distKey === 'kochi' || distKey === 'munnar') {
-    targetLocation = { name: 'Kerala Backwaters & Hills, India', timeZone: 'Asia/Kolkata', tzLabel: 'IST (UTC+5:30)', lat: 9.9312, lon: 76.2673 };
-  } else if (distKey === 'goa' || distKey === 'north-goa' || distKey === 'south-goa') {
-    targetLocation = { name: 'Panaji, Goa, India', timeZone: 'Asia/Kolkata', tzLabel: 'IST (UTC+5:30)', lat: 15.4989, lon: 73.8278 };
-  } else if (distKey === 'agra') {
-    targetLocation = { name: 'Agra, Uttar Pradesh, India', timeZone: 'Asia/Kolkata', tzLabel: 'IST (UTC+5:30)', lat: 27.1767, lon: 78.0081 };
-  } else if (distKey === 'varanasi') {
-    targetLocation = { name: 'Varanasi, Uttar Pradesh, India', timeZone: 'Asia/Kolkata', tzLabel: 'IST (UTC+5:30)', lat: 25.3176, lon: 82.9739 };
-  } else if (distKey === 'manali' || distKey === 'shimla') {
-    targetLocation = { name: 'Manali, Himachal Pradesh, India', timeZone: 'Asia/Kolkata', tzLabel: 'IST (UTC+5:30)', lat: 32.2432, lon: 77.1892 };
-  }
-
   const now = new Date();
   const timeStr = new Intl.DateTimeFormat('en-US', {
-    timeZone: targetLocation.timeZone,
+    timeZone: 'Asia/Makassar',
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
@@ -1405,17 +1280,16 @@ app.get('/api/weather', async (req, res) => {
   }).format(now);
 
   const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes cache
-  const cachedEntry = weatherCacheMap[targetLocation.name];
-  if (cachedEntry && (Date.now() - cachedEntry.timestamp < CACHE_TTL_MS)) {
+  if (weatherCache.data && (Date.now() - weatherCache.timestamp < CACHE_TTL_MS)) {
     return res.json({
-      ...cachedEntry.data,
+      ...weatherCache.data,
       localTime: timeStr,
       cached: true
     });
   }
 
   try {
-    const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${targetLocation.lat}&longitude=${targetLocation.lon}&current_weather=true&hourly=relativehumidity_2m,uv_index&daily=sunrise,sunset&timezone=${encodeURIComponent(targetLocation.timeZone)}`;
+    const apiUrl = 'https://api.open-meteo.com/v1/forecast?latitude=-8.4095&longitude=115.1889&current_weather=true&hourly=relativehumidity_2m,uv_index&daily=sunrise,sunset&timezone=Asia%2FMakassar';
     const response = await fetch(apiUrl, { signal: AbortSignal.timeout(4000) });
 
     if (response.ok) {
@@ -1423,7 +1297,7 @@ app.get('/api/weather', async (req, res) => {
       const current = json.current_weather || {};
       const wmo = decodeWMOCode(current.weathercode || 0);
 
-      const tempC = Math.round(current.temperature || (targetLocation.lat > 30 ? 18 : 28));
+      const tempC = Math.round(current.temperature || 29);
       const tempF = Math.round((tempC * 9 / 5) + 32);
       const windSpeedKmH = current.windspeed || 12;
 
@@ -1433,15 +1307,12 @@ app.get('/api/weather', async (req, res) => {
 
       // Current hour index for humidity & uv
       const hourIndex = now.getHours();
-      const humidity = (json.hourly && json.hourly.relativehumidity_2m && json.hourly.relativehumidity_2m[hourIndex]) ? json.hourly.relativehumidity_2m[hourIndex] : 62;
-      const uvIndex = (json.hourly && json.hourly.uv_index && json.hourly.uv_index[hourIndex]) ? Math.round(json.hourly.uv_index[hourIndex]) : 6;
+      const humidity = (json.hourly && json.hourly.relativehumidity_2m && json.hourly.relativehumidity_2m[hourIndex]) ? json.hourly.relativehumidity_2m[hourIndex] : 68;
+      const uvIndex = (json.hourly && json.hourly.uv_index && json.hourly.uv_index[hourIndex]) ? Math.round(json.hourly.uv_index[hourIndex]) : 7;
 
       const freshData = {
-        location: targetLocation.name,
-        city: targetLocation.name.split(',')[0] + (targetLocation.name.split(',')[1] ? `, ${targetLocation.name.split(',')[1].trim()}` : ''),
-        country: targetLocation.name.includes('India') ? 'India' : 'Indonesia',
-        timezone: targetLocation.timeZone,
-        timeZone: targetLocation.tzLabel,
+        location: 'Denpasar & Ubud, Bali, Indonesia',
+        timeZone: 'WITA (UTC+8)',
         temperatureC: tempC,
         temperatureF: tempF,
         condition: wmo.condition,
@@ -1454,7 +1325,7 @@ app.get('/api/weather', async (req, res) => {
         liveSource: 'Open-Meteo Weather Service'
       };
 
-      weatherCacheMap[targetLocation.name] = {
+      weatherCache = {
         data: freshData,
         timestamp: Date.now()
       };
@@ -1466,27 +1337,25 @@ app.get('/api/weather', async (req, res) => {
       });
     }
   } catch (err) {
+    // Graceful offline fallback
     console.warn('Weather API fetch failed, serving fallback:', err.message);
   }
 
   // Resilient fallback
   const fallbackData = {
-    location: targetLocation.name,
-    city: targetLocation.name.split(',')[0] + (targetLocation.name.split(',')[1] ? `, ${targetLocation.name.split(',')[1].trim()}` : ''),
-    country: targetLocation.name.includes('India') ? 'India' : 'Indonesia',
-    timezone: targetLocation.timeZone,
-    timeZone: targetLocation.tzLabel,
+    location: 'Denpasar & Ubud, Bali, Indonesia',
+    timeZone: 'WITA (UTC+8)',
     localTime: timeStr,
-    temperatureC: targetLocation.lat > 30 ? 18 : 28,
-    temperatureF: targetLocation.lat > 30 ? 64 : 82.4,
-    condition: 'Pleasant Travel Weather',
+    temperatureC: 29,
+    temperatureF: 84.2,
+    condition: 'Sunny Tropical Golden Hour',
     icon: '☀️',
-    humidity: '60%',
-    uvIndex: 6,
-    windSpeed: '10 km/h',
+    humidity: '68%',
+    uvIndex: 7,
+    windSpeed: '12 km/h',
     sunrise: '06:15',
-    sunset: '18:25',
-    liveSource: 'Simulated Precision Telemetry'
+    sunset: '18:18',
+    liveSource: 'Historical Bali Climate Model'
   };
 
   res.json(fallbackData);

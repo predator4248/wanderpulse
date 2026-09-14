@@ -6,7 +6,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const inits = [
     ['Theme', initTheme],
-    ['DestinationHierarchy', initDestinationHierarchy],
     ['BaliClock', initBaliClock],
     ['Navbar', initNavbar],
     ['Currency', initCurrency],
@@ -110,679 +109,7 @@ function updateThemeIcon(theme) {
 }
 
 /* ==========================================================================
-   1b. MULTI-LAYER DESTINATION DISCOVERY HIERARCHY (COUNTRY > STATE > DISTRICT)
-   ========================================================================== */
-let activeDestination = {
-  country: 'india',
-  state: 'rajasthan',
-  district: 'jaipur'
-};
-
-let explorerSelection = {
-  country: 'india',
-  state: 'rajasthan',
-  district: 'jaipur'
-};
-
-let BALI_ATTRACTIONS_ORIGINAL = [];
-let BALI_HOTELS_ORIGINAL = [];
-let activeTimeZone = 'Asia/Kolkata';
-let activeTimeLabel = 'IST';
-
-function getDestinationInfo(countryId, stateId, districtId) {
-  const hierarchy = (typeof DESTINATION_HIERARCHY !== 'undefined') ? DESTINATION_HIERARCHY : null;
-  if (!hierarchy) return null;
-  const country = hierarchy[countryId];
-  if (!country) return null;
-  const state = country.states ? country.states[stateId] : null;
-  if (!state) return null;
-  const district = state.districts ? state.districts[districtId] : null;
-  return { country, state, district };
-}
-
-function findDistrictBySlug(slug) {
-  if (!slug) return null;
-  const hierarchy = (typeof DESTINATION_HIERARCHY !== 'undefined') ? DESTINATION_HIERARCHY : null;
-  if (!hierarchy) return null;
-
-  // Specific aliases
-  if (slug === 'bali' || slug === 'indonesia') return { countryId: 'indonesia', stateId: 'bali', districtId: 'badung' };
-  if (slug === 'ubud' || slug === 'gianyar') return { countryId: 'indonesia', stateId: 'bali', districtId: 'gianyar' };
-  if (slug === 'jaipur' || slug === 'pinkcity') return { countryId: 'india', stateId: 'rajasthan', districtId: 'jaipur' };
-  if (slug === 'udaipur') return { countryId: 'india', stateId: 'rajasthan', districtId: 'udaipur' };
-  if (slug === 'alleppey' || slug === 'alappuzha') return { countryId: 'india', stateId: 'kerala', districtId: 'alleppey' };
-  if (slug === 'munnar') return { countryId: 'india', stateId: 'kerala', districtId: 'munnar' };
-  if (slug === 'kochi' || slug === 'fort-kochi' || slug === 'fort_kochi' || slug === 'ernakulam') return { countryId: 'india', stateId: 'kerala', districtId: 'fort_kochi' };
-  if (slug === 'goa' || slug === 'north-goa' || slug === 'north_goa') return { countryId: 'india', stateId: 'goa', districtId: 'north_goa' };
-  if (slug === 'south-goa' || slug === 'south_goa') return { countryId: 'india', stateId: 'goa', districtId: 'south_goa' };
-  if (slug === 'agra') return { countryId: 'india', stateId: 'uttar_pradesh', districtId: 'agra' };
-  if (slug === 'varanasi' || slug === 'banaras' || slug === 'kashi') return { countryId: 'india', stateId: 'uttar_pradesh', districtId: 'varanasi' };
-  if (slug === 'manali') return { countryId: 'india', stateId: 'himachal_pradesh', districtId: 'manali' };
-  if (slug === 'shimla') return { countryId: 'india', stateId: 'himachal_pradesh', districtId: 'shimla' };
-  if (slug === 'rishikesh') return { countryId: 'india', stateId: 'uttarakhand', districtId: 'rishikesh' };
-
-  for (const cKey in hierarchy) {
-    const c = hierarchy[cKey];
-    for (const sKey in c.states) {
-      const s = c.states[sKey];
-      for (const dKey in s.districts) {
-        if (dKey.toLowerCase() === slug || s.districts[dKey].name.toLowerCase().replace(/\s+/g, '-') === slug) {
-          return { countryId: cKey, stateId: sKey, districtId: dKey };
-        }
-      }
-    }
-  }
-  return null;
-}
-
-function initDestinationHierarchy() {
-  if (typeof ATTRACTIONS_DATA !== 'undefined' && BALI_ATTRACTIONS_ORIGINAL.length === 0) {
-    BALI_ATTRACTIONS_ORIGINAL = [...ATTRACTIONS_DATA];
-  }
-  if (typeof HOTELS_DATA !== 'undefined' && BALI_HOTELS_ORIGINAL.length === 0) {
-    BALI_HOTELS_ORIGINAL = [...HOTELS_DATA];
-  }
-
-  // Check URL search parameters first, then hash
-  const urlParams = new URLSearchParams(window.location.search);
-  const qCountry = (urlParams.get('country') || '').toLowerCase().trim();
-  const qState = (urlParams.get('state') || '').toLowerCase().trim();
-  const qDistrict = (urlParams.get('district') || '').toLowerCase().trim();
-
-  const initialHash = (window.location.hash || '').replace('#', '').toLowerCase();
-  const slugTarget = qDistrict || initialHash;
-  const matched = findDistrictBySlug(slugTarget);
-
-  if (matched) {
-    activeDestination = {
-      country: qCountry || matched.countryId,
-      state: qState || matched.stateId,
-      district: matched.districtId
-    };
-  } else if (qCountry && qState && qDistrict) {
-    activeDestination = { country: qCountry, state: qState, district: qDistrict };
-  } else {
-    // Default to India - Jaipur (Primary Focus)
-    activeDestination = { country: 'india', state: 'rajasthan', district: 'jaipur' };
-  }
-  explorerSelection = { ...activeDestination };
-
-  // Listen for hash changes
-  window.addEventListener('hashchange', () => {
-    const newHash = (window.location.hash || '').replace('#', '').toLowerCase();
-    if (['transit-boat', 'boat', 'fast-boat', 'ferries', 'transit-train', 'train', 'transit-bus', 'bus', 'transit-flight', 'flight', 'how-to-reach', 'attractions', 'hotels', 'transit-hub', 'estimator', 'map-section', 'places-explorer', 'reviews', 'faq'].includes(newHash)) {
-      return;
-    }
-    const found = findDistrictBySlug(newHash);
-    if (found && (found.districtId !== activeDestination.district || found.countryId !== activeDestination.country)) {
-      window.switchActiveDestination(found.countryId, found.stateId, found.districtId, true);
-    }
-  });
-
-  // Init real-time search
-  initLiveDestinationSearch();
-
-  // Execute initial destination activation
-  window.switchActiveDestination(activeDestination.country, activeDestination.state, activeDestination.district, true);
-}
-
-window.openDestinationExplorerModal = function(initialPhase = 'country') {
-  const modal = document.getElementById('destinationExplorerModal');
-  if (!modal) return;
-  modal.classList.add('open');
-  document.body.style.overflow = 'hidden';
-
-  explorerSelection = { ...activeDestination };
-
-  const searchInput = document.getElementById('destLiveSearchInput');
-  const searchResults = document.getElementById('destSearchResultsGrid');
-  const clearBtn = document.getElementById('destSearchClearBtn');
-  if (searchInput) searchInput.value = '';
-  if (searchResults) { searchResults.innerHTML = ''; searchResults.style.display = 'none'; }
-  if (clearBtn) clearBtn.style.display = 'none';
-
-  window.switchDestPhase(initialPhase);
-};
-
-window.switchDestPhase = function(phase) {
-  // Update tabs
-  document.querySelectorAll('.dest-step-tab').forEach(tab => {
-    tab.classList.toggle('active', tab.dataset.phase === phase);
-  });
-
-  // Update views
-  const phases = ['country', 'state', 'district'];
-  phases.forEach(p => {
-    const view = document.getElementById(`destPhase${p.charAt(0).toUpperCase() + p.slice(1)}`);
-    if (view) {
-      view.classList.toggle('active', p === phase);
-      view.style.display = (p === phase) ? 'block' : 'none';
-    }
-  });
-
-  const hierarchy = (typeof DESTINATION_HIERARCHY !== 'undefined') ? DESTINATION_HIERARCHY : null;
-  if (!hierarchy) return;
-
-  const currentCountry = hierarchy[explorerSelection.country] || hierarchy['india'];
-  const currentState = (currentCountry && currentCountry.states) ? (currentCountry.states[explorerSelection.state] || Object.values(currentCountry.states)[0]) : null;
-
-  // Update badges & headings
-  const stateViewCountryName = document.getElementById('stateViewCountryName');
-  if (stateViewCountryName && currentCountry) stateViewCountryName.textContent = currentCountry.name;
-
-  const districtViewStateName = document.getElementById('districtViewStateName');
-  if (districtViewStateName && currentState) districtViewStateName.textContent = currentState.name;
-
-  const stepCountryBadge = document.getElementById('stepCountryBadge');
-  if (stepCountryBadge && currentCountry) stepCountryBadge.textContent = `${currentCountry.flag} ${currentCountry.name}`;
-
-  const stepStateBadge = document.getElementById('stepStateBadge');
-  if (stepStateBadge && currentState) stepStateBadge.textContent = `${currentState.icon || '📍'} ${currentState.name}`;
-
-  const stepDistrictBadge = document.getElementById('stepDistrictBadge');
-  if (stepDistrictBadge) {
-    const curDist = currentState && currentState.districts ? currentState.districts[explorerSelection.district] : null;
-    stepDistrictBadge.textContent = curDist ? `${curDist.icon || '🌸'} ${curDist.name}` : 'Select District';
-  }
-
-  // Render content
-  if (phase === 'country') {
-    renderExplorerCountries();
-  } else if (phase === 'state') {
-    renderExplorerStates();
-  } else if (phase === 'district') {
-    renderExplorerDistricts();
-  }
-};
-
-function renderExplorerCountries() {
-  const container = document.getElementById('destCountriesGrid');
-  if (!container) return;
-  const hierarchy = (typeof DESTINATION_HIERARCHY !== 'undefined') ? DESTINATION_HIERARCHY : null;
-  if (!hierarchy) return;
-
-  const keys = Object.keys(hierarchy);
-  container.innerHTML = keys.map(cKey => {
-    const c = hierarchy[cKey];
-    const isSelected = cKey === explorerSelection.country;
-    const statesCount = Object.keys(c.states || {}).length;
-    const isIndia = cKey === 'india';
-
-    return `
-      <div class="dest-country-card glass-card rainbow-hover ${isSelected ? 'active-selected' : ''}" onclick="window.selectExplorerCountry('${cKey}')">
-        <div class="dest-card-media" style="position: relative; height: 160px; overflow: hidden; border-radius: var(--radius-md) var(--radius-md) 0 0;">
-          <img src="${c.heroImage || 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80'}" alt="${c.name}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80';" />
-          <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(11,15,25,0.92) 0%, rgba(11,15,25,0.2) 60%, transparent 100%);"></div>
-          <span style="position: absolute; top: 12px; left: 12px; font-size: 1.8rem;">${c.flag}</span>
-          ${isIndia ? '<span class="dest-badge-primary">🇮🇳 Primary Focus • Bharat</span>' : ''}
-          ${isSelected ? '<span class="dest-badge-active">Selected</span>' : ''}
-        </div>
-        <div style="padding: 16px;">
-          <h4 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
-            <span>${c.name}</span>
-            <span style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 600;">${statesCount} States / Regions</span>
-          </h4>
-          <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 14px;">${c.tagline || c.description}</p>
-          <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
-            <span style="font-size: 0.78rem; color: var(--text-muted);">Currency: <strong>${c.currency || 'INR'}</strong></span>
-            <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.8rem; padding: 6px 14px;">
-              Explore States →
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function renderExplorerStates() {
-  const container = document.getElementById('destStatesGrid');
-  if (!container) return;
-  const hierarchy = (typeof DESTINATION_HIERARCHY !== 'undefined') ? DESTINATION_HIERARCHY : null;
-  if (!hierarchy) return;
-
-  const currentCountry = hierarchy[explorerSelection.country] || hierarchy['india'];
-  const states = currentCountry.states || {};
-  const keys = Object.keys(states);
-
-  container.innerHTML = keys.map(sKey => {
-    const s = states[sKey];
-    const isSelected = sKey === explorerSelection.state;
-    const distCount = Object.keys(s.districts || {}).length;
-
-    return `
-      <div class="dest-state-card glass-card rainbow-hover ${isSelected ? 'active-selected' : ''}" onclick="window.selectExplorerState('${sKey}')">
-        <div style="display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px;">
-          <div style="font-size: 2.2rem; line-height: 1; padding: 10px; border-radius: 12px; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.25);">
-            ${s.icon || '🏰'}
-          </div>
-          <div style="flex: 1;">
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-              <h4 style="font-size: 1.2rem; font-weight: 800; margin: 0;">${s.name}</h4>
-              ${isSelected ? '<span class="dest-badge-active" style="position: static;">Selected</span>' : ''}
-            </div>
-            <span style="font-size: 0.78rem; color: var(--accent-cyan); display: block; margin-top: 2px;">Capital: ${s.capital || 'Hub'} • ${distCount} Famous Districts</span>
-          </div>
-        </div>
-        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 14px;">${s.tagline || s.description}</p>
-        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px;">
-          ${(s.highlights || []).slice(0, 3).map(h => `<span class="tag-subtle" style="font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; background: rgba(255,255,255,0.06);">${h}</span>`).join('')}
-        </div>
-        <div style="display: flex; justify-content: flex-end;">
-          <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.8rem; padding: 6px 14px;">
-            Choose Districts (${distCount}) →
-          </button>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function renderExplorerDistricts() {
-  const container = document.getElementById('destDistrictsGrid');
-  if (!container) return;
-  const hierarchy = (typeof DESTINATION_HIERARCHY !== 'undefined') ? DESTINATION_HIERARCHY : null;
-  if (!hierarchy) return;
-
-  const currentCountry = hierarchy[explorerSelection.country] || hierarchy['india'];
-  const currentState = (currentCountry && currentCountry.states) ? (currentCountry.states[explorerSelection.state] || Object.values(currentCountry.states)[0]) : null;
-  if (!currentState) return;
-
-  const districts = currentState.districts || {};
-  const keys = Object.keys(districts);
-
-  container.innerHTML = keys.map(dKey => {
-    const d = districts[dKey];
-    const isCurrentActive = dKey === activeDestination.district && explorerSelection.country === activeDestination.country;
-
-    return `
-      <div class="dest-district-card glass-card rainbow-hover ${isCurrentActive ? 'current-active-dest' : ''}" onclick="window.selectExplorerDistrict('${dKey}')">
-        <div class="dest-card-media" style="position: relative; height: 180px; overflow: hidden; border-radius: var(--radius-md) var(--radius-md) 0 0;">
-          <img src="${d.heroImage || d.image || 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80'}" alt="${d.name}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80';" />
-          <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(11,15,25,0.92) 0%, rgba(11,15,25,0.2) 60%, transparent 100%);"></div>
-          <span style="position: absolute; top: 12px; left: 12px; font-size: 1.6rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));">${d.icon || '🌸'}</span>
-          ${isCurrentActive ? '<span class="dest-badge-active" style="top: 12px; right: 12px;">Active Hub</span>' : ''}
-          <div style="position: absolute; bottom: 10px; left: 14px; right: 14px; display: flex; justify-content: space-between; align-items: flex-end;">
-            <div>
-              <h4 style="font-size: 1.3rem; font-weight: 900; margin: 0; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.8);">${d.name}</h4>
-              <span style="font-size: 0.78rem; color: var(--accent-cyan); font-weight: 600;">${d.tagline || currentState.name}</span>
-            </div>
-            ${d.rating ? `<span style="font-size: 0.85rem; font-weight: 800; color: #FBBF24; background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 6px;">★ ${d.rating}</span>` : ''}
-          </div>
-        </div>
-        <div style="padding: 16px;">
-          <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 12px;">${d.description || ''}</p>
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; font-size: 0.78rem;">
-            <div style="background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-subtle);">
-              <span style="color: var(--text-muted); display: block; font-size: 0.7rem;">TOP ATTRACTIONS</span>
-              <strong style="color: var(--text-primary);">${d.spotsCount || 'Famous Spots'}</strong>
-            </div>
-            <div style="background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-subtle);">
-              <span style="color: var(--text-muted); display: block; font-size: 0.7rem;">BEST SEASON</span>
-              <strong style="color: var(--accent-emerald);">${d.bestSeason || 'Year-round'}</strong>
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;">
-            ${(d.transitHubs || ['Flights', 'Trains', 'Volvo']).map(th => `<span style="font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; background: rgba(56,189,248,0.1); color: var(--accent-cyan); border: 1px solid rgba(56,189,248,0.2);">${th}</span>`).join('')}
-          </div>
-
-          <button type="button" class="btn btn-primary-grad" style="width: 100%; justify-content: center; font-size: 0.88rem; padding: 10px 16px;">
-            🚀 Explore ${d.name} Experience →
-          </button>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-window.selectExplorerCountry = function(countryId) {
-  explorerSelection.country = countryId;
-  const hierarchy = (typeof DESTINATION_HIERARCHY !== 'undefined') ? DESTINATION_HIERARCHY : null;
-  if (hierarchy && hierarchy[countryId] && hierarchy[countryId].states) {
-    explorerSelection.state = Object.keys(hierarchy[countryId].states)[0];
-    const curState = hierarchy[countryId].states[explorerSelection.state];
-    if (curState && curState.districts) {
-      explorerSelection.district = Object.keys(curState.districts)[0];
-    }
-  }
-  window.switchDestPhase('state');
-};
-
-window.selectExplorerState = function(stateId) {
-  explorerSelection.state = stateId;
-  const hierarchy = (typeof DESTINATION_HIERARCHY !== 'undefined') ? DESTINATION_HIERARCHY : null;
-  if (hierarchy && hierarchy[explorerSelection.country] && hierarchy[explorerSelection.country].states[stateId]) {
-    const curState = hierarchy[explorerSelection.country].states[stateId];
-    if (curState && curState.districts) {
-      explorerSelection.district = Object.keys(curState.districts)[0];
-    }
-  }
-  window.switchDestPhase('district');
-};
-
-window.selectExplorerDistrict = function(districtId) {
-  explorerSelection.district = districtId;
-  closeModal('destinationExplorerModal');
-  window.switchActiveDestination(explorerSelection.country, explorerSelection.state, districtId, false);
-};
-
-function initLiveDestinationSearch() {
-  const searchInput = document.getElementById('destLiveSearchInput');
-  const clearBtn = document.getElementById('destSearchClearBtn');
-  const resultsGrid = document.getElementById('destSearchResultsGrid');
-  if (!searchInput || !resultsGrid) return;
-
-  searchInput.addEventListener('input', (e) => {
-    const query = (e.target.value || '').trim().toLowerCase();
-    if (clearBtn) clearBtn.style.display = query ? 'inline-flex' : 'none';
-
-    if (query.length < 2) {
-      resultsGrid.style.display = 'none';
-      resultsGrid.innerHTML = '';
-      const curTab = document.querySelector('.dest-step-tab.active');
-      const activePhase = curTab ? curTab.dataset.phase : 'country';
-      window.switchDestPhase(activePhase);
-      return;
-    }
-
-    // Hide phase views while searching
-    document.querySelectorAll('.dest-phase-view').forEach(v => {
-      v.style.display = 'none';
-      v.classList.remove('active');
-    });
-
-    resultsGrid.style.display = 'grid';
-
-    const matches = [];
-    const hierarchy = (typeof DESTINATION_HIERARCHY !== 'undefined') ? DESTINATION_HIERARCHY : {};
-
-    // Search Hierarchy (Country > State > District)
-    for (const cKey in hierarchy) {
-      const c = hierarchy[cKey];
-      for (const sKey in c.states) {
-        const s = c.states[sKey];
-        // Match State
-        if (s.name.toLowerCase().includes(query) || (s.tagline && s.tagline.toLowerCase().includes(query))) {
-          const firstDist = Object.keys(s.districts)[0];
-          matches.push({
-            type: 'State / Province',
-            title: s.name,
-            subtitle: `${c.name} • ${Object.keys(s.districts).length} Districts`,
-            icon: s.icon || '📍',
-            countryId: cKey,
-            stateId: sKey,
-            districtId: firstDist,
-            image: s.districts[firstDist]?.heroImage || c.heroImage
-          });
-        }
-        for (const dKey in s.districts) {
-          const d = s.districts[dKey];
-          // Match District
-          if (d.name.toLowerCase().includes(query) || (d.tagline && d.tagline.toLowerCase().includes(query)) || (d.description && d.description.toLowerCase().includes(query))) {
-            matches.push({
-              type: 'District / Travel Hub',
-              title: d.name,
-              subtitle: `${s.name}, ${c.name} • ${d.tagline || ''}`,
-              icon: d.icon || '🌸',
-              countryId: cKey,
-              stateId: sKey,
-              districtId: dKey,
-              image: d.heroImage || d.image
-            });
-          }
-        }
-      }
-    }
-
-    // Search Attractions
-    const allAttractions = [
-      ...(typeof INDIA_ATTRACTIONS_DATA !== 'undefined' ? INDIA_ATTRACTIONS_DATA : []),
-      ...(typeof ATTRACTIONS_DATA !== 'undefined' ? ATTRACTIONS_DATA : []),
-      ...BALI_ATTRACTIONS_ORIGINAL
-    ];
-    const seenAttractionIds = new Set();
-    allAttractions.forEach(a => {
-      if (seenAttractionIds.has(a.id)) return;
-      seenAttractionIds.add(a.id);
-      if (a.name.toLowerCase().includes(query) || a.location.toLowerCase().includes(query) || (a.categoryLabel && a.categoryLabel.toLowerCase().includes(query))) {
-        const isIndia = (typeof INDIA_ATTRACTIONS_DATA !== 'undefined') && INDIA_ATTRACTIONS_DATA.some(ia => ia.id === a.id);
-        const cKey = isIndia ? 'india' : 'indonesia';
-        const sKey = isIndia ? (a.state || 'rajasthan') : 'bali';
-        const dKey = isIndia ? (a.district || 'jaipur') : 'badung';
-        matches.push({
-          type: 'Iconic Sight / Landmark',
-          title: a.name,
-          subtitle: `${a.location} • Entry: ${formatPrice(a.feeUSD)}`,
-          icon: '📍',
-          countryId: cKey,
-          stateId: sKey,
-          districtId: dKey,
-          image: a.image,
-          spotId: a.id
-        });
-      }
-    });
-
-    if (matches.length === 0) {
-      resultsGrid.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 48px 20px;">
-          <span style="font-size: 2.5rem; display: block; margin-bottom: 12px;">🗺️</span>
-          <h4 style="font-size: 1.2rem; font-weight: 700;">No destinations matching "${query}"</h4>
-          <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 6px;">Try searching "Jaipur", "Amer Fort", "Udaipur", "Alleppey", "Munnar", "Goa", "Agra", or "Bali".</p>
-        </div>
-      `;
-      return;
-    }
-
-    resultsGrid.innerHTML = matches.slice(0, 12).map(m => `
-      <div class="dest-search-card glass-card rainbow-hover" onclick="window.handleSearchSelect('${m.countryId}', '${m.stateId}', '${m.districtId}', '${m.spotId || ''}')" style="display: flex; gap: 14px; padding: 12px; cursor: pointer; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-card); margin-bottom: 10px;">
-        <img src="${m.image || 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=400&q=80'}" alt="${m.title}" style="width: 72px; height: 72px; object-fit: cover; border-radius: var(--radius-sm); flex-shrink: 0;" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=400&q=80';" />
-        <div style="flex: 1; min-width: 0;">
-          <span style="display: inline-block; font-size: 0.7rem; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase; margin-bottom: 2px;">${m.type}</span>
-          <h4 style="font-size: 1rem; font-weight: 800; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${m.title}</h4>
-          <p style="font-size: 0.78rem; color: var(--text-secondary); margin: 2px 0 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${m.subtitle}</p>
-          <span style="font-size: 0.72rem; color: var(--accent-emerald); font-weight: 600; display: inline-block; margin-top: 4px;">Select & Explore Hub →</span>
-        </div>
-      </div>
-    `).join('');
-  });
-}
-
-window.clearDestSearch = function() {
-  const searchInput = document.getElementById('destLiveSearchInput');
-  const clearBtn = document.getElementById('destSearchClearBtn');
-  const resultsGrid = document.getElementById('destSearchResultsGrid');
-  if (searchInput) searchInput.value = '';
-  if (clearBtn) clearBtn.style.display = 'none';
-  if (resultsGrid) {
-    resultsGrid.style.display = 'none';
-    resultsGrid.innerHTML = '';
-  }
-  const curTab = document.querySelector('.dest-step-tab.active');
-  const activePhase = curTab ? curTab.dataset.phase : 'country';
-  window.switchDestPhase(activePhase);
-};
-
-window.handleSearchSelect = function(countryId, stateId, districtId, spotId) {
-  closeModal('destinationExplorerModal');
-  window.switchActiveDestination(countryId, stateId, districtId, false);
-  if (spotId) {
-    setTimeout(() => {
-      window.openAttractionModal(spotId);
-    }, 600);
-  }
-};
-
-window.switchActiveDestination = function(countryId, stateId, districtId, skipScroll = false) {
-  const info = getDestinationInfo(countryId, stateId, districtId);
-  if (!info || !info.country || !info.state || !info.district) {
-    console.warn('Destination info not found for', countryId, stateId, districtId);
-    return;
-  }
-  const { country, state, district } = info;
-  activeDestination = { country: countryId, state: stateId, district: districtId };
-  explorerSelection = { ...activeDestination };
-
-  // 1. Update Breadcrumbs Bar
-  const crumbCountryFlag = document.getElementById('crumbCountryFlag');
-  const crumbCountryName = document.getElementById('crumbCountryName');
-  const crumbStateIcon = document.getElementById('crumbStateIcon');
-  const crumbStateName = document.getElementById('crumbStateName');
-  const crumbDistrictIcon = document.getElementById('crumbDistrictIcon');
-  const crumbDistrictName = document.getElementById('crumbDistrictName');
-
-  const crumbCountryLink = document.getElementById('destCrumbCountry');
-  const crumbStateLink = document.getElementById('destCrumbState');
-  const crumbDistrictLink = document.getElementById('destCrumbDistrict');
-  const btnChangeDistrictPage = document.getElementById('btnChangeDistrictPage');
-
-  if (crumbCountryFlag) crumbCountryFlag.textContent = country.flag || '🌍';
-  if (crumbCountryName) crumbCountryName.textContent = country.name;
-  if (crumbStateIcon) crumbStateIcon.textContent = state.icon || '📍';
-  if (crumbStateName) crumbStateName.textContent = state.name;
-  if (crumbDistrictIcon) crumbDistrictIcon.textContent = district.icon || '🌸';
-  if (crumbDistrictName) crumbDistrictName.textContent = district.name;
-
-  if (crumbCountryLink && crumbCountryLink.tagName === 'A') crumbCountryLink.href = 'index.html';
-  if (crumbStateLink && crumbStateLink.tagName === 'A') crumbStateLink.href = `states.html?country=${countryId}`;
-  if (crumbDistrictLink && crumbDistrictLink.tagName === 'A') crumbDistrictLink.href = `districts.html?country=${countryId}&state=${stateId}`;
-  if (btnChangeDistrictPage && btnChangeDistrictPage.tagName === 'A') btnChangeDistrictPage.href = `districts.html?country=${countryId}&state=${stateId}`;
-
-  // 2. Update Hero Section
-  const heroLiveCityLabel = document.getElementById('heroLiveCityLabel');
-  const heroHighlightText = document.getElementById('heroHighlightText');
-  const heroLeadText = document.getElementById('heroLeadText');
-  const heroVisualImg = document.getElementById('heroVisualImg');
-  const heroFloatingCity = document.getElementById('heroFloatingCity');
-
-  if (heroLiveCityLabel) heroLiveCityLabel.textContent = `${district.name}, ${state.name} • ${country.name}`;
-  if (heroHighlightText) heroHighlightText.textContent = `${district.name} (${state.name})`;
-  if (heroLeadText) heroLeadText.textContent = district.leadText || district.description || 'Explore world-renowned tourist attractions, verified luxury stays, multimodal transit hubs, and local fare calculators.';
-  if (heroVisualImg) {
-    heroVisualImg.src = district.heroImage || district.image || 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=1200&q=80';
-    heroVisualImg.alt = `${district.name}, ${state.name}`;
-  }
-  if (heroFloatingCity) heroFloatingCity.textContent = district.name;
-
-  document.title = `${district.name}, ${state.name} - WanderPulse Multi-Layer Destination Discovery`;
-
-  // 3. Update Section Labels
-  const labels = [
-    ['attractionsDistrictLabel', district.name],
-    ['hotelsDistrictLabel', district.name],
-    ['transitDistrictLabel', district.name],
-    ['commuteDistrictLabel', district.name]
-  ];
-  labels.forEach(([id, text]) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = text;
-  });
-
-  // 4. Update Attractions & Hotels Datasets
-  if (countryId === 'india') {
-    if (typeof INDIA_ATTRACTIONS_DATA !== 'undefined') {
-      const matchingSpots = INDIA_ATTRACTIONS_DATA.filter(a => a.district === districtId);
-      ATTRACTIONS_DATA = matchingSpots.length > 0 ? matchingSpots : INDIA_ATTRACTIONS_DATA.filter(a => a.state === stateId);
-      if (ATTRACTIONS_DATA.length === 0) ATTRACTIONS_DATA = [...INDIA_ATTRACTIONS_DATA];
-    }
-    if (typeof INDIA_HOTELS_DATA !== 'undefined') {
-      const matchingHotels = INDIA_HOTELS_DATA.filter(h => h.district === districtId);
-      HOTELS_DATA = matchingHotels.length > 0 ? matchingHotels : INDIA_HOTELS_DATA.filter(h => h.state === stateId);
-      if (HOTELS_DATA.length === 0) HOTELS_DATA = [...INDIA_HOTELS_DATA];
-    }
-    // Auto-switch currency to INR for India
-    if (typeof currentCurrency !== 'undefined' && currentCurrency !== 'INR') {
-      if (typeof updateAllCurrencies === 'function') updateAllCurrencies('INR');
-    }
-  } else if (countryId === 'indonesia') {
-    if (BALI_ATTRACTIONS_ORIGINAL.length > 0) {
-      ATTRACTIONS_DATA = [...BALI_ATTRACTIONS_ORIGINAL];
-    }
-    if (BALI_HOTELS_ORIGINAL.length > 0) {
-      HOTELS_DATA = [...BALI_HOTELS_ORIGINAL];
-    }
-    if (typeof currentCurrency !== 'undefined' && currentCurrency === 'INR') {
-      if (typeof updateAllCurrencies === 'function') updateAllCurrencies('USD');
-    }
-  }
-
-  // Re-render Attractions & Hotels
-  if (typeof renderAttractions === 'function') renderAttractions('all');
-  if (typeof renderHotels === 'function') renderHotels('all', 'rating');
-
-  // Update Hotel Proximity Select dropdown
-  const proxSelect = document.getElementById('hotelProximitySelect');
-  if (proxSelect && Array.isArray(ATTRACTIONS_DATA)) {
-    proxSelect.innerHTML = `<option value="">All Landmarks & Spots</option>` +
-      ATTRACTIONS_DATA.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
-  }
-
-  // 5. Update Commute Calculator Dropdowns
-  const origSelect = document.getElementById('commuteOriginSelect');
-  const destSelect = document.getElementById('commuteDestSelect');
-  if (origSelect && destSelect) {
-    if (countryId === 'india' && typeof INDIA_REGIONS !== 'undefined') {
-      window.activeCommuteRegions = INDIA_REGIONS;
-      const districtKeys = Object.keys(INDIA_REGIONS).filter(k => INDIA_REGIONS[k].district === districtId);
-      const activeKeys = districtKeys.length >= 2 ? districtKeys : Object.keys(INDIA_REGIONS);
-      origSelect.innerHTML = activeKeys.map(k => `<option value="${k}">${INDIA_REGIONS[k].name}</option>`).join('');
-      destSelect.innerHTML = activeKeys.map(k => `<option value="${k}">${INDIA_REGIONS[k].name}</option>`).join('');
-      if (activeKeys.length > 1) {
-        origSelect.value = activeKeys[0];
-        destSelect.value = activeKeys[1];
-      }
-    } else if (countryId === 'indonesia' && typeof BALI_REGIONS !== 'undefined') {
-      window.activeCommuteRegions = BALI_REGIONS;
-      const baliKeys = Object.keys(BALI_REGIONS);
-      origSelect.innerHTML = baliKeys.map(k => `<option value="${k}">${BALI_REGIONS[k].name}</option>`).join('');
-      destSelect.innerHTML = baliKeys.map(k => `<option value="${k}">${BALI_REGIONS[k].name}</option>`).join('');
-      origSelect.value = 'airport';
-      destSelect.value = 'ubud';
-    }
-    if (typeof updateCommuteResults === 'function') updateCommuteResults();
-  }
-
-  // 6. Update Transit Hub & Modes Matrix
-  if (countryId === 'india') {
-    if (typeof INDIA_LOCAL_TRAVEL_MODES !== 'undefined') {
-      window.activeTravelModes = INDIA_LOCAL_TRAVEL_MODES;
-    }
-    const transitDestEl = document.getElementById('transitDestination');
-    if (transitDestEl) transitDestEl.value = `${district.name} (${district.station || 'Hub'})`;
-  } else if (countryId === 'indonesia') {
-    if (typeof LOCAL_TRAVEL_MODES !== 'undefined') {
-      window.activeTravelModes = LOCAL_TRAVEL_MODES;
-    }
-    const transitDestEl = document.getElementById('transitDestination');
-    if (transitDestEl) transitDestEl.value = "I Gusti Ngurah Rai Int'l (DPS)";
-  }
-  if (typeof renderLocalModeMatrix === 'function') renderLocalModeMatrix();
-
-  // 7. Update Live Weather & Clock Timezone
-  activeTimeZone = countryId === 'india' ? 'Asia/Kolkata' : 'Asia/Makassar';
-  activeTimeLabel = countryId === 'india' ? 'IST' : 'WITA';
-  if (typeof window.fetchLiveWeather === 'function') {
-    window.fetchLiveWeather(districtId, countryId);
-  }
-
-  // 8. Update URL Hash
-  if (window.location.hash !== '#' + districtId) {
-    history.replaceState(null, '', '#' + districtId);
-  }
-
-  // 9. Toast Alert
-  showToast('Destination Explored', `Welcome to ${district.name}, ${state.name}! Discover attractions, hotels, transit & fare calculators.`);
-
-  if (!skipScroll) {
-    const destBar = document.getElementById('destinationBarWrapper');
-    if (destBar) destBar.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-};
-
-/* ==========================================================================
-   2. BALI / DESTINATION LOCAL TIME & LIVE WEATHER CLOCK
+   2. BALI LOCAL TIME & LIVE WEATHER CLOCK
    ========================================================================== */
 function initBaliClock() {
   const clockEl = document.getElementById('baliTimeClock');
@@ -795,8 +122,9 @@ function initBaliClock() {
 
   function updateClock() {
     const now = new Date();
+    // Bali is WITA (UTC + 8)
     const options = {
-      timeZone: activeTimeZone || 'Asia/Kolkata',
+      timeZone: 'Asia/Makassar',
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
@@ -810,11 +138,9 @@ function initBaliClock() {
   setInterval(updateClock, 1000);
 
   // Live Weather Telemetry & Sunset Tracker
-  window.fetchLiveWeather = async function(districtParam, countryParam) {
+  async function fetchLiveWeather() {
     try {
-      const dist = districtParam || (activeDestination ? activeDestination.district : 'jaipur');
-      const ctry = countryParam || (activeDestination ? activeDestination.country : 'india');
-      const res = await fetch(`/api/weather?district=${encodeURIComponent(dist)}&country=${encodeURIComponent(ctry)}`);
+      const res = await fetch('/api/weather');
       if (res.ok) {
         const data = await res.json();
         if (tempEl) tempEl.textContent = `${data.temperatureC}°C`;
@@ -833,38 +159,36 @@ function initBaliClock() {
     } catch (e) {
       console.log('Using local weather telemetry');
     }
-  };
+  }
 
   function updateSunsetCountdown(sunsetStr) {
     const now = new Date();
-    const localTimeStr = new Intl.DateTimeFormat('en-US', {
-      timeZone: activeTimeZone || 'Asia/Kolkata',
+    const baliTimeStr = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Makassar',
       hour: 'numeric',
       minute: 'numeric',
       hour12: false
     }).format(now);
-    const [currH, currM] = localTimeStr.split(':').map(Number);
+    const [currH, currM] = baliTimeStr.split(':').map(Number);
     const [setH, setM] = sunsetStr.split(':').map(Number);
     const currentMins = currH * 60 + currM;
     const sunsetMins = setH * 60 + setM;
     const diff = sunsetMins - currentMins;
 
-    const destName = (activeDestination && activeDestination.district) ? activeDestination.district.charAt(0).toUpperCase() + activeDestination.district.slice(1) : 'Local';
-
     if (diff > 0) {
       const hrs = Math.floor(diff / 60);
       const mins = diff % 60;
-      const text = `🌅 Golden Hour Sunset in <strong>${hrs > 0 ? hrs + 'h ' : ''}${mins}m</strong> (at ${sunsetStr} ${activeTimeLabel || 'IST'})`;
+      const text = `🌅 Golden Hour Sunset in <strong>${hrs > 0 ? hrs + 'h ' : ''}${mins}m</strong> (at ${sunsetStr} WITA)`;
       if (sunsetEl) sunsetEl.innerHTML = text;
-      if (drawerSunset) drawerSunset.innerHTML = `🌅 Sunset in <strong>${hrs > 0 ? hrs + 'h ' : ''}${mins}m</strong> (${sunsetStr} ${activeTimeLabel || 'IST'})`;
+      if (drawerSunset) drawerSunset.innerHTML = `🌅 Sunset in <strong>${hrs > 0 ? hrs + 'h ' : ''}${mins}m</strong> (${sunsetStr} WITA)`;
     } else {
-      if (sunsetEl) sunsetEl.innerHTML = `✨ Nightfall in ${destName} • Tomorrow's Sunrise: 06:15 AM 🌄`;
-      if (drawerSunset) drawerSunset.innerHTML = `✨ Nightfall in ${destName} • Tomorrow's Sunrise: 06:15 AM 🌄`;
+      if (sunsetEl) sunsetEl.innerHTML = `✨ Nightfall in Bali • Tomorrow's Sunrise: 06:15 AM 🌄`;
+      if (drawerSunset) drawerSunset.innerHTML = `✨ Nightfall in Bali • Tomorrow's Sunrise: 06:15 AM 🌄`;
     }
   }
 
-  window.fetchLiveWeather();
-  setInterval(() => window.fetchLiveWeather(), 5 * 60 * 1000); // 5 min interval
+  fetchLiveWeather();
+  setInterval(fetchLiveWeather, 5 * 60 * 1000); // 5 min interval
 }
 
 /* ==========================================================================
@@ -1148,9 +472,7 @@ function filterAttractionsBySearch(query) {
 let currentAttractionModalPhotoIdx = 0;
 window.attractionModalNextPhoto = function(spotId, e) {
   if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
-  let spot = ATTRACTIONS_DATA.find(s => s.id === spotId);
-  if (!spot && typeof INDIA_ATTRACTIONS_DATA !== 'undefined') spot = INDIA_ATTRACTIONS_DATA.find(s => s.id === spotId);
-  if (!spot && BALI_ATTRACTIONS_ORIGINAL.length > 0) spot = BALI_ATTRACTIONS_ORIGINAL.find(s => s.id === spotId);
+  const spot = ATTRACTIONS_DATA.find(s => s.id === spotId);
   if (!spot || !Array.isArray(spot.gallery) || spot.gallery.length <= 1) return;
   currentAttractionModalPhotoIdx = (currentAttractionModalPhotoIdx + 1) % spot.gallery.length;
   const imgEl = document.getElementById('attractionModalMainImg');
@@ -1161,9 +483,7 @@ window.attractionModalNextPhoto = function(spotId, e) {
 
 window.attractionModalPrevPhoto = function(spotId, e) {
   if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
-  let spot = ATTRACTIONS_DATA.find(s => s.id === spotId);
-  if (!spot && typeof INDIA_ATTRACTIONS_DATA !== 'undefined') spot = INDIA_ATTRACTIONS_DATA.find(s => s.id === spotId);
-  if (!spot && BALI_ATTRACTIONS_ORIGINAL.length > 0) spot = BALI_ATTRACTIONS_ORIGINAL.find(s => s.id === spotId);
+  const spot = ATTRACTIONS_DATA.find(s => s.id === spotId);
   if (!spot || !Array.isArray(spot.gallery) || spot.gallery.length <= 1) return;
   currentAttractionModalPhotoIdx = (currentAttractionModalPhotoIdx - 1 + spot.gallery.length) % spot.gallery.length;
   const imgEl = document.getElementById('attractionModalMainImg');
@@ -1173,9 +493,7 @@ window.attractionModalPrevPhoto = function(spotId, e) {
 };
 
 window.openAttractionModal = function(spotId) {
-  let spot = ATTRACTIONS_DATA.find(s => s.id === spotId);
-  if (!spot && typeof INDIA_ATTRACTIONS_DATA !== 'undefined') spot = INDIA_ATTRACTIONS_DATA.find(s => s.id === spotId);
-  if (!spot && BALI_ATTRACTIONS_ORIGINAL.length > 0) spot = BALI_ATTRACTIONS_ORIGINAL.find(s => s.id === spotId);
+  const spot = ATTRACTIONS_DATA.find(s => s.id === spotId);
   if (!spot) return;
 
   const modalBackdrop = document.getElementById('attractionModal');
@@ -2213,78 +1531,49 @@ function renderLocalModeMatrix() {
   const tbody = document.getElementById('travelModesMatrixBody');
   if (!tbody) return;
 
-  const modes = (typeof window.activeTravelModes !== 'undefined' && Array.isArray(window.activeTravelModes))
-    ? window.activeTravelModes
-    : ((typeof LOCAL_TRAVEL_MODES !== 'undefined') ? LOCAL_TRAVEL_MODES : []);
+  const modes = (typeof LOCAL_TRAVEL_MODES !== 'undefined') ? LOCAL_TRAVEL_MODES : [];
   if (modes.length === 0) return;
 
-  tbody.innerHTML = modes.map(m => {
-    const name = m.name || m.mode || 'Transit Mode';
-    const icon = m.icon || '🚗';
-    const comfort = m.comfort || 'Executive AC';
-    const speed = m.trafficSpeed || m.speed || 'Standard';
-    const luggage = m.luggage || '1–2 Bags';
-    const safety = m.safety || 'Verified';
-    const cost = m.costPerDayUSD ? formatPrice(m.costPerDayUSD) : (m.cost || '₹500 / day');
-    const bestFor = m.bestFor || '';
-    const rating = m.rating || '4.9';
-    let action = m.bookingAction || `window.openIndiaTransitBooking('${name}')`;
-
-    return `
-      <tr>
-        <td>
-          <div class="mode-name-cell">
-            <span style="font-size: 1.4rem;">${icon}</span>
-            <div>
-              <strong>${name}</strong>
-              <span style="display: block; font-size: 0.72rem; color: var(--text-muted);">Rating: ${rating} / 5.0</span>
-            </div>
+  tbody.innerHTML = modes.map(m => `
+    <tr>
+      <td>
+        <div class="mode-name-cell">
+          <span style="font-size: 1.4rem;">${m.icon}</span>
+          <div>
+            <strong>${m.name}</strong>
+            <span style="display: block; font-size: 0.72rem; color: var(--text-muted);">Rating: ${m.rating} / 5.0</span>
           </div>
-        </td>
-        <td>
-          <span style="font-size: 0.84rem; font-weight: 600;">${comfort}</span>
-        </td>
-        <td>
-          <span style="font-size: 0.84rem; color: ${speed.includes('Fast') || speed.includes('Semi') ? 'var(--accent-emerald)' : 'var(--text-primary)'}; font-weight: 600;">
-            ${speed}
-          </span>
-        </td>
-        <td>
-          <span style="font-size: 0.84rem;">${luggage}</span>
-        </td>
-        <td>
-          <span style="font-size: 0.84rem; color: var(--accent-cyan); font-weight: 700;">${safety}</span>
-        </td>
-        <td>
-          <strong style="color: var(--accent-coral); font-size: 0.95rem;">${cost}</strong>
-          <span style="font-size: 0.7rem; color: var(--text-muted); display: block;">/ journey or day</span>
-        </td>
-        <td style="max-width: 220px;">
-          <span style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.4; display: block;">${bestFor}</span>
-        </td>
-        <td>
-          <button type="button" class="btn btn-outline" style="font-size: 0.75rem; padding: 6px 12px; white-space: nowrap;" onclick="${action.startsWith('window.') || action.startsWith('open') ? action : `window.openIndiaTransitBooking('${name}')`}">
-            Choose →
-          </button>
-        </td>
-      </tr>
-    `;
-  }).join('');
+        </div>
+      </td>
+      <td>
+        <span style="font-size: 0.84rem; font-weight: 600;">${m.comfort}</span>
+      </td>
+      <td>
+        <span style="font-size: 0.84rem; color: ${m.trafficSpeed.includes('Fast') ? 'var(--accent-emerald)' : 'var(--text-primary)'}; font-weight: 600;">
+          ${m.trafficSpeed}
+        </span>
+      </td>
+      <td>
+        <span style="font-size: 0.84rem;">${m.luggage}</span>
+      </td>
+      <td>
+        <span style="font-size: 0.84rem; color: var(--accent-cyan); font-weight: 700;">${m.safety}</span>
+      </td>
+      <td>
+        <strong style="color: var(--accent-coral); font-size: 0.95rem;">${formatPrice(m.costPerDayUSD)}</strong>
+        <span style="font-size: 0.7rem; color: var(--text-muted); display: block;">/ day</span>
+      </td>
+      <td style="max-width: 200px;">
+        <span style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.4; display: block;">${m.bestFor}</span>
+      </td>
+      <td>
+        <button type="button" class="btn btn-outline" style="font-size: 0.75rem; padding: 6px 12px; white-space: nowrap;" onclick="${m.bookingAction}">
+          Choose →
+        </button>
+      </td>
+    </tr>
+  `).join('');
 }
-
-window.openIndiaTransitBooking = function(modeName) {
-  if (modeName.includes('Vande Bharat') || modeName.includes('Railways') || modeName.includes('IRCTC')) {
-    window.openTransitBooking('train', 'Vande Bharat Express (IRCTC Semi-High Speed)');
-  } else if (modeName.includes('Volvo') || modeName.includes('Bus')) {
-    window.openTransitBooking('bus', 'Interstate AC Volvo Multi-Axle Sleeper');
-  } else if (modeName.includes('Houseboat') || modeName.includes('Cruise')) {
-    window.openTransitBooking('boat', 'Kerala Heritage Houseboat Cruise');
-  } else if (modeName.includes('Enfield') || modeName.includes('Scooter') || modeName.includes('Activa')) {
-    window.openRentalBookingModal('scoopy');
-  } else {
-    window.openRentalBookingModal('car-driver');
-  }
-};
 
 window.openRideHailingGuide = function() {
   showToast('Ride-Hailing in Bali', 'Grab & Gojek are legal island-wide. Drop-offs are allowed anywhere. In restricted red zones (Ubud, Uluwatu), walk 200m to the main street for pick-up!');
@@ -2905,67 +2194,28 @@ function initHeroSearch() {
    12. REST API DATA LOADER (WITH LOCAL FALLBACK)
    ========================================================================== */
 async function loadApiDataAndRender() {
-  if (typeof ATTRACTIONS_DATA !== 'undefined' && BALI_ATTRACTIONS_ORIGINAL.length === 0) {
-    BALI_ATTRACTIONS_ORIGINAL = [...ATTRACTIONS_DATA];
+  try {
+    const resAttractions = await fetch('/api/attractions');
+    if (resAttractions.ok) {
+      const json = await resAttractions.json();
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        ATTRACTIONS_DATA = json.data;
+      }
+    }
+  } catch (e) {
+    console.log('Using built-in attractions data');
   }
-  if (typeof HOTELS_DATA !== 'undefined' && BALI_HOTELS_ORIGINAL.length === 0) {
-    BALI_HOTELS_ORIGINAL = [...HOTELS_DATA];
-  }
 
-  if (activeDestination && activeDestination.country === 'india') {
-    try {
-      const resAttractions = await fetch(`/api/attractions?country=india&district=${activeDestination.district}`);
-      if (resAttractions.ok) {
-        const json = await resAttractions.json();
-        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-          ATTRACTIONS_DATA = json.data;
-        }
-      }
-    } catch (e) {
-      if (typeof INDIA_ATTRACTIONS_DATA !== 'undefined') {
-        const matching = INDIA_ATTRACTIONS_DATA.filter(a => a.district === activeDestination.district);
-        ATTRACTIONS_DATA = matching.length > 0 ? matching : [...INDIA_ATTRACTIONS_DATA];
+  try {
+    const resHotels = await fetch('/api/hotels');
+    if (resHotels.ok) {
+      const json = await resHotels.json();
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        HOTELS_DATA = json.data;
       }
     }
-
-    try {
-      const resHotels = await fetch(`/api/hotels?country=india&district=${activeDestination.district}`);
-      if (resHotels.ok) {
-        const json = await resHotels.json();
-        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-          HOTELS_DATA = json.data;
-        }
-      }
-    } catch (e) {
-      if (typeof INDIA_HOTELS_DATA !== 'undefined') {
-        const matching = INDIA_HOTELS_DATA.filter(h => h.district === activeDestination.district);
-        HOTELS_DATA = matching.length > 0 ? matching : [...INDIA_HOTELS_DATA];
-      }
-    }
-  } else {
-    try {
-      const resAttractions = await fetch('/api/attractions');
-      if (resAttractions.ok) {
-        const json = await resAttractions.json();
-        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-          ATTRACTIONS_DATA = json.data;
-        }
-      }
-    } catch (e) {
-      console.log('Using built-in attractions data');
-    }
-
-    try {
-      const resHotels = await fetch('/api/hotels');
-      if (resHotels.ok) {
-        const json = await resHotels.json();
-        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-          HOTELS_DATA = json.data;
-        }
-      }
-    } catch (e) {
-      console.log('Using built-in hotels data');
-    }
+  } catch (e) {
+    console.log('Using built-in hotels data');
   }
 
   renderAttractions('all');
@@ -3602,13 +2852,8 @@ function initGalleryModal() {
 
 window.openLocationGallery = function(itemId, type = 'attraction') {
   let item = ATTRACTIONS_DATA.find(a => a.id === itemId);
-  if (!item && typeof INDIA_ATTRACTIONS_DATA !== 'undefined') item = INDIA_ATTRACTIONS_DATA.find(a => a.id === itemId);
-  if (!item && BALI_ATTRACTIONS_ORIGINAL.length > 0) item = BALI_ATTRACTIONS_ORIGINAL.find(a => a.id === itemId);
-
   if (!item) {
     item = HOTELS_DATA.find(h => h.id === itemId);
-    if (!item && typeof INDIA_HOTELS_DATA !== 'undefined') item = INDIA_HOTELS_DATA.find(h => h.id === itemId);
-    if (!item && BALI_HOTELS_ORIGINAL.length > 0) item = BALI_HOTELS_ORIGINAL.find(h => h.id === itemId);
     if (item) type = 'hotel';
   }
   if (!item) return;
@@ -3778,9 +3023,7 @@ window.hotelPrevPhoto = function(e) {
 };
 
 window.openHotelDetail = function(hotelId, defaultRoomId = null) {
-  let hotel = HOTELS_DATA.find(h => h.id === hotelId);
-  if (!hotel && typeof INDIA_HOTELS_DATA !== 'undefined') hotel = INDIA_HOTELS_DATA.find(h => h.id === hotelId);
-  if (!hotel && BALI_HOTELS_ORIGINAL.length > 0) hotel = BALI_HOTELS_ORIGINAL.find(h => h.id === hotelId);
+  const hotel = HOTELS_DATA.find(h => h.id === hotelId);
   if (!hotel) return;
 
   activeHotelForDetail = hotel;

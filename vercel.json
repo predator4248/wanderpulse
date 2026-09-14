@@ -7,9 +7,6 @@
       "config": {
         "includeFiles": [
           "index.html",
-          "states.html",
-          "districts.html",
-          "destination.html",
           "manifest.json",
           "sw.js",
           "css/**",
