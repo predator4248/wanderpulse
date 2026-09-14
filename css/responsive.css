@@ -1,6 +1,6 @@
 /* ==========================================================================
    WANDERPULSE BALI - RESPONSIVE STYLESHEET
-   Breakpoints, Touch Optimizations, Mobile Navigation & Print Styles
+   Breakpoints, Touch Optimizations, Mobile Navigation & Screen Fitting
    ========================================================================== */
 
 /* --- Large Desktop / Screens < 1200px --- */
@@ -58,12 +58,6 @@
     gap: 28px;
   }
 
-  /* Transit Mode Pane */
-  .transit-pane.active {
-    grid-template-columns: 1fr;
-    gap: 28px;
-  }
-
   /* Estimator Layout */
   .estimator-layout {
     grid-template-columns: 1fr;
@@ -73,14 +67,26 @@
   /* Map Layout */
   .map-layout {
     grid-template-columns: 1fr;
+    gap: 24px;
   }
 }
 
 /* --- Phablets & Small Tablets < 768px --- */
 @media (max-width: 768px) {
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  /* Header adjustments */
+  .site-header {
+    height: 68px;
+  }
+
   .hero-search-box {
     grid-template-columns: 1fr;
     gap: 12px;
+    padding: 14px;
   }
 
   .hero-search-box .btn-primary-grad {
@@ -90,7 +96,8 @@
 
   .hero-stats {
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 16px;
+    justify-content: center;
   }
 
   .route-input-group {
@@ -101,15 +108,20 @@
     display: none;
   }
 
+  /* Complete Grid Single-Column Fallbacks to prevent horizontal overflow */
   .attractions-grid,
-  .hotels-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .transit-highlights-grid {
-    grid-template-columns: 1fr;
-  }
-
+  .hotels-grid,
+  .travel-tools-grid,
+  .itinerary-days-container,
+  .reviews-grid,
+  .rental-cards-grid,
+  .guide-cards-grid,
+  .safety-grid,
+  .food-grid,
+  .route-result-display,
+  .geoapify-results-grid,
+  .transit-highlights-grid,
+  .calc-input-row,
   .form-row {
     grid-template-columns: 1fr;
   }
@@ -124,19 +136,63 @@
     text-align: center;
     gap: 16px;
   }
-}
 
-/* --- Mobile Phones < 480px --- */
-@media (max-width: 480px) {
-  .container {
-    padding-left: 18px;
-    padding-right: 18px;
+  /* Map 3D Canvas constraint */
+  .map-3d-wrapper {
+    min-height: 320px;
+    height: 320px;
+    max-width: 100%;
+    overflow: hidden;
   }
 
-  .three-lines-drawer {
-    width: 100vw;
-    border-left: none;
-    border-right: none;
+  /* Modal responsiveness */
+  .modal-backdrop {
+    padding: 14px 10px;
+  }
+
+  .modal-dialog {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    max-height: 92vh;
+  }
+
+  .modal-body {
+    padding: 20px 16px;
+  }
+
+  .gallery-modal-dialog {
+    max-width: 100vw;
+    margin: 0;
+  }
+
+  .gallery-hero-viewport {
+    max-height: 55vh;
+  }
+
+  .gallery-nav-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 1.2rem;
+  }
+  .gallery-nav-btn.nav-prev { left: 8px; }
+  .gallery-nav-btn.nav-next { right: 8px; }
+}
+
+/* --- Mobile Landscape & Medium Phones < 640px --- */
+@media (max-width: 640px) {
+  .nav-itinerary-btn .nav-itinerary-text {
+    display: none; /* Keep ❤️ icon and badge count to prevent header overflow */
+  }
+
+  .nav-itinerary-btn {
+    padding: 7px 11px;
+    gap: 4px;
+  }
+
+  .header-quick-action.soundscape-btn,
+  .header-quick-action.theme-btn {
+    display: none; /* Fully accessible inside Three-Lines Menu Drawer */
   }
 
   .nav-left {
@@ -161,10 +217,19 @@
   .three-lines-toggle {
     padding: 7px 11px;
   }
+}
 
-  .header-quick-action.soundscape-btn,
-  .header-quick-action.theme-btn {
-    display: none; /* Accessible in Three-Lines Menu */
+/* --- Mobile Phones < 480px --- */
+@media (max-width: 480px) {
+  .container {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .three-lines-drawer {
+    width: 100vw;
+    border-left: none;
+    border-right: none;
   }
 
   .section-title {
@@ -172,22 +237,40 @@
   }
 
   .hero-title {
-    font-size: 2.3rem;
+    font-size: 2.1rem;
+    line-height: 1.2;
+    word-break: break-word;
   }
 
   .hero-visual-card img {
-    height: 380px;
+    height: 320px;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  .hero-stats {
+    gap: 10px;
+  }
+
+  .hero-stat-pill {
+    padding: 8px 14px;
   }
 
   .floating-weather-badge,
   .floating-transit-badge {
     position: static;
-    margin: 12px;
+    margin: 8px auto;
     width: fit-content;
+    max-width: 100%;
   }
 
   .tier-select-grid {
     grid-template-columns: 1fr;
+  }
+
+  .sky-presets-bar {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
   }
 
   .newsletter-form {
@@ -198,21 +281,123 @@
   }
 
   .modal-dialog {
-    margin: 10px;
+    margin: 0;
     max-height: 94vh;
+    border-radius: var(--radius-md);
   }
+
   .modal-body {
-    padding: 20px;
+    padding: 16px 12px;
+  }
+
+  .modal-close-btn {
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .pass-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pass-barcode-row {
+    padding: 14px 16px;
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .active-room-card {
+    grid-template-columns: 1fr;
+  }
+
+  /* Toast Notification mobile positioning */
+  .toast-container {
+    left: 12px;
+    right: 12px;
+    bottom: 14px;
+    max-width: calc(100vw - 24px);
+  }
+
+  .toast-notification {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    padding: 12px 14px;
+    font-size: 0.85rem;
   }
 }
 
 /* --- Ultra-Narrow Mobile Screens < 380px --- */
 @media (max-width: 380px) {
+  .container {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
   .three-lines-label {
     display: none;
   }
+
   .three-lines-toggle {
-    padding: 8px 10px;
+    padding: 7px 9px;
+  }
+
+  .brand-logo {
+    font-size: 1.12rem;
+    gap: 6px;
+  }
+
+  .logo-badge {
+    width: 30px;
+    height: 30px;
+  }
+
+  .logo-badge svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .section-title {
+    font-size: 1.62rem;
+  }
+
+  .section-subtitle {
+    font-size: 0.92rem;
+  }
+
+  .hero-title {
+    font-size: 1.78rem;
+  }
+
+  .hero-visual-card img {
+    height: 260px;
+  }
+
+  .filter-btn,
+  .map-pin,
+  .quick-pill-link,
+  .hub-chip {
+    padding: 6px 11px;
+    font-size: 0.78rem;
+  }
+
+  .itinerary-overview-bar {
+    padding: 14px 12px;
+  }
+
+  .hero-search-box {
+    padding: 10px;
+  }
+
+  .visa-portals-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .geoapify-search-bar {
+    flex-direction: column;
   }
 }
 
@@ -234,7 +419,8 @@
   .modal-backdrop,
   .toast-container,
   .newsletter-form,
-  .hero-search-box {
+  .hero-search-box,
+  .ambient-glow-wrapper {
     display: none !important;
   }
 

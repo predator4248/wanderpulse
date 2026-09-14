@@ -105,11 +105,13 @@
   <!-- Accessibility Skip Link -->
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
-  <!-- Ambient Light Accents -->
-  <div class="ambient-glow glow-coral" style="top: 5%; left: -10%;"></div>
-  <div class="ambient-glow glow-violet" style="top: 30%; right: -15%;"></div>
-  <div class="ambient-glow glow-cyan" style="top: 65%; left: -8%;"></div>
-  <div class="ambient-glow glow-amber" style="top: 85%; right: -5%;"></div>
+  <!-- Ambient Light Accents (Contained background canvas to eliminate viewport overflow) -->
+  <div class="ambient-glow-wrapper" aria-hidden="true">
+    <div class="ambient-glow glow-coral" style="top: 5%; left: -10%;"></div>
+    <div class="ambient-glow glow-violet" style="top: 30%; right: -15%;"></div>
+    <div class="ambient-glow glow-cyan" style="top: 65%; left: -8%;"></div>
+    <div class="ambient-glow glow-amber" style="top: 85%; right: -5%;"></div>
+  </div>
 
   <!-- SITE HEADER & NAVIGATION -->
   <header class="site-header" role="banner">
@@ -153,7 +155,7 @@
 
         <!-- Itinerary Quick Link -->
         <a href="#itinerary" class="nav-itinerary-btn header-quick-action" title="View Saved Custom Itinerary">
-          ❤️ <span>My Trip</span>
+          ❤️ <span class="nav-itinerary-text">My Trip</span>
           <span class="itinerary-count-badge" style="display: none;">0</span>
         </a>
 
