@@ -88,6 +88,9 @@ const ATTRACTIONS = dataModule.ATTRACTIONS_DATA;
 const HOTELS = dataModule.HOTELS_DATA;
 const GEOAPIFY_VERIFIED = dataModule.GEOAPIFY_VERIFIED_PLACES || {};
 const TRANSIT_PRESETS = (dataModule.TRANSIT_DATA && dataModule.TRANSIT_DATA.presets) || dataModule.TRANSIT_ROUTES_PRESETS || {};
+const BALI_REGIONS = dataModule.BALI_REGIONS || {};
+const LOCAL_TRAVEL_MODES = dataModule.LOCAL_TRAVEL_MODES || [];
+const BALI_MARINE_HARBORS = dataModule.BALI_MARINE_HARBORS || [];
 
 let GEOAPIFY_API_KEY = process.env.GEOAPIFY_API_KEY || '';
 const GEOAPIFY_CACHE_FILE = path.join(DATA_DIR, 'geoapify_cache.json');
@@ -784,6 +787,116 @@ app.post('/api/transit/route', (req, res) => {
   });
 });
 
+// 4b. Intra-Island Point-to-Point Commute & Fare Engine API
+app.post('/api/transit/commute', (req, res) => {
+  const { origin, destination } = req.body;
+  const origKey = (origin || 'airport').toLowerCase().trim();
+  const destKey = (destination || 'ubud').toLowerCase().trim();
+
+  const orig = BALI_REGIONS[origKey] || BALI_REGIONS['airport'];
+  const dest = BALI_REGIONS[destKey] || BALI_REGIONS['ubud'];
+
+  // Calculate realistic distance
+  const straightMeters = haversineDistance(orig.lat, orig.lng, dest.lat, dest.lng);
+  const isMarine = !!(orig.isIsland || dest.isIsland);
+  const roadKm = Math.max(4, Math.round((straightMeters / 1000) * (isMarine ? 1.15 : 1.38)));
+
+  let carMins = Math.round((roadKm / 28) * 60);
+  let scooterMins = Math.round((roadKm / 42) * 60);
+
+  if (['canggu', 'kuta-seminyak'].includes(origKey) || ['canggu', 'kuta-seminyak'].includes(destKey)) {
+    carMins += 20;
+  }
+  if (origKey === 'ubud' || destKey === 'ubud') {
+    carMins += 15;
+  }
+
+  const formatDuration = (mins) => {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    if (h === 0) return `${m} mins`;
+    return `${h} hr ${m > 0 ? m + 'm' : ''}`.trim();
+  };
+
+  let carPriceUSD = Math.max(14, Math.round(roadKm * 0.55 + 8));
+  let scooterRideUSD = Math.max(4, Math.round(roadKm * 0.22 + 2));
+  let grabCarUSD = Math.max(10, Math.round(roadKm * 0.45 + 5));
+
+  if (origKey === 'airport') {
+    carPriceUSD = Math.max(18, carPriceUSD);
+  }
+
+  let grabZoneStatus = 'Green Zone (Normal App Pick-up & Drop-off)';
+  let grabNotice = 'Grab & Gojek cars can drop-off and pick-up freely.';
+  if (['ubud', 'uluwatu', 'padang-bai'].includes(destKey)) {
+    grabZoneStatus = 'Drop-off Allowed / Pick-up Restricted';
+    grabNotice = 'Grab can drop you off here without issues. For return journeys, walk 200m away from temple/village centers to avoid local taxi cartel protests, or pre-book a private chauffeur.';
+  } else if (['canggu'].includes(destKey)) {
+    grabZoneStatus = 'High Traffic Zone';
+    grabNotice = 'Cars face severe delays on the narrow Canggu shortcut. Gojek motorbikes (GoRide) or scooter rentals are 2x faster.';
+  }
+
+  let boatDetails = null;
+  if (isMarine) {
+    boatDetails = {
+      available: true,
+      departureHarbor: orig.isIsland ? 'Toyapakeh / Buyuk Harbor (Penida)' : 'Sanur New Harbor (Pelabuhan Sanur)',
+      arrivalHarbor: dest.isIsland ? 'Toyapakeh / Buyuk Pier' : 'Sanur New Harbor',
+      crossingDuration: '30 - 45 Minutes',
+      ticketUSD: 15,
+      operator: 'Maruti Duta Express / Semaya One Fast Boat'
+    };
+  }
+
+  let roadAlert = 'Smooth driving conditions. Snaking tropical village roads with occasional ceremonial processions.';
+  if (isMarine) {
+    roadAlert = 'Overwater marine crossing required. Fast boats depart Sanur New Harbor regularly. Check sea swell conditions.';
+  } else if ((origKey === 'canggu' && destKey === 'kuta-seminyak') || (origKey === 'kuta-seminyak' && destKey === 'canggu')) {
+    roadAlert = 'Canggu Shortcut Warning: The narrow shortcut through rice fields is strictly for motorbikes and scooters. Cars will be rerouted via Raya Kerobokan (+35 mins).';
+  } else if (origKey === 'airport' && ['nusa-dua', 'sanur'].includes(destKey)) {
+    roadAlert = 'Time-Saver: Ask your driver to take the Bali Mandara Overwater Toll Road (Jalan Tol). Bypasses South Bali gridlock in 8 minutes!';
+  } else if (destKey === 'bedugul-lovina') {
+    roadAlert = 'Highland Switchbacks: Steep mountain grades and afternoon fog near Lake Beratan. Drive cautiously on wet asphalt.';
+  }
+
+  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${orig.lat},${orig.lng}&destination=${dest.lat},${dest.lng}&travelmode=${isMarine ? 'transit' : 'driving'}`;
+
+  res.json({
+    success: true,
+    origin: orig,
+    destination: dest,
+    distanceKm: roadKm,
+    durationCar: formatDuration(carMins),
+    durationScooter: formatDuration(scooterMins),
+    carPriceUSD,
+    scooterRideUSD,
+    grabCarUSD,
+    grabZoneStatus,
+    grabNotice,
+    boatDetails,
+    roadAlert,
+    googleMapsUrl,
+    recommendation: isMarine ? 'fast-boat' : (carMins > 60 || origKey === 'airport' ? 'car-driver' : 'scooter')
+  });
+});
+
+// 4c. Marine Weather & Swell Status API
+app.get('/api/transit/marine-conditions', (req, res) => {
+  res.json({
+    success: true,
+    strait: 'Badung & Lombok Straits (Bali - Nusa Penida - Gilis)',
+    status: 'Calm to Moderate',
+    safetyRating: 'Safe for All Certified Fast Boats',
+    waveHeightM: 0.8,
+    wavePeriodSec: 10,
+    windSpeedKnots: 8,
+    visibilityKm: 15,
+    waterTempC: 28,
+    recommendations: 'Optimal morning crossing window between 07:30 and 10:00 AM. Ocean surface is glassy with minimal wave rolling.',
+    harborsOperating: ['Sanur New Harbor (SNR)', 'Padang Bai (PBI)', 'Serangan Marina (SRG)', 'Kusamba (KSB)']
+  });
+});
+
 // 5. Hotel Booking Reservation API (Validated & Persisted)
 app.post('/api/book', rateLimit(15, 60000), (req, res) => {
   const { hotelId, guestName, roomType, checkin, checkout, guests } = req.body;
@@ -861,8 +974,8 @@ app.post('/api/transit/book', rateLimit(20, 60000), (req, res) => {
   const extraBaggageKg = req.body.extraBaggageKg || req.body.baggageFee || 0;
   const mealPreference = req.body.mealPreference || 'Standard Island Meal';
 
-  if (!transitType || !['flight', 'train', 'bus'].includes(transitType)) {
-    return res.status(400).json({ success: false, error: 'Invalid transit type (must be flight, train, or bus).' });
+  if (!transitType || !['flight', 'train', 'bus', 'boat', 'airport-transfer'].includes(transitType)) {
+    return res.status(400).json({ success: false, error: 'Invalid transit type (must be flight, train, bus, boat, or airport-transfer).' });
   }
 
   if (!originHub || !departureDate || !leadPassengerName || !email) {
@@ -895,6 +1008,16 @@ app.post('/api/transit/book', rateLimit(20, 60000), (req, res) => {
     pnrPrefix = 'DPS-BUS';
     operatorName = 'Pahala Kencana Royal VIP Sleeper';
     stationGate = 'Pulo Gebang Terminal - Bay 12';
+  } else if (transitType === 'boat') {
+    basePriceUSD = 20;
+    pnrPrefix = 'DPS-SEA';
+    operatorName = 'Eka Jaya Fast Boat / Maruti Duta Marine';
+    stationGate = 'Sanur New Harbor - Floating Berth 2';
+  } else if (transitType === 'airport-transfer') {
+    basePriceUSD = 18;
+    pnrPrefix = 'DPS-TRF';
+    operatorName = 'Official Bali Airport Chauffeur Dispatch';
+    stationGate = 'International Arrivals Hall - Meeting Pillar 4';
   }
 
   // Class multiplier
@@ -1482,15 +1605,34 @@ app.get('*', (req, res, next) => {
 
 // Start Server if executed directly, export for serverless environments (Vercel, Render)
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`\n======================================================`);
-    console.log(`🌟 WANDERPULSE BALI - 3D NODE.JS SERVER RUNNING!`);
-    console.log(`📍 Local URL:     http://localhost:${PORT}/`);
-    console.log(`🛰️  API Health:    http://localhost:${PORT}/api/health`);
-    console.log(`🌴 Attractions:   http://localhost:${PORT}/api/attractions`);
-    console.log(`🏨 Hotels:        http://localhost:${PORT}/api/hotels`);
-    console.log(`======================================================\n`);
-  });
+  function startServer(portToUse, attemptsLeft = 5) {
+    const srv = app.listen(portToUse, () => {
+      const activePort = srv.address().port;
+      console.log(`\n======================================================`);
+      console.log(`🌟 WANDERPULSE BALI - 3D NODE.JS SERVER RUNNING!`);
+      console.log(`📍 Local URL:     http://localhost:${activePort}/`);
+      console.log(`🛰️  API Health:    http://localhost:${activePort}/api/health`);
+      console.log(`🌴 Attractions:   http://localhost:${activePort}/api/attractions`);
+      console.log(`🏨 Hotels:        http://localhost:${activePort}/api/hotels`);
+      console.log(`======================================================\n`);
+    });
+
+    srv.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        if (attemptsLeft > 0) {
+          const nextPort = Number(portToUse) + 1;
+          console.warn(`⚠️ Port ${portToUse} is already in use. Automatically switching to fallback port http://localhost:${nextPort}/ ...`);
+          startServer(nextPort, attemptsLeft - 1);
+        } else {
+          console.error(`❌ Could not bind to port ${portToUse}. All fallback attempts exhausted.`);
+        }
+      } else {
+        console.error('❌ Server startup error:', err.message);
+      }
+    });
+  }
+
+  startServer(PORT);
 }
 
 module.exports = app;

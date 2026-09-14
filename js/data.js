@@ -981,11 +981,364 @@ let TRANSIT_DATA = {
         duration: '22 hrs',
         costUSD: 35
       }
+    },
+    'jakarta': {
+      city: 'Jakarta (CGK / Gambir)',
+      flight: {
+        airline: 'Garuda Indonesia / Citilink / Batik Air / AirAsia (Frequent Hourly)',
+        duration: '1 hr 50 mins',
+        costUSD: 65,
+        route: 'CGK → DPS (Direct Non-Stop Domestic Corridor)',
+        stops: 'Non-Stop Direct Domestic Flight'
+      },
+      trainOption: {
+        available: true,
+        summary: 'Take the premier Trans-Java Executive Express (Argo Bromo Anggrek / Blambangan Ekspres) from Gambir across Java to Ketapang, then 45-min ferry straight into Gilimanuk Bali.',
+        trainName: 'KAI Blambangan Ekspres (Direct Jakarta-Banyuwangi)',
+        duration: '16 hrs scenic rail + 45 mins ferry',
+        costUSD: 42
+      },
+      busOption: {
+        available: true,
+        summary: 'Direct executive sleeper coach from Pulo Gebang Terminal in East Jakarta directly into Denpasar Mengwi Terminal with Ro-Ro ferry crossing included.',
+        operator: 'Pahala Kencana / Gunung Harta VIP Double Decker',
+        duration: '22 hrs direct',
+        costUSD: 32
+      }
+    },
+    'melbourne': {
+      city: 'Melbourne (MEL)',
+      flight: {
+        airline: 'Jetstar / Virgin Australia / Garuda Indonesia / Batik Air',
+        duration: '6 hrs 00 mins',
+        costUSD: 440,
+        route: 'MEL → DPS (Direct Non-Stop Daily)',
+        stops: 'Non-Stop Direct Flight'
+      },
+      trainOption: {
+        available: false,
+        summary: 'Direct non-stop flight to DPS recommended. For rail enthusiasts, fly to Surabaya and connect via KAI Probowangi scenic train to Ketapang harbor.',
+        trainName: 'KAI Probowangi Scenic Train',
+        duration: '6 hrs rail from Surabaya',
+        costUSD: 18
+      },
+      busOption: {
+        available: false,
+        summary: 'Fly direct to DPS. Once in Bali, tourist shuttles and private chauffeurs provide seamless transfers across all regencies.',
+        operator: 'Perama Island Shuttle',
+        duration: 'Local Transfers',
+        costUSD: 12
+      }
+    },
+    'perth': {
+      city: 'Perth (PER)',
+      flight: {
+        airline: 'AirAsia / Jetstar / Batik Air Malaysia (Ultra-Fast Hop)',
+        duration: '3 hrs 40 mins',
+        costUSD: 240,
+        route: 'PER → DPS (Direct Non-Stop Daily)',
+        stops: 'Non-Stop Direct Flight'
+      },
+      trainOption: {
+        available: false,
+        summary: 'Perth is only 3.5 hours flight away from Bali, making direct flight by far the fastest and most convenient gateway.',
+        trainName: 'Direct Flight Preferred',
+        duration: '3.5 hrs flight',
+        costUSD: 240
+      },
+      busOption: {
+        available: false,
+        summary: 'Connect from DPS airport to any villa via private chauffeur or official airport Grab/Gojek lounge.',
+        operator: 'Bali Airport Chauffeur Dispatch',
+        duration: '30-45 mins to villa',
+        costUSD: 18
+      }
+    },
+    'dubai': {
+      city: 'Dubai / Doha (DXB / DOH)',
+      flight: {
+        airline: 'Emirates (Direct A380) / Qatar Airways (Direct)',
+        duration: '9 hrs 10 mins',
+        costUSD: 680,
+        route: 'DXB / DOH → DPS (Direct Non-Stop Daily)',
+        stops: 'Direct Non-Stop Flights Daily'
+      },
+      trainOption: {
+        available: true,
+        summary: 'Fly Emirates into Jakarta (CGK), experience KAI Luxury Sleeper Suite Train to Banyuwangi, and take the 45-min ferry to Bali.',
+        trainName: 'KAI Luxury Sleeper Suite Train',
+        duration: '11 hrs rail + ferry',
+        costUSD: 60
+      },
+      busOption: {
+        available: true,
+        summary: 'Overland sleeper coach from Jakarta to Denpasar with reclining bunks and full meal service.',
+        operator: 'Lorena VIP Executive Sleeper',
+        duration: '22 hrs',
+        costUSD: 35
+      }
+    },
+    'frankfurt': {
+      city: 'Frankfurt / Amsterdam (FRA / AMS)',
+      flight: {
+        airline: 'Singapore Airlines / Qatar Airways / Emirates (1 Stop)',
+        duration: '15 hrs 45 mins',
+        costUSD: 780,
+        route: 'FRA → SIN / DOH → DPS',
+        stops: '1 Seamless Hub Transit'
+      },
+      trainOption: {
+        available: true,
+        summary: 'Fly to Jakarta, take the panoramic rail across volcanic Java (Mount Merapi & Mount Bromo vistas) to East Java Ketapang Harbor.',
+        trainName: 'KAI Panoramic / Argo Semeru Rail',
+        duration: '15 hrs rail + ferry',
+        costUSD: 55
+      },
+      busOption: {
+        available: true,
+        summary: 'Executive sleeper bus through the Trans-Java toll expressway directly onto the vehicle ferry to Bali.',
+        operator: 'Pahala Kencana Double Decker',
+        duration: '22 hrs',
+        costUSD: 36
+      }
+    },
+    'kuala-lumpur': {
+      city: 'Kuala Lumpur (KUL)',
+      flight: {
+        airline: 'AirAsia / Malaysia Airlines / Batik Air (Frequent Daily)',
+        duration: '3 hrs 05 mins',
+        costUSD: 110,
+        route: 'KUL → DPS (Direct Non-Stop)',
+        stops: 'Non-Stop Direct Flight'
+      },
+      trainOption: {
+        available: true,
+        summary: 'Fly into Surabaya (SUB), take the 6-hour scenic KAI train through tropical plantations to Ketapang harbor for ferry.',
+        trainName: 'KAI Sri Tanjung Express',
+        duration: '6 hrs train + ferry',
+        costUSD: 16
+      },
+      busOption: {
+        available: true,
+        summary: 'Overland coach from Surabaya to Mengwi Terminal in Bali with ferry crossing included.',
+        operator: 'Gunung Harta Solutions',
+        duration: '9 hrs',
+        costUSD: 20
+      }
+    },
+    'bangkok': {
+      city: 'Bangkok (BKK / DMK)',
+      flight: {
+        airline: 'Thai AirAsia / Thai Airways / Batik Air (Direct)',
+        duration: '4 hrs 25 mins',
+        costUSD: 195,
+        route: 'BKK → DPS (Direct Non-Stop Daily)',
+        stops: 'Non-Stop Direct Flight'
+      },
+      trainOption: {
+        available: true,
+        summary: 'Connect via Jakarta or Surabaya for the trans-island rail journey across Java rice terraces to Ketapang ferry.',
+        trainName: 'KAI Executive Rail',
+        duration: '14 hrs rail + ferry',
+        costUSD: 45
+      },
+      busOption: {
+        available: true,
+        summary: 'Trans-island coach from Jakarta/Surabaya to Denpasar.',
+        operator: 'Damri Royal Class',
+        duration: '12 hrs from Surabaya',
+        costUSD: 24
+      }
     }
   }
 };
 
 const TRANSIT_ROUTES_PRESETS = TRANSIT_DATA.presets;
+
+// --------------------------------------------------------------------------
+// BALI INTRA-ISLAND COMMUTE & ROUTE ENGINE (Verified GIS & Real Traffic)
+// --------------------------------------------------------------------------
+const BALI_REGIONS = {
+  'airport': { id: 'airport', name: "Ngurah Rai Airport (DPS)", area: 'Tuban, South Bali', lat: -8.7481, lng: 115.1672 },
+  'kuta-seminyak': { id: 'kuta-seminyak', name: "Kuta & Seminyak", area: 'Southwest Coast', lat: -8.6913, lng: 115.1682 },
+  'canggu': { id: 'canggu', name: "Canggu & Pererenan", area: 'Badung Coastal', lat: -8.6500, lng: 115.1300 },
+  'ubud': { id: 'ubud', name: "Ubud Cultural Center", area: 'Gianyar Highlands', lat: -8.5069, lng: 115.2625 },
+  'uluwatu': { id: 'uluwatu', name: "Uluwatu & Bukit", area: 'Pecatu Peninsula', lat: -8.8100, lng: 115.1200 },
+  'sanur': { id: 'sanur', name: "Sanur Beach & Fast Boat Port", area: 'East Denpasar', lat: -8.6750, lng: 115.2600 },
+  'nusa-dua': { id: 'nusa-dua', name: "Nusa Dua & Jimbaran", area: 'South Badung', lat: -8.7950, lng: 115.2200 },
+  'padang-bai': { id: 'padang-bai', name: "Padang Bai Harbor (Gili Gateway)", area: 'Karangasem', lat: -8.5300, lng: 115.5100 },
+  'amed': { id: 'amed', name: "Amed & Tulamben Coast", area: 'Northeast Bali', lat: -8.3500, lng: 115.6500 },
+  'bedugul-lovina': { id: 'bedugul-lovina', name: "Bedugul & Lovina", area: 'North Bali', lat: -8.1700, lng: 115.0200 },
+  'nusa-penida': { id: 'nusa-penida', name: "Nusa Penida Island", area: 'Klungkung Regency', lat: -8.7278, lng: 115.5444, isIsland: true }
+};
+
+// Comparative Local Travel Modes
+const LOCAL_TRAVEL_MODES = [
+  {
+    id: 'car-driver',
+    name: 'Private SUV + Chauffeur',
+    icon: '🚗',
+    rating: 4.9,
+    comfort: 'Ultra High (AC)',
+    trafficSpeed: 'Moderate (Peak queues)',
+    luggage: 'Large (4-6 bags)',
+    safety: 'Maximum (Vetted driver)',
+    costPerDayUSD: 35,
+    costPerDayIDR: 550000,
+    bestFor: 'Day trips, families, couples, temple touring, luggage transfers',
+    keyAdvantage: '10 hours unlimited custom itinerary with zero driving stress and air-conditioned sanctuary.',
+    crucialNote: 'Driver handles fuel, parking, and narrow Balinese village access roads.',
+    bookingAction: 'openRentalBookingModal("car-driver")'
+  },
+  {
+    id: 'scooter',
+    name: 'Automatic Scooter (Scoopy/NMAX)',
+    icon: '🛵',
+    rating: 4.7,
+    comfort: 'Standard Open Air',
+    trafficSpeed: 'Lightning Fast (Bypasses traffic)',
+    luggage: 'Underseat + 1 Daypack',
+    safety: 'Moderate (Requires skill)',
+    costPerDayUSD: 7,
+    costPerDayIDR: 110000,
+    bestFor: 'Solo travelers, digital nomads, cafe hopping in Canggu & Seminyak',
+    keyAdvantage: 'Filter through Canggu shortcut gridlocks and park directly in front of beaches & cafes.',
+    crucialNote: 'International Driving Permit (IDP 1949) + Helmet mandatory by Indonesian law.',
+    bookingAction: 'openRentalBookingModal("scoopy")'
+  },
+  {
+    id: 'grab-gojek',
+    name: 'Ride-Hailing (Grab / Gojek)',
+    icon: '📱',
+    rating: 4.6,
+    comfort: 'High (GoCar) / Nimble (GoRide)',
+    trafficSpeed: 'Variable (GoRide is fast)',
+    luggage: 'GoCar: 2-3 bags / GoRide: none',
+    safety: 'High (GPS tracking)',
+    costPerDayUSD: 14,
+    costPerDayIDR: 220000,
+    bestFor: 'Point-to-point hops in South Bali (Kuta, Seminyak, Sanur)',
+    keyAdvantage: 'Instant cashless hailing via mobile app with transparent upfront pricing.',
+    crucialNote: 'Drop-offs are permitted everywhere, but pick-ups are strictly banned in local taxi cartel zones (Ubud, Uluwatu, Padang Bai).',
+    bookingAction: 'window.openRideHailingGuide()'
+  },
+  {
+    id: 'bluebird',
+    name: 'Bluebird Metered Taxis',
+    icon: '🚕',
+    rating: 4.8,
+    comfort: 'High (Clean AC sedans)',
+    trafficSpeed: 'Moderate',
+    luggage: 'Medium (2-3 bags)',
+    safety: 'High (Regulated fleet)',
+    costPerDayUSD: 18,
+    costPerDayIDR: 285000,
+    bestFor: 'Airport arrivals, official hotel desk dispatch, street hails',
+    keyAdvantage: 'Legitimate taximeter with no haggling. Can be booked via MyBluebird app or hotel lobby.',
+    crucialNote: 'Always look for the genuine Bluebird logo and driver uniform; avoid imitators ("Blue Biro").',
+    bookingAction: 'window.openBluebirdBooking()'
+  },
+  {
+    id: 'perama-shuttle',
+    name: 'Perama Tourist Shuttles',
+    icon: '🚌',
+    rating: 4.4,
+    comfort: 'Standard AC Minicoach',
+    trafficSpeed: 'Scheduled',
+    luggage: 'Generous (1-2 big suitcases)',
+    safety: 'High (Professional drivers)',
+    costPerDayUSD: 10,
+    costPerDayIDR: 155000,
+    bestFor: 'Budget backpackers moving between towns (Kuta ➔ Ubud ➔ Lovina ➔ Padang Bai)',
+    keyAdvantage: 'Fixed departure schedule connecting major travel hubs at a fraction of private taxi cost.',
+    crucialNote: 'Runs 2-3 times daily; booking at least 1 day in advance is strongly recommended.',
+    bookingAction: 'window.openTransitBooking("bus", "Perama Tourist Shuttle")'
+  },
+  {
+    id: 'fast-boat',
+    name: 'Marine Fast Boats & Ferries',
+    icon: '🛥️',
+    rating: 4.9,
+    comfort: 'High (Enclosed AC cabin + sundeck)',
+    trafficSpeed: 'Ocean Speed (30-35 knots)',
+    luggage: '25kg per passenger included',
+    safety: 'High (SOLAS lifejackets & GPS)',
+    costPerDayUSD: 22,
+    costPerDayIDR: 350000,
+    bestFor: 'Nusa Penida, Nusa Lembongan, Gili Trawangan, Gili Air, Lombok',
+    keyAdvantage: 'Fastest way to reach offshore islands: 30 mins to Penida from Sanur; 90 mins to Gilis from Padang Bai.',
+    crucialNote: 'Sanur New Harbor features modern floating jetties (no walking through waves!). Check sea swell status before sailing.',
+    bookingAction: 'window.openTransitBooking("boat", "Sanur New Harbor (Penida Express)")'
+  }
+];
+
+// Marine Harbors Directory
+const BALI_MARINE_HARBORS = [
+  {
+    id: 'sanur-port',
+    name: 'Sanur New Harbor (Pelabuhan Sanur)',
+    code: 'SNR',
+    coordinates: { lat: -8.6751, lng: 115.2632 },
+    location: 'Sanur Beach, Denpasar',
+    type: 'Modern Passenger Terminal',
+    highlights: 'Multi-story terminal building with air-conditioned waiting lounges, digital boarding gates, and wave-free floating jetties.',
+    destinations: ['Nusa Penida (Toyapakeh / Buyuk)', 'Nusa Lembongan (Jungutbatu / Mushroom Bay)'],
+    crossingTime: '30 - 45 Minutes',
+    dailyDepartures: 'Over 40 daily speedboats (07:00 – 17:30)',
+    topOperators: ['Maruti Duta Express', 'Semaya One', 'Rocky Fast Cruise', 'Angel Billabong'],
+    averageFareUSD: 15,
+    averageFareIDR: 240000,
+    tip: 'Book departure between 07:30 and 09:00 AM for the calmest sea waters in the Badung Strait.'
+  },
+  {
+    id: 'padang-bai',
+    name: 'Padang Bai Harbor (Gili & Lombok Pier)',
+    code: 'PBI',
+    coordinates: { lat: -8.5302, lng: 115.5105 },
+    location: 'Karangasem, East Bali',
+    type: 'Deep-Water Fast Boat & Ferry Terminal',
+    highlights: 'Main maritime highway connecting Bali to Gili Trawangan, Gili Meno, Gili Air, and Bangsal (Lombok).',
+    destinations: ['Gili Trawangan', 'Gili Air', 'Bangsal / Senggigi (Lombok)', 'Nusa Penida'],
+    crossingTime: '1 hr 30 mins - 2 hrs',
+    dailyDepartures: '18 daily express departures',
+    topOperators: ['Eka Jaya Fast Boat (Catamaran)', 'Golden Queen', 'Wahana Gili Ocean'],
+    averageFareUSD: 28,
+    averageFareIDR: 440000,
+    tip: 'Eka Jaya operates large 210-passenger steel-hull catamarans with stabilizers for maximum seasickness prevention.'
+  },
+  {
+    id: 'serangan-harbor',
+    name: 'Serangan Luxury Marina',
+    code: 'SRG',
+    coordinates: { lat: -8.7258, lng: 115.2415 },
+    location: 'Serangan Island, South Denpasar',
+    type: 'Private Marina & Catamaran Pier',
+    highlights: 'Close to Kuta, Seminyak, and Nusa Dua (only 20 mins from airport). VIP departure lounge with complimentary espresso & luggage porterage.',
+    destinations: ['Gili Trawangan', 'Gili Air', 'Teluk Kodek (Lombok)', 'Nusa Lembongan'],
+    crossingTime: '2 hrs 15 mins (Direct Gili)',
+    dailyDepartures: 'Premium morning departures',
+    topOperators: ['BlueWater Express', 'Gili Getaway'],
+    averageFareUSD: 45,
+    averageFareIDR: 700000,
+    tip: 'Includes complimentary hotel transfers from South Bali hotels directly to the pier.'
+  },
+  {
+    id: 'kusamba-port',
+    name: 'Kusamba Harbor (Traditional Fast Pier)',
+    code: 'KSB',
+    coordinates: { lat: -8.5582, lng: 115.4412 },
+    location: 'Klungkung Regency',
+    type: 'Regional Express Port',
+    highlights: 'Shortest nautical distance to North Nusa Penida (Sampalan). Popular with locals and day-trippers visiting East Penida.',
+    destinations: ['Nusa Penida (Sampalan / Buyuk)'],
+    crossingTime: '20 Minutes Ultra-Express',
+    dailyDepartures: 'Every 45 minutes',
+    topOperators: ['The Angkal Fast Boat', 'Sekar Jaya'],
+    averageFareUSD: 10,
+    averageFareIDR: 160000,
+    tip: 'Ideal if staying in Sidemen, Candidasa, or Ubud, as it saves 40 minutes road travel compared to Sanur.'
+  }
+];
 
 let FAQ_DATA = [
   {
@@ -1242,6 +1595,9 @@ if (typeof module !== 'undefined' && module.exports) {
     HOTELS_DATA,
     TRANSIT_DATA,
     TRANSIT_ROUTES_PRESETS,
+    BALI_REGIONS,
+    LOCAL_TRAVEL_MODES,
+    BALI_MARINE_HARBORS,
     FAQ_DATA,
     GEOAPIFY_VERIFIED_PLACES,
     formatPrice

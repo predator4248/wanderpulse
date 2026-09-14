@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     ['HotelFilters', initHotelFilters],
     ['TransitHub', initTransitHub],
     ['RouteCalculator', initRouteCalculator],
+    ['LocalCommute', initLocalCommuteCalculator],
+    ['LocalModeMatrix', renderLocalModeMatrix],
     ['BudgetEstimator', initBudgetEstimator],
     ['MapInteractions', initMapInteractions],
     ['GeoapifyPlaces', initGeoapifyPlacesExplorer],
@@ -304,6 +306,10 @@ function initCurrency() {
     // Update Transit route fare displays
     const activeOrigin = document.getElementById('originCitySelect')?.value || 'new-york';
     updateRouteResults(activeOrigin);
+
+    // Update Local Commute and Modes Matrix displays
+    if (typeof updateCommuteResults === 'function') updateCommuteResults();
+    if (typeof renderLocalModeMatrix === 'function') renderLocalModeMatrix();
 
     // Update Budget Estimator
     recalculateBudget();
@@ -1012,12 +1018,14 @@ function initTransitHub() {
   modeTabs.forEach(tab => {
     tab.addEventListener('click', () => {
       modeTabs.forEach(t => {
-        t.classList.remove('active-flight', 'active-train', 'active-bus');
+        t.classList.remove('active-flight', 'active-train', 'active-bus', 'active-boat');
+        t.setAttribute('aria-selected', 'false');
       });
       panes.forEach(p => p.classList.remove('active'));
 
       const mode = tab.dataset.mode;
       tab.classList.add(`active-${mode}`);
+      tab.setAttribute('aria-selected', 'true');
       const targetPane = document.getElementById(`transit-${mode}`);
       if (targetPane) targetPane.classList.add('active');
     });
@@ -1132,6 +1140,9 @@ function updateRouteResults(cityKey) {
       <button type="button" class="btn btn-primary-grad" style="margin-top: 12px; width: 100%; justify-content: center; font-size: 0.85rem;" onclick="window.openTransitBooking('flight', '${data.city}')">
         ✈️ Book Flight Ticket (${data.city} → DPS)
       </button>
+      <a href="https://www.google.com/travel/flights?q=Flights+from+${encodeURIComponent(data.city)}+to+DPS+Bali" target="_blank" rel="noopener noreferrer" class="btn-google-flights" style="margin-top: 6px; width: 100%;">
+        🔍 Compare Real-Time Fares on Google Flights
+      </a>
     </div>
 
     <!-- Train & Ferry Overland Route Card -->
@@ -1178,6 +1189,9 @@ function updateRouteResults(cityKey) {
       <button type="button" class="btn btn-primary-grad" style="margin-top: 12px; width: 100%; justify-content: center; font-size: 0.85rem; background: var(--grad-train);" onclick="window.openTransitBooking('train', 'Jakarta (CGK / Gambir)')">
         🚆 Book Trans-Java Train Pass (KAI)
       </button>
+      <a href="https://www.tiket.com/kereta-api" target="_blank" rel="noopener noreferrer" class="btn-google-flights" style="margin-top: 6px; width: 100%;">
+        🎫 View Official KAI Timetable (Tiket.com)
+      </a>
     </div>
 
     <!-- Bus & Coach Route Card -->
@@ -1263,14 +1277,279 @@ function generateCustomRoute(cityName) {
         </div>
         <span class="co2-eco-tag">✈️ Single PNR Ticket</span>
       </div>
-      <button type="button" class="btn btn-primary-grad" style="margin-top: 14px; width: 100%; justify-content: center;" onclick="window.openTransitBooking('flight', '${cityName}')">
-        ✈️ Book Flight from ${cityName} to Bali (DPS)
-      </button>
+      <div style="display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap;">
+        <button type="button" class="btn btn-primary-grad" style="flex: 2; justify-content: center;" onclick="window.openTransitBooking('flight', '${cityName}')">
+          ✈️ Book Flight from ${cityName} to Bali (DPS)
+        </button>
+        <a href="https://www.google.com/travel/flights?q=Flights+from+${encodeURIComponent(cityName)}+to+DPS+Bali" target="_blank" rel="noopener noreferrer" class="btn-google-flights" style="flex: 1; justify-content: center;">
+          🔍 Live Fares on Google Flights
+        </a>
+      </div>
     </div>
   `;
 
   showToast('Custom City Route', `Generated custom transit itinerary from ${cityName} to Bali.`);
 }
+
+/* ==========================================================================
+   8b. INTRA-ISLAND COMMUTE & FARE CALCULATOR (GIS & GOOGLE MAPS ROUTING)
+   ========================================================================== */
+function initLocalCommuteCalculator() {
+  const origSelect = document.getElementById('commuteOriginSelect');
+  const destSelect = document.getElementById('commuteDestSelect');
+  const calcBtn = document.getElementById('calcCommuteBtn');
+
+  if (origSelect) {
+    origSelect.addEventListener('change', updateCommuteResults);
+  }
+  if (destSelect) {
+    destSelect.addEventListener('change', updateCommuteResults);
+  }
+  if (calcBtn) {
+    calcBtn.addEventListener('click', updateCommuteResults);
+  }
+
+  // Initial calculation
+  updateCommuteResults();
+}
+
+async function updateCommuteResults() {
+  const origSelect = document.getElementById('commuteOriginSelect');
+  const destSelect = document.getElementById('commuteDestSelect');
+  const displayContainer = document.getElementById('commuteResultsDisplay');
+  if (!displayContainer) return;
+
+  const originKey = origSelect ? origSelect.value : 'airport';
+  const destKey = destSelect ? destSelect.value : 'ubud';
+
+  let data = null;
+
+  try {
+    const res = await fetch('/api/transit/commute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ origin: originKey, destination: destKey })
+    });
+    const json = await res.json();
+    if (json.success) {
+      data = json;
+    }
+  } catch (err) {
+    console.warn('Commute API fallback:', err);
+  }
+
+  // Client-side fallback if server offline
+  if (!data) {
+    const regions = (typeof BALI_REGIONS !== 'undefined') ? BALI_REGIONS : {
+      airport: { name: "Ngurah Rai Airport (DPS)", lat: -8.7481, lng: 115.1672 },
+      ubud: { name: "Ubud Cultural Center", lat: -8.5069, lng: 115.2625 }
+    };
+    const orig = regions[originKey] || regions['airport'];
+    const dest = regions[destKey] || regions['ubud'];
+    const isMarine = !!(orig.isIsland || dest.isIsland);
+    const dist = 38;
+    data = {
+      origin: orig,
+      destination: dest,
+      distanceKm: dist,
+      durationCar: isMarine ? '45m boat + 35m drive' : '1 hr 25m',
+      durationScooter: isMarine ? '45m boat + 20m ride' : '55 mins',
+      carPriceUSD: isMarine ? 32 : 24,
+      scooterRideUSD: 8,
+      grabCarUSD: 18,
+      grabZoneStatus: ['ubud', 'uluwatu'].includes(destKey) ? 'Drop-off Allowed / Pick-up Restricted' : 'Green Zone',
+      grabNotice: ['ubud', 'uluwatu'].includes(destKey) ? 'Drop-offs are unrestricted. Pick-ups in central zone restricted by local taxi cartel; walk 200m to main road or book private driver.' : 'Grab & Gojek operate freely here.',
+      roadAlert: isMarine ? 'Requires fast boat crossing from Sanur New Harbor.' : 'Canggu shortcut is motorcycle-only. Peak sunset traffic on bypass.',
+      googleMapsUrl: `https://www.google.com/maps/dir/?api=1&origin=${orig.lat},${orig.lng}&destination=${dest.lat},${dest.lng}&travelmode=${isMarine ? 'transit' : 'driving'}`,
+      recommendation: isMarine ? 'fast-boat' : 'car-driver'
+    };
+  }
+
+  displayContainer.innerHTML = `
+    <!-- Top Metadata Bar with Google Maps Direct Link -->
+    <div class="commute-meta-bar">
+      <div>
+        <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); display: block; font-weight: 700;">Calculated Route</span>
+        <strong style="font-size: 1.15rem; color: var(--text-primary);">${data.origin.name} ➔ ${data.destination.name}</strong>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+        <span class="commute-time-tag">📏 ${data.distanceKm} km Direct Road Transit</span>
+        <a href="${data.googleMapsUrl}" target="_blank" rel="noopener noreferrer" class="btn-google-maps" title="Open live GPS directions in Google Maps">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+          </svg>
+          Open Turn-by-Turn in Google Maps
+        </a>
+      </div>
+    </div>
+
+    <!-- 4 Side-by-Side Commute Options -->
+    <div class="commute-modes-grid">
+      <!-- Option 1: Private Driver & AC Car -->
+      <div class="commute-mode-card ${data.recommendation === 'car-driver' ? 'best-recommendation' : ''}">
+        ${data.recommendation === 'car-driver' ? '<span class="badge-best-choice">Recommended</span>' : ''}
+        <div class="commute-card-header">
+          <div class="commute-mode-icon">🚗</div>
+          <div>
+            <h4 style="font-size: 1rem; margin-bottom: 2px;">Private Driver & SUV</h4>
+            <span style="font-size: 0.75rem; color: var(--text-secondary);">AC Toyota Avanza / Innova</span>
+          </div>
+        </div>
+        <div>
+          <span class="commute-price-tag">${formatPrice(data.carPriceUSD)}</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Fixed door-to-door transfer</span>
+        </div>
+        <div class="commute-time-tag">⏱️ ${data.durationCar} (with traffic)</div>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin: 0;">
+          Luggage porterage, air-conditioned cabin, and zero stress on winding mountain switchbacks.
+        </p>
+        <button type="button" class="btn btn-primary-grad" style="margin-top: auto; font-size: 0.82rem; padding: 8px 12px; justify-content: center;" onclick="window.openRentalBookingModal('car-driver')">
+          Book Private Driver →
+        </button>
+      </div>
+
+      <!-- Option 2: Scooter / Motorbike -->
+      <div class="commute-mode-card ${data.recommendation === 'scooter' ? 'best-recommendation' : ''}">
+        ${data.recommendation === 'scooter' ? '<span class="badge-best-choice">Fastest in Traffic</span>' : ''}
+        <div class="commute-card-header">
+          <div class="commute-mode-icon">🛵</div>
+          <div>
+            <h4 style="font-size: 1rem; margin-bottom: 2px;">Automatic Scooter</h4>
+            <span style="font-size: 0.75rem; color: var(--text-secondary);">Honda Scoopy / NMAX</span>
+          </div>
+        </div>
+        <div>
+          <span class="commute-price-tag">${formatPrice(data.scooterRideUSD)}</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Per day rental or GoRide</span>
+        </div>
+        <div class="commute-time-tag" style="color: var(--accent-emerald);">⚡ ${data.durationScooter} (Bypasses Queues)</div>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin: 0;">
+          Filter through Canggu & Seminyak gridlocks. Requires IDP 1949 and helmet by Indonesian law.
+        </p>
+        <button type="button" class="btn btn-outline" style="margin-top: auto; font-size: 0.82rem; padding: 8px 12px; justify-content: center;" onclick="window.openRentalBookingModal('scoopy')">
+          Rent Scooter ($7/day) →
+        </button>
+      </div>
+
+      <!-- Option 3: Ride Hailing (Grab / Gojek) -->
+      <div class="commute-mode-card">
+        <div class="commute-card-header">
+          <div class="commute-mode-icon">📱</div>
+          <div>
+            <h4 style="font-size: 1rem; margin-bottom: 2px;">Grab / Gojek Hailing</h4>
+            <span style="font-size: 0.75rem; color: var(--text-secondary);">App-based Dispatch</span>
+          </div>
+        </div>
+        <div>
+          <span class="commute-price-tag">${formatPrice(data.grabCarUSD)}</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Est. GoCar / GrabCar fare</span>
+        </div>
+        <div>
+          <span class="${data.grabZoneStatus.includes('Green') ? 'badge-zone-green' : 'badge-zone-red'}">${data.grabZoneStatus}</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin: 0;">
+          ${data.grabNotice}
+        </p>
+        <button type="button" class="btn btn-outline" style="margin-top: auto; font-size: 0.82rem; padding: 8px 12px; justify-content: center;" onclick="window.openRideHailingGuide()">
+          Ride-Hailing Rules →
+        </button>
+      </div>
+
+      <!-- Option 4: Marine Fast Boat (If applicable) -->
+      ${data.boatDetails ? `
+        <div class="commute-mode-card best-recommendation" style="border-color: rgba(6, 182, 212, 0.5);">
+          <span class="badge-best-choice" style="background: var(--accent-cyan);">Ocean Route</span>
+          <div class="commute-card-header">
+            <div class="commute-mode-icon" style="background: rgba(6, 182, 212, 0.15); color: #06B6D4;">🛥️</div>
+            <div>
+              <h4 style="font-size: 1rem; margin-bottom: 2px;">Marine Fast Boat</h4>
+              <span style="font-size: 0.75rem; color: var(--text-secondary);">${data.boatDetails.operator}</span>
+            </div>
+          </div>
+          <div>
+            <span class="commute-price-tag">${formatPrice(data.boatDetails.ticketUSD)}</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">1 Passenger Seat + 25kg Bag</span>
+          </div>
+          <div class="commute-time-tag" style="color: #06b6d4;">🌊 ${data.boatDetails.crossingDuration} Sea Crossing</div>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin: 0;">
+            ${data.boatDetails.departureHarbor} ➔ ${data.boatDetails.arrivalHarbor}. Modern floating berth boarding.
+          </p>
+          <button type="button" class="btn btn-primary-grad" style="margin-top: auto; font-size: 0.82rem; padding: 8px 12px; justify-content: center; background: linear-gradient(135deg, #06b6d4, #0284c7);" onclick="window.openTransitBooking('boat', '${data.boatDetails.departureHarbor}')">
+            Book Boat Ticket →
+          </button>
+        </div>
+      ` : ''}
+    </div>
+
+    <!-- Traffic Bottleneck Alert Box -->
+    <div class="traffic-alert-box">
+      <span style="font-size: 1.2rem;">⚠️</span>
+      <div>
+        <strong style="color: var(--text-primary); display: block; margin-bottom: 2px;">Island Road Advisory & Bottleneck Alert</strong>
+        <span>${data.roadAlert}</span>
+      </div>
+    </div>
+  `;
+}
+
+/* ==========================================================================
+   8c. LOCAL TRAVEL MODES COMPARISON MATRIX RENDERER
+   ========================================================================== */
+function renderLocalModeMatrix() {
+  const tbody = document.getElementById('travelModesMatrixBody');
+  if (!tbody) return;
+
+  const modes = (typeof LOCAL_TRAVEL_MODES !== 'undefined') ? LOCAL_TRAVEL_MODES : [];
+  if (modes.length === 0) return;
+
+  tbody.innerHTML = modes.map(m => `
+    <tr>
+      <td>
+        <div class="mode-name-cell">
+          <span style="font-size: 1.4rem;">${m.icon}</span>
+          <div>
+            <strong>${m.name}</strong>
+            <span style="display: block; font-size: 0.72rem; color: var(--text-muted);">Rating: ${m.rating} / 5.0</span>
+          </div>
+        </div>
+      </td>
+      <td>
+        <span style="font-size: 0.84rem; font-weight: 600;">${m.comfort}</span>
+      </td>
+      <td>
+        <span style="font-size: 0.84rem; color: ${m.trafficSpeed.includes('Fast') ? 'var(--accent-emerald)' : 'var(--text-primary)'}; font-weight: 600;">
+          ${m.trafficSpeed}
+        </span>
+      </td>
+      <td>
+        <span style="font-size: 0.84rem;">${m.luggage}</span>
+      </td>
+      <td>
+        <span style="font-size: 0.84rem; color: var(--accent-cyan); font-weight: 700;">${m.safety}</span>
+      </td>
+      <td>
+        <strong style="color: var(--accent-coral); font-size: 0.95rem;">${formatPrice(m.costPerDayUSD)}</strong>
+        <span style="font-size: 0.7rem; color: var(--text-muted); display: block;">/ day</span>
+      </td>
+      <td style="max-width: 200px;">
+        <span style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.4; display: block;">${m.bestFor}</span>
+      </td>
+      <td>
+        <button type="button" class="btn btn-outline" style="font-size: 0.75rem; padding: 6px 12px; white-space: nowrap;" onclick="${m.bookingAction}">
+          Choose →
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+window.openRideHailingGuide = function() {
+  showToast('Ride-Hailing in Bali', 'Grab & Gojek are legal island-wide. Drop-offs are allowed anywhere. In restricted red zones (Ubud, Uluwatu), walk 200m to the main street for pick-up!');
+};
+
+window.openBluebirdBooking = function() {
+  showToast('Bluebird Taxi Dispatch', 'Call 24/7 Bali Bluebird hotline (+62 361 701111) or download the official MyBluebird app for metered bookings.');
+};
 
 /* ==========================================================================
    9. INTERACTIVE TRIP BUDGET & ITINERARY ESTIMATOR
@@ -2891,7 +3170,12 @@ const TRANSIT_ORIGINS_BY_MODE = {
     { value: 'Singapore (SIN)', label: 'Singapore (SIN) - Changi Airport', baseUSD: 140, code: 'SIN', city: 'Singapore', duration: '2h 40m' },
     { value: 'Jakarta (CGK / Gambir)', label: 'Jakarta (CGK) - Soekarno-Hatta', baseUSD: 70, code: 'CGK', city: 'Jakarta', duration: '1h 50m' },
     { value: 'Sydney (SYD)', label: 'Sydney (SYD) - Kingsford Smith', baseUSD: 460, code: 'SYD', city: 'Sydney', duration: '6h 15m' },
+    { value: 'Melbourne (MEL)', label: 'Melbourne (MEL) - Tullamarine', baseUSD: 440, code: 'MEL', city: 'Melbourne', duration: '6h 00m' },
+    { value: 'Perth (PER)', label: 'Perth (PER) - Western Australia', baseUSD: 240, code: 'PER', city: 'Perth', duration: '3h 40m' },
+    { value: 'Kuala Lumpur (KUL)', label: 'Kuala Lumpur (KUL) - KLIA', baseUSD: 110, code: 'KUL', city: 'Kuala Lumpur', duration: '3h 05m' },
+    { value: 'Dubai (DXB)', label: 'Dubai (DXB) - Emirates Hub', baseUSD: 680, code: 'DXB', city: 'Dubai', duration: '9h 10m' },
     { value: 'London (LHR)', label: 'London (LHR) - Heathrow', baseUSD: 740, code: 'LHR', city: 'London', duration: '16h 20m' },
+    { value: 'Frankfurt (FRA)', label: 'Frankfurt (FRA) - Germany', baseUSD: 780, code: 'FRA', city: 'Frankfurt', duration: '15h 45m' },
     { value: 'New York (JFK)', label: 'New York (JFK) - John F. Kennedy', baseUSD: 890, code: 'JFK', city: 'New York', duration: '21h 30m' },
     { value: 'Mumbai / Delhi (BOM/DEL)', label: 'Mumbai / Delhi (BOM/DEL)', baseUSD: 340, code: 'BOM', city: 'Mumbai', duration: '7h 10m' },
     { value: 'Tokyo (NRT)', label: 'Tokyo (NRT) - Narita Int’l', baseUSD: 520, code: 'NRT', city: 'Tokyo', duration: '7h 35m' },
@@ -2908,6 +3192,22 @@ const TRANSIT_ORIGINS_BY_MODE = {
     { value: 'Surabaya (Gubeng)', label: 'Surabaya (Bungurasih) - Gunung Harta Express', baseUSD: 22, code: 'SBY', city: 'Surabaya', duration: '9h Direct' },
     { value: 'Yogyakarta (Tugu)', label: 'Yogyakarta (Giwangan) - Safari Dharma Sleeper', baseUSD: 30, code: 'JOG', city: 'Yogyakarta', duration: '14h Direct' },
     { value: 'Malang (Arjosari)', label: 'Malang (Arjosari Terminal) - Tiara Mas', baseUSD: 26, code: 'MLG', city: 'Malang', duration: '10h Direct' }
+  ],
+  boat: [
+    { value: 'Sanur (SNR) - New Harbor', label: 'Sanur Harbor (SNR) ➔ Nusa Penida (Toyapakeh)', baseUSD: 16, code: 'SNR', city: 'Sanur Pier', duration: '35 mins' },
+    { value: 'Sanur Harbor (Lembongan)', label: 'Sanur Harbor (SNR) ➔ Nusa Lembongan (Jungutbatu)', baseUSD: 15, code: 'SNR', city: 'Sanur Pier', duration: '30 mins' },
+    { value: 'Padang Bai (PBI) - Gili Express', label: 'Padang Bai (PBI) ➔ Gili Trawangan / Air', baseUSD: 28, code: 'PBI', city: 'Padang Bai Pier', duration: '1h 30m' },
+    { value: 'Padang Bai (Lombok Bangsal)', label: 'Padang Bai (PBI) ➔ Lombok (Bangsal)', baseUSD: 30, code: 'PBI', city: 'Padang Bai Pier', duration: '2h 00m' },
+    { value: 'Serangan Luxury Marina', label: 'Serangan Luxury Marina ➔ Gili Trawangan (VIP)', baseUSD: 45, code: 'SRG', city: 'Serangan Marina', duration: '2h 15m' },
+    { value: 'Kusamba Harbor', label: 'Kusamba (KSB) ➔ North Nusa Penida (Sampalan)', baseUSD: 10, code: 'KSB', city: 'Kusamba Pier', duration: '20 mins' }
+  ],
+  'airport-transfer': [
+    { value: 'DPS ➔ Seminyak / Legian', label: 'DPS Airport ➔ Seminyak / Legian / Kuta Villa', baseUSD: 18, code: 'DPS', city: 'DPS Airport', duration: '25 mins' },
+    { value: 'DPS ➔ Canggu / Pererenan', label: 'DPS Airport ➔ Canggu / Pererenan Villa', baseUSD: 24, code: 'DPS', city: 'DPS Airport', duration: '45 mins' },
+    { value: 'DPS ➔ Ubud Highland', label: 'DPS Airport ➔ Ubud Highland Resort', baseUSD: 28, code: 'DPS', city: 'DPS Airport', duration: '1h 15m' },
+    { value: 'DPS ➔ Uluwatu / Bukit', label: 'DPS Airport ➔ Uluwatu / Pecatu Cliff Villa', baseUSD: 22, code: 'DPS', city: 'DPS Airport', duration: '35 mins' },
+    { value: 'DPS ➔ Sanur Coastal', label: 'DPS Airport ➔ Sanur Beach Hotel / Port', baseUSD: 18, code: 'DPS', city: 'DPS Airport', duration: '25 mins' },
+    { value: 'DPS ➔ Nusa Dua / Jimbaran', label: 'DPS Airport ➔ Nusa Dua Resort / Jimbaran', baseUSD: 20, code: 'DPS', city: 'DPS Airport', duration: '20 mins' }
   ]
 };
 
@@ -3088,6 +3388,32 @@ function switchTransitMode(mode) {
       `;
     }
     if (co2Badge) co2Badge.textContent = '🚌 Direct Hotel Area Drop-off';
+  } else if (mode === 'boat') {
+    if (tagEl) tagEl.textContent = 'Certified Marine Passenger Cruise';
+    if (titleEl) titleEl.textContent = 'Book Marine Fast Boat Ticket';
+    if (subEl) subEl.textContent = 'High-speed multi-engine catamaran crossing to Nusa Penida, Nusa Lembongan, or Gili Islands.';
+    if (destInput) destInput.value = 'Nusa Penida / Gili Trawangan Pier';
+    if (classSelect) {
+      classSelect.innerHTML = `
+        <option value="standard" selected>Standard Ocean Seat ($0)</option>
+        <option value="premium-economy">Upper Sunda Deck / Panoramic (+40%)</option>
+        <option value="business">VIP Air-Conditioned Captain Cabin (+120%)</option>
+      `;
+    }
+    if (co2Badge) co2Badge.textContent = '🌊 Modern Floating Berth Boarding';
+  } else if (mode === 'airport-transfer') {
+    if (tagEl) tagEl.textContent = 'Official Bali Airport Meet & Greet';
+    if (titleEl) titleEl.textContent = 'Book Private DPS Airport Chauffeur';
+    if (subEl) subEl.textContent = 'Dedicated chauffeur waiting at DPS arrivals hall with personalized name-board and villa luggage porterage.';
+    if (destInput) destInput.value = 'Direct Villa / Resort Lobby Delivery';
+    if (classSelect) {
+      classSelect.innerHTML = `
+        <option value="standard" selected>Private Standard AC SUV (Avanza) ($0)</option>
+        <option value="premium-economy">Executive AC Innova Reborn (+40%)</option>
+        <option value="business">Luxury Toyota Alphard VIP Suite (+120%)</option>
+      `;
+    }
+    if (co2Badge) co2Badge.textContent = '🛡️ Flight Tracking Included • Zero Wait Fee';
   }
 
   updateTransitFareEstimate();
@@ -3175,7 +3501,7 @@ function renderBoardingPass(ticket) {
 }
 
 function generateClientTicket(params) {
-  const modePrefix = params.mode === 'train' ? 'KAI-TRN' : (params.mode === 'bus' ? 'DPS-BUS' : 'DPS-AIR');
+  const modePrefix = params.mode === 'train' ? 'KAI-TRN' : (params.mode === 'bus' ? 'DPS-BUS' : (params.mode === 'boat' ? 'DPS-SEA' : (params.mode === 'airport-transfer' ? 'DPS-TRF' : 'DPS-AIR')));
   const pnr = `${modePrefix}-${Math.floor(100000 + Math.random() * 900000)}`;
 
   const originList = TRANSIT_ORIGINS_BY_MODE[params.mode] || TRANSIT_ORIGINS_BY_MODE.flight;
@@ -3184,11 +3510,11 @@ function generateClientTicket(params) {
   return {
     pnr,
     mode: params.mode,
-    operator: params.mode === 'train' ? 'Kereta Api Indonesia (KAI Executive)' : (params.mode === 'bus' ? 'Gunung Harta VIP Sleeper' : 'Garuda Indonesia / Singapore Airlines'),
+    operator: params.mode === 'train' ? 'Kereta Api Indonesia (KAI Executive)' : (params.mode === 'bus' ? 'Gunung Harta VIP Sleeper' : (params.mode === 'boat' ? 'Eka Jaya Fast Boat / Maruti Duta Express' : (params.mode === 'airport-transfer' ? 'Official DPS Airport Chauffeur Dispatch' : 'Garuda Indonesia / Singapore Airlines'))),
     origin: params.origin,
     originCity: match.city,
     originCode: match.code,
-    destination: "Bali (DPS)",
+    destination: params.mode === 'boat' ? 'Nusa Penida / Gili Islands' : (params.mode === 'airport-transfer' ? 'Hotel / Villa Lobby' : 'Bali (DPS)'),
     duration: match.duration,
     date: params.departDate,
     depTime: '08:30 WITA',
@@ -3196,8 +3522,8 @@ function generateClientTicket(params) {
     leadPassenger: params.leadPassenger,
     passengers: params.passengers,
     cabinClass: params.travelClass === 'business' ? 'Business Class Suite' : (params.travelClass === 'premium-economy' ? 'Premium Economy' : 'Economy Saver'),
-    seat: 'Seat 14A',
-    gatePlatform: params.mode === 'flight' ? 'Gate 4B' : 'Platform 2',
+    seat: params.mode === 'boat' ? 'Vessel Seat 14A' : (params.mode === 'airport-transfer' ? 'Chauffeur Van Unit 4' : 'Seat 14A'),
+    gatePlatform: params.mode === 'flight' ? 'Gate 4B' : (params.mode === 'train' ? 'Platform 3' : (params.mode === 'boat' ? 'Sanur Floating Berth 2' : (params.mode === 'airport-transfer' ? 'Arrivals Meeting Pillar 4' : 'Bay 12'))),
     barcodeNumber: `${Math.floor(1000 + Math.random() * 9000)} ${Math.floor(1000 + Math.random() * 9000)} ${Math.floor(1000 + Math.random() * 9000)}`
   };
 }

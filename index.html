@@ -796,6 +796,10 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 17h2l.64-2.54a6 6 0 0 0-5.64-7.46H8a6 6 0 0 0-5.64 7.46L3 17h2"></path><circle cx="7" cy="17" r="2"></circle><circle cx="17" cy="17" r="2"></circle></svg>
             <span>🚌 By Bus & Sleeper Coaches</span>
           </button>
+          <button class="transit-tab-btn" data-mode="boat" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20a2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1 2.4 2.4 0 0 1 2-1 2.4 2.4 0 0 1 2 1 2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1 2.4 2.4 0 0 1 2-1 2.4 2.4 0 0 1 2 1 2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1"></path><path d="M4 18L7 6l5-2 5 2 3 12"></path><path d="M12 4v14"></path></svg>
+            <span>🛥️ By Fast Boat & Island Ferries</span>
+          </button>
         </div>
 
         <!-- MODE 1: BY FLIGHT -->
@@ -987,12 +991,203 @@
           </div>
         </div>
 
-        <!-- INTERACTIVE ROUTE & FARE ESTIMATOR WIDGET -->
+          </div>
+        </div>
+
+        <!-- MODE 4: BY FAST BOAT & ISLAND FERRIES -->
+        <div class="transit-pane" id="transit-boat" role="tabpanel">
+          <div class="glass-card transit-info-card">
+            <div class="transit-mode-header">
+              <div class="mode-icon-circle icon-boat-bg">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20a2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1 2.4 2.4 0 0 1 2-1 2.4 2.4 0 0 1 2 1 2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1 2.4 2.4 0 0 1 2-1 2.4 2.4 0 0 1 2 1 2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1"></path><path d="M4 18L7 6l5-2 5 2 3 12"></path><path d="M12 4v14"></path></svg>
+              </div>
+              <div>
+                <h3 class="mode-title">Marine Express Speedboats & Straits Ferries</h3>
+                <p class="mode-tagline">Rapid ocean crossings to Nusa Penida, Nusa Lembongan, Gili Islands & Lombok</p>
+              </div>
+            </div>
+
+            <p style="color: var(--text-secondary); line-height: 1.7;">
+              Bali is the oceanic epicenter of the Lesser Sunda Islands. Thanks to the newly opened multi-million dollar <strong>Sanur New Harbor terminal</strong>, travelers enjoy dry, wave-free boarding directly onto modern air-conditioned catamarans and high-speed quad-engine passenger cruisers.
+            </p>
+
+            <div class="transit-steps-timeline">
+              <div class="timeline-step">
+                <h4 class="step-title">1. Sanur New Terminal to Nusa Islands (30–45 Mins)</h4>
+                <p class="step-desc">Departing every 30 minutes from Sanur's modern jetty to Toyapakeh / Buyuk Harbor (Nusa Penida) and Jungutbatu (Nusa Lembongan). No wet feet, electronic boarding gates, and spacious luggage stowage.</p>
+              </div>
+              <div class="timeline-step">
+                <h4 class="step-title">2. Padang Bai Express to Gili Islands & Lombok (90 Mins)</h4>
+                <p class="step-desc">High-speed twin-hull catamarans operated by Eka Jaya and Golden Queen glide across the Lombok Strait directly to Gili Trawangan, Gili Air, and Bangsal harbor in Lombok.</p>
+              </div>
+              <div class="timeline-step">
+                <h4 class="step-title">3. Luxury Serangan Catamaran & Kusamba Express</h4>
+                <p class="step-desc">Serangan Marina offers premium direct routes with hotel lounge pickup, while Kusamba Port in East Bali delivers the fastest 20-minute jump straight into North Nusa Penida.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card transit-info-card">
+            <!-- Real-Time Marine Weather & Swell Status Banner -->
+            <div class="marine-swell-banner">
+              <div>
+                <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); display: block; font-weight: 700;">Live Marine Weather & Swell Status</span>
+                <strong style="font-size: 1rem; color: var(--text-primary);">Badung & Lombok Straits: Calm Waters (0.8m)</strong>
+              </div>
+              <span class="swell-status-pill">🟢 Safe for Sailing</span>
+            </div>
+
+            <h4 style="font-size: 1.25rem; margin-bottom: 8px;">Fast Boat Highlights & Logistics</h4>
+            <div class="transit-highlights-grid">
+              <div class="highlight-pill">
+                <span class="pill-label">Penida Ticket Range</span>
+                <span class="pill-value">$12 - $18 USD</span>
+              </div>
+              <div class="highlight-pill">
+                <span class="pill-label">Gili Ticket Range</span>
+                <span class="pill-value">$25 - $35 USD</span>
+              </div>
+              <div class="highlight-pill">
+                <span class="pill-label">Boarding System</span>
+                <span class="pill-value">Dry Floating Jetty</span>
+              </div>
+              <div class="highlight-pill">
+                <span class="pill-label">Daily Sailings</span>
+                <span class="pill-value">60+ Scheduled Boats</span>
+              </div>
+            </div>
+
+            <div style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: var(--radius-md); padding: 18px; margin-top: auto;">
+              <h5 style="color: var(--accent-cyan); font-size: 0.95rem; margin-bottom: 6px;">💡 Morning Crossing Pro-Tip</h5>
+              <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5;">Book early morning departures (07:30 – 09:30 AM). Ocean swells in the Lombok and Badung Straits are naturally calmest at dawn, providing a smooth, glassy ride with zero seasickness.</p>
+              <div style="display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap;">
+                <button type="button" class="btn btn-primary-grad" style="flex: 2; justify-content: center; background: linear-gradient(135deg, #06b6d4, #0284c7);" onclick="window.openTransitBooking('boat', 'Sanur (SNR) - New Harbor')">
+                  🛥️ Book Fast Boat Ticket to Nusa Penida / Gilis
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BALI 4 MAJOR MARINE HARBORS SHOWCASE -->
+        <div style="margin-top: 32px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+            <div>
+              <span class="section-tag tag-cyan">Gateway Sea Ports</span>
+              <h3 style="font-size: 1.4rem; font-weight: 800; margin: 4px 0 2px;">Bali Marine Harbors Directory</h3>
+              <p style="color: var(--text-secondary); font-size: 0.88rem;">Official passenger terminals connecting Bali to offshore island archipelagos.</p>
+            </div>
+          </div>
+
+          <div class="marine-harbors-grid">
+            <!-- Harbor 1: Sanur New Harbor -->
+            <div class="marine-harbor-card">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="harbor-badge-code">SNR • SANUR</span>
+                <span class="badge-zone-green">Modern Terminal</span>
+              </div>
+              <h4 style="font-size: 1.15rem; margin: 4px 0;">Sanur New Harbor (Pelabuhan Sanur)</h4>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+                State-of-the-art terminal building with AC waiting lounges, automated ticketing gates, cafes, and wave-free floating jetties.
+              </p>
+              <div class="harbor-dest-tags">
+                <span class="dest-tag">➔ Nusa Penida (30m)</span>
+                <span class="dest-tag">➔ Nusa Lembongan (30m)</span>
+                <span class="dest-tag">➔ Gili Islands (2h)</span>
+              </div>
+              <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+                <span style="font-size: 0.85rem; font-weight: 800; color: var(--accent-coral);">From $15 USD</span>
+                <a href="https://www.google.com/maps/search/?api=1&query=-8.6751,115.2632" target="_blank" rel="noopener noreferrer" class="btn-google-flights" style="padding: 4px 10px; font-size: 0.75rem;">
+                  📍 Port Map
+                </a>
+              </div>
+            </div>
+
+            <!-- Harbor 2: Padang Bai -->
+            <div class="marine-harbor-card">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="harbor-badge-code">PBI • PADANG BAI</span>
+                <span class="badge-zone-green">Gili Hub</span>
+              </div>
+              <h4 style="font-size: 1.15rem; margin: 4px 0;">Padang Bai Fast Boat Harbor</h4>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+                East Bali deep-water terminal serving large multi-engine catamarans (Eka Jaya) to Gili Trawangan, Gili Air, and Lombok.
+              </p>
+              <div class="harbor-dest-tags">
+                <span class="dest-tag">➔ Gili Trawangan (90m)</span>
+                <span class="dest-tag">➔ Gili Air (1h 45m)</span>
+                <span class="dest-tag">➔ Bangsal Lombok (2h)</span>
+              </div>
+              <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+                <span style="font-size: 0.85rem; font-weight: 800; color: var(--accent-coral);">From $28 USD</span>
+                <a href="https://www.google.com/maps/search/?api=1&query=-8.5302,115.5105" target="_blank" rel="noopener noreferrer" class="btn-google-flights" style="padding: 4px 10px; font-size: 0.75rem;">
+                  📍 Port Map
+                </a>
+              </div>
+            </div>
+
+            <!-- Harbor 3: Serangan Marina -->
+            <div class="marine-harbor-card">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="harbor-badge-code">SRG • SERANGAN</span>
+                <span class="badge-zone-green">VIP Marina</span>
+              </div>
+              <h4 style="font-size: 1.15rem; margin: 4px 0;">Serangan Luxury Marina</h4>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+                Located 20 mins from DPS airport. Premium catamaran departures with private lounge, luggage porterage, and direct hotel shuttles.
+              </p>
+              <div class="harbor-dest-tags">
+                <span class="dest-tag">➔ Gili Trawangan (2h 15m)</span>
+                <span class="dest-tag">➔ Nusa Lembongan (25m)</span>
+                <span class="dest-tag">➔ Lombok (2h 30m)</span>
+              </div>
+              <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+                <span style="font-size: 0.85rem; font-weight: 800; color: var(--accent-coral);">From $45 USD</span>
+                <a href="https://www.google.com/maps/search/?api=1&query=-8.7258,115.2415" target="_blank" rel="noopener noreferrer" class="btn-google-flights" style="padding: 4px 10px; font-size: 0.75rem;">
+                  📍 Port Map
+                </a>
+              </div>
+            </div>
+
+            <!-- Harbor 4: Kusamba Port -->
+            <div class="marine-harbor-card">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="harbor-badge-code">KSB • KUSAMBA</span>
+                <span class="badge-zone-green">20-Min Express</span>
+              </div>
+              <h4 style="font-size: 1.15rem; margin: 4px 0;">Kusamba Express Pier</h4>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+                Shortest nautical distance to North Nusa Penida (Sampalan). Ideal if traveling from Ubud, Sidemen, or East Bali villas.
+              </p>
+              <div class="harbor-dest-tags">
+                <span class="dest-tag">➔ Sampalan Penida (20m)</span>
+                <span class="dest-tag">➔ Buyuk Harbor (25m)</span>
+              </div>
+              <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+                <span style="font-size: 0.85rem; font-weight: 800; color: var(--accent-coral);">From $10 USD</span>
+                <a href="https://www.google.com/maps/search/?api=1&query=-8.5582,115.4412" target="_blank" rel="noopener noreferrer" class="btn-google-flights" style="padding: 4px 10px; font-size: 0.75rem;">
+                  📍 Port Map
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- INTERACTIVE ROUTE & FARE ESTIMATOR WIDGET (EXPANDED HUBS) -->
         <div class="route-calculator-panel">
           <div class="route-calc-header">
-            <span class="section-tag tag-amber">Interactive Route Engine</span>
-            <h3>Plan Your Door-to-Door Route to Bali</h3>
-            <p style="color: var(--text-secondary);">Select your home departure hub or enter any city to calculate transit legs, durations, and costs.</p>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <span class="section-tag tag-amber">Door-to-Door Global Route Engine</span>
+                <h3>Plan Your Journey to Bali (DPS)</h3>
+                <p style="color: var(--text-secondary);">Select your home departure hub or enter any city to calculate flight legs, scenic trans-Java rail, sleeper coaches, and costs.</p>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <a href="https://www.google.com/travel/flights?q=Flights+to+DPS+Bali" target="_blank" rel="noopener noreferrer" class="btn-google-flights" title="Search live fares on Google Flights">
+                  ✈️ Google Flights Live
+                </a>
+              </div>
+            </div>
           </div>
 
           <div class="quick-hub-chips" aria-label="Popular Departure Cities">
@@ -1000,10 +1195,15 @@
             <button type="button" class="hub-chip" data-city="new-york">New York</button>
             <button type="button" class="hub-chip" data-city="london">London</button>
             <button type="button" class="hub-chip" data-city="sydney">Sydney</button>
+            <button type="button" class="hub-chip" data-city="melbourne">Melbourne</button>
+            <button type="button" class="hub-chip" data-city="perth">Perth</button>
             <button type="button" class="hub-chip" data-city="singapore">Singapore</button>
+            <button type="button" class="hub-chip" data-city="kuala-lumpur">Kuala Lumpur</button>
+            <button type="button" class="hub-chip" data-city="dubai">Dubai</button>
             <button type="button" class="hub-chip" data-city="mumbai">Mumbai / Delhi</button>
             <button type="button" class="hub-chip" data-city="tokyo">Tokyo</button>
-            <button type="button" class="hub-chip" data-city="jakarta">Jakarta (Overland Rail)</button>
+            <button type="button" class="hub-chip" data-city="frankfurt">Frankfurt</button>
+            <button type="button" class="hub-chip" data-city="jakarta">Jakarta (Rail / Air)</button>
           </div>
 
           <div class="route-input-group">
@@ -1013,9 +1213,14 @@
                 <option value="new-york">New York (JFK / EWR) - United States</option>
                 <option value="london">London (LHR / LGW) - United Kingdom</option>
                 <option value="sydney">Sydney (SYD) - Australia</option>
+                <option value="melbourne">Melbourne (MEL) - Australia</option>
+                <option value="perth">Perth (PER) - Western Australia</option>
                 <option value="singapore">Singapore (SIN) - Changi</option>
+                <option value="kuala-lumpur">Kuala Lumpur (KUL) - Malaysia</option>
+                <option value="dubai">Dubai / Doha (DXB / DOH) - Middle East</option>
                 <option value="mumbai">Mumbai / Delhi (BOM / DEL) - India</option>
                 <option value="tokyo">Tokyo (NRT / HND) - Japan</option>
+                <option value="frankfurt">Frankfurt / Amsterdam (FRA / AMS) - Europe</option>
                 <option value="jakarta">Jakarta (CGK / Gambir) - Indonesia Domestic</option>
               </select>
             </div>
@@ -1035,6 +1240,208 @@
           <!-- Dynamic Output Card for Routes -->
           <div class="route-result-display" id="routeResultDisplay" aria-live="polite">
             <!-- Populated via JS updateRouteResults -->
+          </div>
+        </div>
+
+        <!-- NEW: LIVE INTRA-ISLAND COMMUTE & FARE CALCULATOR (POWERED BY GIS & GOOGLE MAPS) -->
+        <div class="commute-calculator-panel" id="island-commute-calc">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <span class="section-tag tag-emerald">Live Bali Transit Intelligence</span>
+              <h3 style="font-size: 1.6rem; font-weight: 800; margin: 6px 0 4px;">Point-to-Point Island Commute & Fare Calculator</h3>
+              <p style="color: var(--text-secondary); max-width: 720px; font-size: 0.92rem; line-height: 1.6;">
+                Plan your intra-island travel between Bali’s distinct regions. Compare realistic travel times, narrow road bottlenecks, private driver rates, scooter speeds, and Grab/Gojek zone permissions with 1-click Google Maps turn-by-turn navigation.
+              </p>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <span class="co2-badge">📍 Verified Bali GIS Routing</span>
+            </div>
+          </div>
+
+          <div class="commute-selectors-grid">
+            <div class="form-field">
+              <label for="commuteOriginSelect" class="form-label" style="font-weight: 700; color: var(--text-primary);">📍 Origin Location (Pick-up)</label>
+              <select id="commuteOriginSelect" class="form-select" style="background: var(--bg-surface);">
+                <option value="airport" selected>Ngurah Rai Airport (DPS) - Tuban</option>
+                <option value="kuta-seminyak">Kuta & Seminyak Coastal</option>
+                <option value="canggu">Canggu & Pererenan</option>
+                <option value="ubud">Ubud Cultural Center</option>
+                <option value="uluwatu">Uluwatu & Bukit Peninsula</option>
+                <option value="sanur">Sanur Beach & Fast Boat Port</option>
+                <option value="nusa-dua">Nusa Dua & Jimbaran</option>
+                <option value="padang-bai">Padang Bai Harbor (Gili Port)</option>
+                <option value="amed">Amed & Tulamben Coast</option>
+                <option value="bedugul-lovina">Bedugul Highlands & Lovina</option>
+                <option value="nusa-penida">Nusa Penida Island</option>
+              </select>
+            </div>
+
+            <div class="route-swap-icon" style="margin-bottom: 8px;" aria-hidden="true">➔</div>
+
+            <div class="form-field">
+              <label for="commuteDestSelect" class="form-label" style="font-weight: 700; color: var(--text-primary);">🏁 Destination Location (Drop-off)</label>
+              <select id="commuteDestSelect" class="form-select" style="background: var(--bg-surface);">
+                <option value="airport">Ngurah Rai Airport (DPS) - Tuban</option>
+                <option value="kuta-seminyak">Kuta & Seminyak Coastal</option>
+                <option value="canggu">Canggu & Pererenan</option>
+                <option value="ubud" selected>Ubud Cultural Center</option>
+                <option value="uluwatu">Uluwatu & Bukit Peninsula</option>
+                <option value="sanur">Sanur Beach & Fast Boat Port</option>
+                <option value="nusa-dua">Nusa Dua & Jimbaran</option>
+                <option value="padang-bai">Padang Bai Harbor (Gili Port)</option>
+                <option value="amed">Amed & Tulamben Coast</option>
+                <option value="bedugul-lovina">Bedugul Highlands & Lovina</option>
+                <option value="nusa-penida">Nusa Penida Island</option>
+              </select>
+            </div>
+
+            <button type="button" id="calcCommuteBtn" class="btn btn-primary-grad" style="padding: 12px 24px; justify-content: center;">
+              Calculate Commute
+            </button>
+          </div>
+
+          <!-- Dynamic Output Card for Commute -->
+          <div class="commute-results-container" id="commuteResultsDisplay" aria-live="polite">
+            <!-- Populated dynamically via JS initLocalCommuteCalculator() -->
+          </div>
+        </div>
+
+        <!-- NEW: LOCAL TRAVEL MODES COMPARISON MATRIX -->
+        <div class="travel-modes-matrix-container" id="travel-modes-matrix">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <span class="section-tag tag-violet">Island Commute Guide</span>
+              <h3 style="font-size: 1.6rem; font-weight: 800; margin: 6px 0 4px;">Local Travel Modes: Which One is Right for You?</h3>
+              <p style="color: var(--text-secondary); max-width: 720px; font-size: 0.92rem; line-height: 1.6;">
+                Compare all 6 primary transportation methods in Bali across comfort, safety, luggage space, speed in traffic, and estimated daily cost.
+              </p>
+            </div>
+            <div>
+              <span class="co2-badge">⚖️ Unbiased Traveler Comparison</span>
+            </div>
+          </div>
+
+          <div class="matrix-table-wrapper">
+            <table class="matrix-table">
+              <thead>
+                <tr>
+                  <th>Travel Mode</th>
+                  <th>Comfort</th>
+                  <th>Traffic Speed</th>
+                  <th>Luggage</th>
+                  <th>Safety</th>
+                  <th>Est. Daily Cost</th>
+                  <th>Best Suited For</th>
+                  <th>Quick Action</th>
+                </tr>
+              </thead>
+              <tbody id="travelModesMatrixBody">
+                <!-- Dynamically populated via renderLocalModeMatrix() -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- NEW: ESSENTIAL BALI ROAD & TRANSIT SURVIVAL GUIDE -->
+        <div style="margin-top: 48px;" id="road-survival-guide">
+          <div style="text-align: center; max-width: 700px; margin: 0 auto 28px;">
+            <span class="section-tag tag-coral">Vital Travel Knowledge</span>
+            <h3 style="font-size: 1.7rem; font-weight: 800; margin: 6px 0 4px;">Essential Bali Road & Transit Survival Guide</h3>
+            <p style="color: var(--text-secondary); font-size: 0.92rem;">
+              Crucial real-world traffic laws, digital police enforcement, local taxi cartel rules, and navigating island shortcuts safely.
+            </p>
+          </div>
+
+          <div class="survival-guide-grid">
+            <!-- Rule 1: Left-Hand Driving -->
+            <div class="survival-card">
+              <div class="survival-header">
+                <span class="survival-icon">🚗</span>
+                <span class="survival-law-badge">Law No. 22/2009</span>
+              </div>
+              <h4 class="survival-rule-title">Drive on the Left & Narrow Road Etiquette</h4>
+              <p class="survival-desc">
+                Traffic flows on the left side of the road with the driver seated on the right. Village roads (Gang) can be extremely narrow with deep irrigation drainage gutters on both sides. If meeting another car head-on, the vehicle with the nearest pull-out space yields.
+              </p>
+              <div class="survival-tip-footer">
+                💡 Tap your horn gently once when approaching blind cliff corners or mountain curves.
+              </div>
+            </div>
+
+            <!-- Rule 2: IDP 1949 Legal Requirement -->
+            <div class="survival-card">
+              <div class="survival-header">
+                <span class="survival-icon">🪪</span>
+                <span class="survival-law-badge">Mandatory Legal Document</span>
+              </div>
+              <h4 class="survival-rule-title">International Driving Permit (IDP 1949)</h4>
+              <p class="survival-desc">
+                Foreigners driving a scooter or car in Indonesia MUST carry an International Driving Permit (1949 Geneva Convention format) with their original national driver's license. Riding without an IDP will result in police fines and voids your travel medical insurance!
+              </p>
+              <div class="survival-tip-footer">
+                💡 Carry physical paper copies of your passport and IDP in your scooter underseat storage.
+              </div>
+            </div>
+
+            <!-- Rule 3: Helmet & AI Camera (ETLE) -->
+            <div class="survival-card">
+              <div class="survival-header">
+                <span class="survival-icon">🪖</span>
+                <span class="survival-law-badge">ETLE AI Camera Fine</span>
+              </div>
+              <h4 class="survival-rule-title">Mandatory Helmets & Automated Traffic Cameras</h4>
+              <p class="survival-desc">
+                Helmets with secured chinstraps (SNI approved) are strictly mandatory for both driver and passenger. The Bali Regional Police has deployed Electronic Traffic Law Enforcement (ETLE) AI cameras at major intersections on Sunset Road, Canggu, and Denpasar detecting unfastened helmets.
+              </p>
+              <div class="survival-tip-footer">
+                💡 WanderPulse rental scooters include 2 sanitized, high-grade certified helmets with visors.
+              </div>
+            </div>
+
+            <!-- Rule 4: Decoded: No-Grab Taxi Zones -->
+            <div class="survival-card">
+              <div class="survival-header">
+                <span class="survival-icon">🛑</span>
+                <span class="survival-law-badge">Local Cartel Zones</span>
+              </div>
+              <h4 class="survival-rule-title">Decoded: "No Grab / Gojek" Zones (Zona Pangkalan)</h4>
+              <p class="survival-desc">
+                In central Ubud, Canggu Batu Bolong, Padang Bai harbor, and Uluwatu cliffs, traditional local village taxi associations (pangkalan) enforce exclusive passenger pick-up zones. <strong>Key secret:</strong> Grab/Gojek can ALWAYS drop you off anywhere! For pick-ups in red zones, walk 200m to the main bypass road, or book a private chauffeur.
+              </p>
+              <div class="survival-tip-footer">
+                💡 Dedicated private drivers with green plates are 100% exempt and welcome everywhere.
+              </div>
+            </div>
+
+            <!-- Rule 5: Bali Mandara Toll Road -->
+            <div class="survival-card">
+              <div class="survival-header">
+                <span class="survival-icon">🌊</span>
+                <span class="survival-law-badge">Jalan Tol Bali Mandara</span>
+              </div>
+              <h4 class="survival-rule-title">Bali Mandara Overwater Toll Road</h4>
+              <p class="survival-desc">
+                A 12.7 km engineering wonder built directly over the ocean connecting Ngurah Rai Airport, Benoa Harbor, and Nusa Dua. Bypasses South Bali's worst traffic gridlock in 8 minutes. Features a dedicated, barricaded motorcycle lane with speed limit 40 km/h and breathtaking ocean vistas.
+              </p>
+              <div class="survival-tip-footer">
+                💡 100% cashless toll. Requires an Indonesian e-Money (Mandiri) or Flazz (BCA) RFID card.
+              </div>
+            </div>
+
+            <!-- Rule 6: Fueling Up in Bali -->
+            <div class="survival-card">
+              <div class="survival-header">
+                <span class="survival-icon">⛽</span>
+                <span class="survival-law-badge">Pertamina vs Pertamini</span>
+              </div>
+              <h4 class="survival-rule-title">Fueling Up: Official SPBU vs Roadside Glass Bottles</h4>
+              <p class="survival-desc">
+                Official government gas stations (SPBU Pertamina) offer genuine Pertamax 92 octane fuel at regulated prices (~13,000 IDR/L). In remote villages, roadside wooden kiosks sell fuel in glass Absolute vodka bottles ("Pertamini"). Only use roadside bottles in emergencies as fuel can be diluted.
+              </p>
+              <div class="survival-tip-footer">
+                💡 Fill up your scooter tank at official Pertamina stations (red/blue signs) for optimal engine power.
+              </div>
+            </div>
           </div>
         </div>
 
@@ -2362,6 +2769,8 @@
           <button type="button" class="transit-modal-tab active" data-mode="flight" id="tabModeFlight">✈️ Flight to DPS</button>
           <button type="button" class="transit-modal-tab" data-mode="train" id="tabModeTrain">🚆 Trans-Java Train (KAI)</button>
           <button type="button" class="transit-modal-tab" data-mode="bus" id="tabModeBus">🚌 Sleeper Coach</button>
+          <button type="button" class="transit-modal-tab" data-mode="boat" id="tabModeBoat">🛥️ Fast Boat Marine</button>
+          <button type="button" class="transit-modal-tab" data-mode="airport-transfer" id="tabModeTransfer">🚖 Airport Chauffeur</button>
         </div>
 
         <form id="transitBookingForm" class="modal-form">

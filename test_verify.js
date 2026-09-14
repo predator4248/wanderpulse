@@ -91,6 +91,38 @@ async function runTests() {
     return res.status === 200 && json.success && json.isPreset && json.data.flight;
   });
 
+  // 5b. Transit Preset Jakarta
+  await testEndpoint('POST /api/transit/route (Preset Jakarta)', '/api/transit/route', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ origin: 'jakarta' })
+  }, (res, json) => {
+    return res.status === 200 && json.success && json.isPreset && json.data.trainOption.available;
+  });
+
+  // 5c. Transit Preset Melbourne
+  await testEndpoint('POST /api/transit/route (Preset Melbourne)', '/api/transit/route', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ origin: 'melbourne' })
+  }, (res, json) => {
+    return res.status === 200 && json.success && json.isPreset && json.data.flight;
+  });
+
+  // 5d. Intra-Island Commute Engine (Airport to Ubud)
+  await testEndpoint('POST /api/transit/commute (Airport to Ubud)', '/api/transit/commute', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ origin: 'airport', destination: 'ubud' })
+  }, (res, json) => {
+    return res.status === 200 && json.success && json.distanceKm > 0 && json.durationCar && json.googleMapsUrl;
+  });
+
+  // 5e. Marine Conditions API
+  await testEndpoint('GET /api/transit/marine-conditions', '/api/transit/marine-conditions', {}, (res, json) => {
+    return res.status === 200 && json.success && json.waveHeightM !== undefined && json.status;
+  });
+
   // 6. Transit Custom City
   await testEndpoint('POST /api/transit/route (Custom Berlin)', '/api/transit/route', {
     method: 'POST',
@@ -180,6 +212,42 @@ async function runTests() {
     })
   }, (res, json) => {
     return res.status === 201 && json.success && json.ticket && json.ticket.pnr.startsWith('KAI-TRN-') && json.ticket.gatePlatform;
+  });
+
+  // 12b. Multimodal Transit Booking - Fast Boat
+  await testEndpoint('POST /api/transit/book (Fast Boat Marine)', '/api/transit/book', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      mode: 'boat',
+      origin: 'Sanur (SNR) - New Harbor',
+      destination: 'Nusa Penida (Toyapakeh)',
+      departDate: '2026-11-22',
+      passengers: 2,
+      travelClass: 'standard',
+      leadPassenger: 'Liam Davies',
+      email: 'liam@example.com'
+    })
+  }, (res, json) => {
+    return res.status === 201 && json.success && json.ticket && json.ticket.pnr.startsWith('DPS-SEA-') && json.ticket.gatePlatform;
+  });
+
+  // 12c. Multimodal Transit Booking - Airport Transfer
+  await testEndpoint('POST /api/transit/book (Airport Chauffeur Transfer)', '/api/transit/book', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      mode: 'airport-transfer',
+      origin: 'DPS ➔ Ubud Highland',
+      destination: 'Padma Resort Ubud Lobby',
+      departDate: '2026-11-25',
+      passengers: 2,
+      travelClass: 'business',
+      leadPassenger: 'Sarah Connor',
+      email: 'sarah@example.com'
+    })
+  }, (res, json) => {
+    return res.status === 201 && json.success && json.ticket && json.ticket.pnr.startsWith('DPS-TRF-') && json.ticket.operator;
   });
 
   // 13. Multimodal Transit Booking - Validation Error (Missing lead passenger)
