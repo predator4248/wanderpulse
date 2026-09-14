@@ -2336,10 +2336,28 @@
   color: var(--accent-cyan);
 }
 .soundscape-btn.active-audio {
-  background: rgba(6, 182, 212, 0.15);
+  background: rgba(6, 182, 212, 0.2);
   border-color: var(--accent-cyan);
   color: var(--accent-cyan);
-  box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.45);
+  animation: audio-pulse 2s infinite ease-in-out;
+}
+#drawerSoundscapeBtn.active-audio {
+  background: rgba(6, 182, 212, 0.22);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  box-shadow: 0 0 18px rgba(6, 182, 212, 0.4);
+  font-weight: 700;
+}
+@keyframes audio-pulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.65);
+    transform: scale(1.03);
+  }
 }
 
 .nav-itinerary-btn {

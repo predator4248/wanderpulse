@@ -1943,135 +1943,239 @@ function initPhrasebook() {
 
 /* ==========================================================================
    17. SYNTHESIZED AMBIENT ISLAND SOUNDSCAPE (WEB AUDIO API)
+   Generates rich procedural Balinese ocean surf, bamboo breeze,
+   and metallic bronze gamelan chimes.
    ========================================================================== */
 let audioCtx = null;
 let isAudioPlaying = false;
-let oceanGain = null;
-let chimeInterval = null;
+let masterSoundscapeGain = null;
+let oceanSurfSource = null;
+let oceanLfo = null;
+let chimeTimer = null;
+
+window.toggleAmbientSoundscape = async function(e) {
+  if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+
+  const btn = document.getElementById('soundscapeToggleBtn');
+  const drawerBtn = document.getElementById('drawerSoundscapeBtn');
+
+  // Initialize or resume Web Audio Context on user gesture
+  try {
+    if (!audioCtx) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) {
+        showToast('Audio Notice', 'Web Audio is not supported on this browser.');
+        return;
+      }
+      audioCtx = new AudioContextClass();
+    }
+
+    if (audioCtx.state === 'suspended') {
+      await audioCtx.resume();
+    }
+  } catch (err) {
+    console.warn('AudioContext init note:', err);
+  }
+
+  if (!isAudioPlaying) {
+    isAudioPlaying = true;
+    startIslandSoundscape();
+
+    if (btn) {
+      btn.classList.add('active-audio');
+      btn.innerHTML = `🔊 <span class="soundscape-text">Sound: ON</span>`;
+      btn.setAttribute('aria-pressed', 'true');
+    }
+    if (drawerBtn) {
+      drawerBtn.classList.add('active-audio');
+      drawerBtn.innerHTML = `<span>Pause Soundscape</span>`;
+      drawerBtn.setAttribute('aria-pressed', 'true');
+    }
+    showToast('Island Soundscape Active', '🌊 Ocean surf & Balinese gamelan chimes playing.');
+  } else {
+    isAudioPlaying = false;
+    stopIslandSoundscape();
+
+    if (btn) {
+      btn.classList.remove('active-audio');
+      btn.innerHTML = `🔈 <span class="soundscape-text">Soundscape</span>`;
+      btn.setAttribute('aria-pressed', 'false');
+    }
+    if (drawerBtn) {
+      drawerBtn.classList.remove('active-audio');
+      drawerBtn.innerHTML = `<span>Play Soundscape</span>`;
+      drawerBtn.setAttribute('aria-pressed', 'false');
+    }
+    showToast('Island Soundscape Paused', 'Ambient island audio paused.');
+  }
+};
 
 function initAmbientSoundscape() {
   const btn = document.getElementById('soundscapeToggleBtn');
   const drawerBtn = document.getElementById('drawerSoundscapeBtn');
 
   if (btn) {
-    btn.addEventListener('click', toggleAmbientSoundscape);
+    btn.onclick = (e) => window.toggleAmbientSoundscape(e);
   }
   if (drawerBtn) {
-    drawerBtn.addEventListener('click', toggleAmbientSoundscape);
+    drawerBtn.onclick = (e) => window.toggleAmbientSoundscape(e);
   }
 }
 
-function toggleAmbientSoundscape() {
-  const btn = document.getElementById('soundscapeToggleBtn');
-  const drawerBtn = document.getElementById('drawerSoundscapeBtn');
-
-  if (!audioCtx) {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) {
-      showToast('Audio Notice', 'Web Audio is not supported by your browser.');
-      return;
-    }
-    audioCtx = new AudioContextClass();
-  }
-
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
-
-  if (!isAudioPlaying) {
-    startSoundscape();
-    isAudioPlaying = true;
-    if (btn) {
-      btn.classList.add('active-audio');
-      btn.innerHTML = `🔊 <span class="soundscape-text">Sound: ON</span>`;
-    }
-    if (drawerBtn) {
-      drawerBtn.classList.add('active-audio');
-      drawerBtn.innerHTML = `<span>Pause Soundscape</span>`;
-    }
-    showToast('Island Soundscape', 'Gentle tropical ocean tide & Balinese chime tones playing.');
-  } else {
-    stopSoundscape();
-    isAudioPlaying = false;
-    if (btn) {
-      btn.classList.remove('active-audio');
-      btn.innerHTML = `🔈 <span class="soundscape-text">Soundscape</span>`;
-    }
-    if (drawerBtn) {
-      drawerBtn.classList.remove('active-audio');
-      drawerBtn.innerHTML = `<span>Play Soundscape</span>`;
-    }
-    showToast('Island Soundscape', 'Ambient sound paused.');
-  }
-}
-
-function startSoundscape() {
+function startIslandSoundscape() {
   if (!audioCtx) return;
 
-  // 1. Synthesize ocean surf with filtered pink/white noise
-  const bufferSize = audioCtx.sampleRate * 2;
-  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-  const output = noiseBuffer.getChannelData(0);
+  const now = audioCtx.currentTime;
+
+  // Master Gain for smooth volume transitions
+  masterSoundscapeGain = audioCtx.createGain();
+  masterSoundscapeGain.gain.setValueAtTime(0.001, now);
+  masterSoundscapeGain.gain.exponentialRampToValueAtTime(0.35, now + 0.6);
+  masterSoundscapeGain.connect(audioCtx.destination);
+
+  // 1. Generate Brownian / Pink Ocean Surf (Natural low/mid energy)
+  const sampleRate = audioCtx.sampleRate || 44100;
+  const bufferSize = sampleRate * 5; // 5-second seamless noise buffer
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, sampleRate);
+  const data = noiseBuffer.getChannelData(0);
+
+  let lastOut = 0.0;
   for (let i = 0; i < bufferSize; i++) {
-    output[i] = Math.random() * 2 - 1;
+    const white = Math.random() * 2 - 1;
+    lastOut = (lastOut + 0.025 * white) / 1.025;
+    data[i] = lastOut * 3.5;
   }
 
-  const whiteNoise = audioCtx.createBufferSource();
-  whiteNoise.buffer = noiseBuffer;
-  whiteNoise.loop = true;
+  oceanSurfSource = audioCtx.createBufferSource();
+  oceanSurfSource.buffer = noiseBuffer;
+  oceanSurfSource.loop = true;
 
-  const filter = audioCtx.createBiquadFilter();
-  filter.type = 'lowpass';
-  filter.frequency.setValueAtTime(320, audioCtx.currentTime);
+  // Dual filter for realistic wave acoustics:
+  // Swept lowpass filter (simulates wave crest and trough)
+  const waveFilter = audioCtx.createBiquadFilter();
+  waveFilter.type = 'lowpass';
+  waveFilter.frequency.setValueAtTime(450, now);
+  waveFilter.Q.setValueAtTime(1.2, now);
 
-  // LFO to simulate rising and receding tides
-  const lfo = audioCtx.createOscillator();
-  lfo.frequency.setValueAtTime(0.12, audioCtx.currentTime);
-  const lfoGain = audioCtx.createGain();
-  lfoGain.gain.setValueAtTime(200, audioCtx.currentTime);
-  lfo.connect(filter.frequency);
-  lfo.start();
+  // LFO modulates filter frequency (approx 7-8 second ocean wave cycle)
+  oceanLfo = audioCtx.createOscillator();
+  oceanLfo.type = 'sine';
+  oceanLfo.frequency.setValueAtTime(0.13, now); // ~7.7s per full swell
 
-  oceanGain = audioCtx.createGain();
-  oceanGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+  const lfoDepth = audioCtx.createGain();
+  lfoDepth.gain.setValueAtTime(320, now);
 
-  whiteNoise.connect(filter);
-  filter.connect(oceanGain);
-  oceanGain.connect(audioCtx.destination);
-  whiteNoise.start();
+  oceanLfo.connect(lfoDepth);
+  lfoDepth.connect(waveFilter.frequency);
 
-  // 2. Periodic gentle pentatonic Gamelan bell chime (Slendro frequencies)
-  const pentatonicFreqs = [523.25, 587.33, 659.25, 783.99, 880.00];
-  chimeInterval = setInterval(() => {
+  // Dynamic surf volume modulation (louder when wave breaks)
+  const surfGain = audioCtx.createGain();
+  surfGain.gain.setValueAtTime(0.40, now);
+
+  const lfoVolGain = audioCtx.createGain();
+  lfoVolGain.gain.setValueAtTime(0.20, now);
+  oceanLfo.connect(lfoVolGain);
+  lfoVolGain.connect(surfGain.gain);
+
+  oceanSurfSource.connect(waveFilter);
+  waveFilter.connect(surfGain);
+  surfGain.connect(masterSoundscapeGain);
+
+  oceanLfo.start(now);
+  oceanSurfSource.start(now);
+
+  // 2. Play immediate welcome chime so user immediately hears audio
+  playGamelanBell(659.25, 0.22); // 'Deng' tone
+
+  // 3. Periodic Balinese Gamelan bronze bells (Traditional Slendro pentatonic notes)
+  const gamelanFrequencies = [528.0, 587.33, 659.25, 792.0, 880.0];
+  const scheduleNextChime = () => {
     if (!isAudioPlaying || !audioCtx) return;
-    const freq = pentatonicFreqs[Math.floor(Math.random() * pentatonicFreqs.length)];
-    playGamelanBell(freq);
-  }, 4800);
+    const delay = 3200 + Math.random() * 3200; // 3.2s to 6.4s
+    chimeTimer = setTimeout(() => {
+      if (!isAudioPlaying || !audioCtx) return;
+      const freq = gamelanFrequencies[Math.floor(Math.random() * gamelanFrequencies.length)];
+      playGamelanBell(freq, 0.18 + Math.random() * 0.08);
+
+      // 30% chance for a melodic 2-note duet chord
+      if (Math.random() > 0.7) {
+        setTimeout(() => {
+          if (!isAudioPlaying || !audioCtx) return;
+          const secondFreq = gamelanFrequencies[Math.floor(Math.random() * gamelanFrequencies.length)];
+          playGamelanBell(secondFreq, 0.14);
+        }, 340);
+      }
+      scheduleNextChime();
+    }, delay);
+  };
+  scheduleNextChime();
 }
 
-function playGamelanBell(freq) {
-  if (!audioCtx) return;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+function playGamelanBell(freq, volume = 0.20) {
+  if (!audioCtx || !masterSoundscapeGain) return;
+  const now = audioCtx.currentTime;
 
-  gain.gain.setValueAtTime(0.025, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 3.0);
+  // Fundamental Bronze Tone
+  const osc1 = audioCtx.createOscillator();
+  const gain1 = audioCtx.createGain();
+  osc1.type = 'sine';
+  osc1.frequency.setValueAtTime(freq, now);
 
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(audioCtx.currentTime + 3.0);
+  // Metallic Harmonic Overtone (traditional Balinese bell shimmer)
+  const osc2 = audioCtx.createOscillator();
+  const gain2 = audioCtx.createGain();
+  osc2.type = 'sine';
+  osc2.frequency.setValueAtTime(freq * 2.76, now); // Natural non-integer bronze overtone
+
+  // Envelopes
+  gain1.gain.setValueAtTime(0.001, now);
+  gain1.gain.linearRampToValueAtTime(volume, now + 0.02);
+  gain1.gain.exponentialRampToValueAtTime(0.0001, now + 3.8);
+
+  gain2.gain.setValueAtTime(0.001, now);
+  gain2.gain.linearRampToValueAtTime(volume * 0.45, now + 0.015);
+  gain2.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
+
+  osc1.connect(gain1);
+  osc2.connect(gain2);
+  gain1.connect(masterSoundscapeGain);
+  gain2.connect(masterSoundscapeGain);
+
+  osc1.start(now);
+  osc2.start(now);
+  osc1.stop(now + 4.0);
+  osc2.stop(now + 2.0);
 }
 
-function stopSoundscape() {
-  if (oceanGain && audioCtx) {
-    oceanGain.gain.setValueAtTime(0, audioCtx.currentTime);
+function stopIslandSoundscape() {
+  if (chimeTimer) {
+    clearTimeout(chimeTimer);
+    chimeTimer = null;
   }
-  if (chimeInterval) {
-    clearInterval(chimeInterval);
-    chimeInterval = null;
+
+  if (masterSoundscapeGain && audioCtx) {
+    const now = audioCtx.currentTime;
+    try {
+      masterSoundscapeGain.gain.setValueAtTime(masterSoundscapeGain.gain.value, now);
+      masterSoundscapeGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
+    } catch (e) {
+      masterSoundscapeGain.gain.value = 0;
+    }
+
+    setTimeout(() => {
+      try {
+        if (oceanSurfSource) {
+          oceanSurfSource.stop();
+          oceanSurfSource.disconnect();
+          oceanSurfSource = null;
+        }
+        if (oceanLfo) {
+          oceanLfo.stop();
+          oceanLfo.disconnect();
+          oceanLfo = null;
+        }
+      } catch (err) {}
+    }, 450);
   }
 }
 

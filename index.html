@@ -147,7 +147,7 @@
       <!-- Nav Actions (Soundscape, Wishlist, Currency, Theme) -->
       <div class="nav-actions">
         <!-- Ambient Soundscape Toggle (Desktop Quick) -->
-        <button id="soundscapeToggleBtn" class="soundscape-btn header-quick-action" aria-label="Toggle Island Soundscape" title="Play gentle ocean surf & Balinese gamelan chime">
+        <button id="soundscapeToggleBtn" class="soundscape-btn header-quick-action" onclick="window.toggleAmbientSoundscape(event)" aria-label="Toggle Island Soundscape" title="Play gentle ocean surf & Balinese gamelan chime">
           🔈 <span class="soundscape-text">Soundscape</span>
         </button>
 
@@ -252,7 +252,7 @@
                 <div class="control-desc">Ocean surf & Balinese gamelan chimes</div>
               </div>
             </div>
-            <button id="drawerSoundscapeBtn" class="btn btn-sm btn-outline">
+            <button id="drawerSoundscapeBtn" class="btn btn-sm btn-outline" onclick="window.toggleAmbientSoundscape(event)">
               <span>Play Soundscape</span>
             </button>
           </div>
