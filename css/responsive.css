@@ -462,6 +462,66 @@
   }
 }
 
+/* --- Weather & News Responsive Adaptations --- */
+@media (max-width: 768px) {
+  .weather-region-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+  .weather-region-tab {
+    flex-shrink: 0;
+  }
+  .weather-current-card {
+    padding: 20px;
+  }
+  .current-temp-number {
+    font-size: 3.5rem;
+  }
+  .current-temp-unit {
+    font-size: 1.6rem;
+  }
+  .hero-weather-emoji {
+    font-size: 3rem;
+  }
+  .condition-headline {
+    font-size: 1.3rem;
+  }
+  .weather-forecast-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .news-toolbar-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .news-search-refresh-group {
+    width: 100%;
+  }
+  .news-search-input-wrap {
+    flex: 1;
+  }
+  .news-search-input {
+    width: 100%;
+  }
+  .news-search-input:focus {
+    width: 100%;
+  }
+  .news-grid-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .weather-forecast-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .weather-metrics-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* --- Print Stylesheet --- */
 @media print {
   .site-header,

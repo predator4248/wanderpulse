@@ -45,6 +45,9 @@
   <!-- Three.js Real-Time 3D WebGL Engine -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
+  <!-- Google Maps JavaScript API Platform (Real-Time GPS & Interactive Explorer) -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD4NKHACPBorcaMKx_VaJxAGcvIhHy6QtU&libraries=places,geometry&callback=initGoogleMapsPlatform" async defer></script>
+
   <!-- Schema.org JSON-LD Structured Data for SEO -->
   <script type="application/ld+json">
   {
@@ -141,6 +144,8 @@
       <nav class="nav-desktop-quick" aria-label="Quick Highlights">
         <a href="#attractions" class="quick-pill-link">⛩️ Attractions</a>
         <a href="#hotels" class="quick-pill-link">🏨 Stays</a>
+        <a href="#island-weather" class="quick-pill-link">⛅ Weather</a>
+        <a href="#island-news" class="quick-pill-link">📰 News</a>
         <a href="#how-to-reach" class="quick-pill-link">✈️ Transit</a>
         <a href="#transit-boat" class="quick-pill-link" onclick="window.switchTransitTab('boat')">🛥️ Fast Boats</a>
         <a href="#island-rentals" class="quick-pill-link">🚗 Rentals</a>
@@ -149,6 +154,11 @@
 
       <!-- Nav Actions (Soundscape, Wishlist, Currency, Theme) -->
       <div class="nav-actions">
+        <!-- Gemini 3.8 Flash AI Concierge Quick Trigger -->
+        <button id="headerGeminiBtn" class="gemini-header-btn header-quick-action" onclick="window.toggleGeminiChat(true)" aria-label="Ask Gemini 3.8 Flash AI" title="Ask questions & suggestions about your Bali trip">
+          ✨ <span class="gemini-header-text">Gemini AI</span>
+        </button>
+
         <!-- Ambient Soundscape Toggle (Desktop Quick) -->
         <button id="soundscapeToggleBtn" class="soundscape-btn header-quick-action" onclick="window.toggleAmbientSoundscape(event)" aria-label="Toggle Island Soundscape" title="Play gentle ocean surf & Balinese gamelan chime">
           🔈 <span class="soundscape-text">Soundscape</span>
@@ -225,10 +235,10 @@
               <div id="drawerBaliClock" class="telemetry-val">12:00:00 PM</div>
             </div>
           </div>
-          <div class="telemetry-pill">
-            <span class="telemetry-icon">☀️</span>
+          <div class="telemetry-pill clickable-pill" onclick="document.getElementById('island-weather')?.scrollIntoView({behavior:'smooth'}); window.toggleThreeLinesMenu(false);" title="Click to view full 5-day weather forecast" style="cursor: pointer;">
+            <span class="telemetry-icon">⛅</span>
             <div>
-              <div class="telemetry-label">Weather & Climate</div>
+              <div class="telemetry-label">Weather &amp; Climate</div>
               <div id="drawerBaliWeather" class="telemetry-val">29°C Tropical Sun</div>
             </div>
           </div>
@@ -343,6 +353,13 @@
       <div class="drawer-nav-section" id="primaryNavMenu">
         <div class="drawer-nav-group-title">🌺 DISCOVER BALI</div>
         <div class="drawer-nav-links">
+          <a href="javascript:void(0)" class="drawer-nav-link nav-link drawer-close-on-click" onclick="window.toggleGeminiChat(true)">
+            <span class="link-icon">✨</span>
+            <div class="link-text">
+              <span class="link-title" style="color: var(--accent-cyan); font-weight: 800;">Gemini 3.8 Flash AI Concierge</span>
+              <span class="link-sub">Real-time questions, trip advice & customized itineraries</span>
+            </div>
+          </a>
           <a href="#hero" class="drawer-nav-link nav-link active drawer-close-on-click">
             <span class="link-icon">🏠</span>
             <div class="link-text">
@@ -369,6 +386,20 @@
             <div class="link-text">
               <span class="link-title">3D Interactive Island Map</span>
               <span class="link-sub">3D regional terrain, elevation & destination pins</span>
+            </div>
+          </a>
+          <a href="#island-weather" class="drawer-nav-link nav-link drawer-close-on-click">
+            <span class="link-icon">⛅</span>
+            <div class="link-text">
+              <span class="link-title">Live 5-Day Weather</span>
+              <span class="link-sub">Google Weather 5-day regional forecast &amp; microclimates</span>
+            </div>
+          </a>
+          <a href="#island-news" class="drawer-nav-link nav-link drawer-close-on-click">
+            <span class="link-icon">📰</span>
+            <div class="link-text">
+              <span class="link-title">Bali Local News</span>
+              <span class="link-sub">Live island travel bulletins &amp; Google News syndication</span>
             </div>
           </a>
         </div>
@@ -494,7 +525,7 @@
             <span class="pulse-dot"></span>
             <span class="hero-badge-item">Bali Live: <span id="baliTimeClock">12:00:00 PM</span> (WITA)</span>
             <span class="hero-badge-sep">•</span>
-            <span class="hero-badge-item"><span id="baliWeatherTemp">29°C</span> <span id="baliWeatherCond">☀️ Warm Tropical Sun</span></span>
+            <span class="hero-badge-item clickable-weather-badge" onclick="document.getElementById('island-weather')?.scrollIntoView({behavior:'smooth'})" title="Click to view 5-day weather forecast" style="cursor: pointer;"><span id="baliWeatherTemp">29°C</span> <span id="baliWeatherCond">☀️ Warm Tropical Sun</span></span>
             <span class="hero-badge-sep">•</span>
             <span class="hero-badge-item" id="baliSunsetItem"><span id="baliSunsetCountdown">🌅 Calculating Sunset...</span></span>
           </div>
@@ -566,6 +597,21 @@
               📄 Offline Trip Dossier
             </button>
           </div>
+
+          <!-- Hero Gemini 3.8 Flash AI Assistant Card -->
+          <div class="hero-gemini-card" id="heroGeminiCard">
+            <div class="hero-gemini-text">
+              <div class="hero-gemini-icon" aria-hidden="true">✨</div>
+              <div>
+                <div class="hero-gemini-heading">Gemini 3.8 Flash AI Concierge</div>
+                <div class="hero-gemini-sub">Ask trip questions, build tailored itineraries & discover secret spots</div>
+              </div>
+            </div>
+            <button type="button" class="hero-gemini-btn" onclick="window.toggleGeminiChat(true)">
+              <span>Ask Gemini AI</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
         </div>
 
         <!-- Right: Floating Visual Card with Weather & Transit Badge -->
@@ -574,7 +620,7 @@
                alt="Scenic Balinese ancient seaside temple Tanah Lot at sunset with glowing vibrant sky" 
                loading="eager" />
           
-          <div class="floating-weather-badge">
+          <div class="floating-weather-badge clickable-weather-badge" onclick="document.getElementById('island-weather')?.scrollIntoView({behavior:'smooth'})" title="Click to view 5-day weather forecast" style="cursor: pointer;">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF9900" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
             <div>
               <span class="weather-temp" id="heroFloatingTemp">29°C</span>
@@ -1994,6 +2040,147 @@
       </div>
     </section>
 
+    <!-- 5.5. LIVE WEATHER & 5-DAY ISLAND FORECAST (Google Weather API) -->
+    <section id="island-weather" class="section-padding" aria-labelledby="weather-heading">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-tag tag-cyan">Live Telemetry &amp; Microclimates</span>
+          <h2 id="weather-heading" class="section-title">
+            Official Google 5-Day Weather &amp; Microclimates
+          </h2>
+          <p class="section-subtitle">
+            Hyper-local tropical weather telemetry powered by official Google Maps Platform Weather API. Track mountain mist in Ubud, sunny surf breaks in Uluwatu, and reef tides across Bali.
+          </p>
+          <div class="rainbow-divider"></div>
+        </div>
+
+        <!-- Weather Control & Region Selector Toolbar -->
+        <div class="weather-toolbar-container">
+          <div class="weather-region-tabs" id="weatherRegionTabs" role="tablist" aria-label="Bali Regions Weather">
+            <button type="button" class="weather-region-tab active" data-region="denpasar" role="tab" aria-selected="true">
+              <span class="tab-icon">🏖️</span>
+              <span class="tab-name">Denpasar &amp; South</span>
+              <span class="tab-sub">Kuta • Seminyak • Sanur</span>
+            </button>
+            <button type="button" class="weather-region-tab" data-region="ubud" role="tab" aria-selected="false">
+              <span class="tab-icon">🌿</span>
+              <span class="tab-name">Ubud Highlands</span>
+              <span class="tab-sub">Jungles • Mist &amp; Spas</span>
+            </button>
+            <button type="button" class="weather-region-tab" data-region="uluwatu" role="tab" aria-selected="false">
+              <span class="tab-icon">🏄</span>
+              <span class="tab-name">Uluwatu Cliffs</span>
+              <span class="tab-sub">Sunset Coast • Surf Swell</span>
+            </button>
+            <button type="button" class="weather-region-tab" data-region="lovina" role="tab" aria-selected="false">
+              <span class="tab-icon">🐬</span>
+              <span class="tab-name">North Bali (Lovina)</span>
+              <span class="tab-sub">Dolphins • Bedugul Lakes</span>
+            </button>
+            <button type="button" class="weather-region-tab" data-region="nusa-penida" role="tab" aria-selected="false">
+              <span class="tab-icon">🏝️</span>
+              <span class="tab-name">Nusa Penida</span>
+              <span class="tab-sub">Offshore Islets • Reef Waters</span>
+            </button>
+          </div>
+
+          <!-- Unit Toggle Switch (°C / °F) -->
+          <div class="weather-unit-toggle" title="Toggle Temperature Unit (°C / °F)">
+            <span class="unit-label unit-c active" id="labelUnitC">°C</span>
+            <button type="button" id="weatherUnitToggleBtn" class="unit-switch-btn" aria-label="Switch Celsius or Fahrenheit" role="switch" aria-checked="false">
+              <span class="switch-handle"></span>
+            </button>
+            <span class="unit-label unit-f" id="labelUnitF">°F</span>
+          </div>
+        </div>
+
+        <!-- Weather Main Dashboard Grid -->
+        <div class="weather-dashboard-grid">
+          <!-- Primary Current Conditions Hero Glass Card -->
+          <div class="weather-current-card glass-card">
+            <div class="weather-card-aura"></div>
+            <div class="current-top-row">
+              <div class="current-location-box">
+                <span class="live-pulse-dot"></span>
+                <span id="weatherCurrentRegion" class="current-region-title">Denpasar &amp; South Bali</span>
+                <span id="weatherDataSourceBadge" class="weather-source-pill">Google Weather Live</span>
+              </div>
+              <div class="current-time-box">
+                <span class="time-label">Island Time:</span>
+                <span id="weatherLocalTime" class="time-val">--:-- WITA</span>
+              </div>
+            </div>
+
+            <div class="current-main-row">
+              <div class="current-temp-group">
+                <div class="current-icon-wrap" id="weatherHeroIconWrap">
+                  <span id="weatherHeroEmoji" class="hero-weather-emoji">⛅</span>
+                </div>
+                <div class="current-temp-wrap">
+                  <span id="weatherHeroTemp" class="current-temp-number">29</span>
+                  <span id="weatherHeroUnit" class="current-temp-unit">°C</span>
+                </div>
+              </div>
+              <div class="current-condition-details">
+                <h3 id="weatherHeroCondition" class="condition-headline">Warm Tropical Sunshine</h3>
+                <p id="weatherHeroFeelsLike" class="feels-like-text">Feels like 31°C • Balmy Island Breeze</p>
+                <div class="activity-hero-badge" id="weatherHeroActivity">
+                  <span class="badge-icon">🛵</span>
+                  <span id="weatherHeroActivityText" class="badge-text">Prime for Beach Lounges, Coastal Cruising &amp; Sunset Temples</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Current Atmospheric Telemetry Metrics Strip -->
+            <div class="weather-metrics-strip">
+              <div class="metric-box">
+                <div class="metric-icon">💧</div>
+                <div class="metric-info">
+                  <span class="metric-label">Humidity</span>
+                  <span id="weatherHeroHumidity" class="metric-val">72%</span>
+                </div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-icon">☀️</div>
+                <div class="metric-info">
+                  <span class="metric-label">UV Index</span>
+                  <span id="weatherHeroUV" class="metric-val">8 (Very High)</span>
+                </div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-icon">💨</div>
+                <div class="metric-info">
+                  <span class="metric-label">Wind</span>
+                  <span id="weatherHeroWind" class="metric-val">12 km/h SE</span>
+                </div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-icon">🌅</div>
+                <div class="metric-info">
+                  <span class="metric-label">Sunrise / Sunset</span>
+                  <span id="weatherHeroSun" class="metric-val">06:15 / 18:18</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5-Day Forecast Grid Section -->
+          <div class="weather-forecast-container">
+            <div class="forecast-section-header">
+              <h3 class="forecast-heading">
+                <span class="cal-icon">📅</span> 5-Day Island Precision Outlook
+              </h3>
+              <span class="forecast-tip">Google Maps Platform Atmospheric Modeling</span>
+            </div>
+
+            <div id="weatherForecastGrid" class="weather-forecast-cards-grid">
+              <!-- Dynamically populated via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- 6. INTERACTIVE REGIONAL MAP SECTION -->
     <section id="regional-map" class="section-padding" aria-labelledby="map-heading">
       <div class="container">
@@ -2008,7 +2195,28 @@
           <div class="rainbow-divider"></div>
         </div>
 
-        <!-- 2D Hotspot Selector Pills (Synced with 3D WebGL Scene & GPS) -->
+        <!-- View Mode Switcher: 3D Topography vs Live Google Maps Platform -->
+        <div class="map-view-switcher-bar">
+          <div class="map-view-tabs" role="tablist" aria-label="Map view mode switcher">
+            <button type="button" class="map-view-tab-btn active" id="mapViewTabGoogle" onclick="window.switchRegionalMapView('google')" aria-selected="true">
+              🗺️ Live Google Maps
+            </button>
+            <button type="button" class="map-view-tab-btn" id="mapViewTab3D" onclick="window.switchRegionalMapView('3d')" aria-selected="false">
+              🌐 3D Island Topography
+            </button>
+          </div>
+          <div class="map-view-meta">
+            <span class="visa-status-pill status-free" id="googleMapsStatusBadge" title="Connected to Google Maps Platform API">
+              <span class="pulse-dot" style="width: 6px; height: 6px; background: #10B981; border-radius: 50%; display: inline-block; margin-right: 4px;"></span>
+              Google Maps Live
+            </span>
+            <button type="button" class="btn btn-outline btn-sm" onclick="window.toggleGoogleMapsKeyModal()" style="font-size: 0.78rem; padding: 4px 10px; border-radius: var(--radius-full);">
+              ⚙️ Maps Key
+            </button>
+          </div>
+        </div>
+
+        <!-- 2D Hotspot Selector Pills (Synced with Google Maps & 3D WebGL Scene) -->
         <div class="map-hotspot-chips" role="tablist" aria-label="Hotspot region selector">
           <button type="button" class="map-pin active-pin" data-zone="ubud">🌿 Ubud Monkey Forest</button>
           <button type="button" class="map-pin" data-zone="uluwatu">🌊 Uluwatu Temple</button>
@@ -2021,11 +2229,26 @@
 
         <div class="map-layout">
           <!-- Real-Time 3D Island Topography WebGL Canvas -->
-          <div class="map-3d-wrapper" id="regionalMap3dContainer">
+          <div class="map-3d-wrapper" id="regionalMap3dContainer" style="display: none;">
             <div class="map-3d-controls">
               <span class="map-3d-hint-icon">3D</span>
               <span>Drag to Rotate • Click 3D Hotspot Pins</span>
               <button type="button" class="map-3d-reset-btn" id="reset3dMapBtn">Reset 3D View</button>
+            </div>
+          </div>
+
+          <!-- Live Google Maps Platform Wrapper -->
+          <div class="map-google-wrapper" id="googleMapWrapper">
+            <div id="googleMapCanvas" class="google-map-canvas"></div>
+            <div class="google-map-overlay-controls">
+              <div class="google-map-filters" aria-label="Map category filters">
+                <button type="button" class="gmap-filter-chip active" data-filter="all" onclick="window.filterGoogleMapMarkers('all', this)">All Pins</button>
+                <button type="button" class="gmap-filter-chip" data-filter="temple" onclick="window.filterGoogleMapMarkers('temple', this)">⛩️ Temples</button>
+                <button type="button" class="gmap-filter-chip" data-filter="nature" onclick="window.filterGoogleMapMarkers('nature', this)">🌴 Nature & Falls</button>
+                <button type="button" class="gmap-filter-chip" data-filter="hotel" onclick="window.filterGoogleMapMarkers('hotel', this)">🏨 Resorts</button>
+                <button type="button" class="gmap-filter-chip" data-filter="transit" onclick="window.filterGoogleMapMarkers('transit', this)">✈️ Transit Hubs</button>
+              </div>
+              <button type="button" class="gmap-reset-btn" onclick="window.resetGoogleMapView()">Reset Bali View</button>
             </div>
           </div>
 
@@ -2060,18 +2283,20 @@
             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
               <span class="section-tag tag-cyan" style="display: inline-flex; align-items: center; gap: 6px;">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                Geoapify Places API v2
+                Google Maps & Places API
               </span>
               <h3 style="font-size: 1.25rem; font-weight: 800; margin: 0;">Bali Places & Google Maps Precision Explorer</h3>
-              <span class="visa-status-pill status-free" id="geoapifyStatusBadge">Zero Discrepancy Verified</span>
+              <span class="visa-status-pill status-free" id="geoapifyStatusBadge">Google Places Active</span>
             </div>
-            <button type="button" class="btn btn-outline btn-sm" onclick="window.toggleGeoapifyKeyModal()" style="font-size: 0.78rem; padding: 5px 12px; border-radius: var(--radius-full);">
-              ⚙️ Geoapify Key Settings
-            </button>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn btn-outline btn-sm" onclick="window.toggleGoogleMapsKeyModal()" style="font-size: 0.78rem; padding: 5px 12px; border-radius: var(--radius-full);">
+                🗺️ Maps API Key
+              </button>
+            </div>
           </div>
 
           <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 8px 0 16px;">
-            Search any destination in Bali or discover nearby attractions, cafes, and accommodations powered by Geoapify Places API with 100% Google Maps coordinate parity.
+            Search any destination in Bali or discover nearby attractions, cafes, and accommodations powered by Google Places API (New) and verified GIS database with 100% Google Maps coordinate parity.
           </p>
 
           <!-- Search & Filter Controls -->
@@ -2107,6 +2332,68 @@
           </div>
         </div>
 
+      </div>
+    </section>
+
+    <!-- 6.2. BALI LOCAL NEWS & TRAVEL DISPATCHES (Google News Syndication) -->
+    <section id="island-news" class="section-padding" style="background: var(--bg-surface);" aria-labelledby="news-heading">
+      <div class="container">
+        <div class="section-header text-center">
+          <div class="live-dispatch-badge">
+            <span class="pulse-ring"></span>
+            <span class="badge-text">Live Island Intelligence • Google News Syndication</span>
+          </div>
+          <h2 id="news-heading" class="section-title">
+            Bali Local News &amp; Island Dispatches
+          </h2>
+          <p class="section-subtitle">
+            Curated, real-time travel bulletins, airport and ferry operations, cultural ceremony announcements, tourism tax updates, and marine advisories directly from Bali.
+          </p>
+          <div class="rainbow-divider"></div>
+        </div>
+
+        <!-- News Toolbar: Filters & Live Search -->
+        <div class="news-toolbar-wrapper">
+          <div class="news-category-pills" id="newsCategoryPills" role="tablist" aria-label="News Categories">
+            <button type="button" class="news-pill active" data-category="all" role="tab" aria-selected="true">
+              🔥 All Island News
+            </button>
+            <button type="button" class="news-pill" data-category="tourism" role="tab" aria-selected="false">
+              🌴 Tourism &amp; Entry
+            </button>
+            <button type="button" class="news-pill" data-category="culture" role="tab" aria-selected="false">
+              🎭 Culture &amp; Ceremonies
+            </button>
+            <button type="button" class="news-pill" data-category="transit" role="tab" aria-selected="false">
+              🛥️ Flights &amp; Marine
+            </button>
+            <button type="button" class="news-pill" data-category="weather" role="tab" aria-selected="false">
+              ⛅ Climate &amp; Eco
+            </button>
+          </div>
+
+          <div class="news-search-refresh-group">
+            <div class="news-search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="search" id="newsSearchInput" class="news-search-input" placeholder="Search Bali headlines..." aria-label="Search Bali headlines">
+              <button type="button" id="newsClearSearchBtn" class="news-clear-btn" aria-label="Clear Search" style="display: none;">&times;</button>
+            </div>
+            <button type="button" id="newsRefreshBtn" class="btn btn-outline news-refresh-btn" title="Refresh Latest News" aria-label="Refresh news feed">
+              <span class="refresh-icon">🔄</span>
+              <span class="refresh-text">Refresh</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- News Cards Grid -->
+        <div id="newsDispatchesGrid" class="news-grid-container" aria-live="polite">
+          <!-- Dynamically populated via JS -->
+        </div>
+
+        <!-- News Footer Disclaimer -->
+        <div class="news-syndication-footer">
+          <span>📰 Real-time headlines syndicated via official Google News RSS &amp; Bali dispatch publications (Antara, Jakarta Globe, The Bali Sun). Updates every 15 minutes.</span>
+        </div>
       </div>
     </section>
 
@@ -2971,6 +3258,52 @@
     </div>
   </div>
 
+  <!-- 4.85. GOOGLE MAPS PLATFORM API KEY SETTINGS MODAL -->
+  <div class="modal-backdrop" id="googleMapsKeyModal" role="dialog" aria-modal="true" aria-labelledby="gmapsModalTitle">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <button class="modal-close-btn" onclick="window.toggleGoogleMapsKeyModal()" aria-label="Close modal">✕</button>
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        <span style="font-size: 1.8rem;">🗺️</span>
+        <div>
+          <h3 id="gmapsModalTitle" style="font-size: 1.3rem; margin: 0;">Google Maps Platform</h3>
+          <span style="font-size: 0.8rem; color: var(--accent-cyan);">Maps JS SDK • Places API (New) • Routes API</span>
+        </div>
+      </div>
+      <p style="font-size: 0.86rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 14px;">
+        Your platform is powered by live Google Maps services with real-time transit polylines, 6-decimal coordinate accuracy, and interactive destination explorer.
+      </p>
+
+      <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px; margin-bottom: 16px;">
+        <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Active Services Status</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8rem;">
+          <div style="display: flex; align-items: center; gap: 6px; color: #10B981;">
+            <span>●</span> Maps JavaScript API (Active)
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; color: #10B981;">
+            <span>●</span> Places API New (Active)
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; color: #10B981;">
+            <span>●</span> Routes API v2 (Active)
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; color: #10B981;">
+            <span>●</span> High-Precision GIS Sync
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label for="googleMapsApiKeyInput" style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">
+          Google Maps API Key:
+        </label>
+        <input type="text" id="googleMapsApiKeyInput" class="form-input" placeholder="AIzaSy..." value="AIzaSyD4NKHACPBorcaMKx_VaJxAGcvIhHy6QtU" style="font-family: monospace; font-size: 0.85rem;" />
+      </div>
+      <div style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
+        <button type="button" class="btn btn-outline" onclick="window.testGoogleMapsKey()">Test Connection</button>
+        <button type="button" class="btn btn-primary" onclick="window.saveGoogleMapsKey()">Save Key</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 4.9. GEOAPIFY API KEY SETTINGS MODAL -->
   <div class="modal-backdrop" id="geoapifyKeyModal" role="dialog" aria-modal="true" aria-labelledby="geoapifyModalTitle">
     <div class="modal-dialog" style="max-width: 500px;">
@@ -3263,13 +3596,148 @@
     </div>
   </div>
 
+  <!-- ==========================================================================
+       9. GEMINI 3.8 FLASH AI TRIP ASSISTANT & CHAT CONCIERGE WIDGET
+       ========================================================================== -->
+  <!-- Floating Launch Button -->
+  <button type="button" id="geminiFloatBtn" class="gemini-float-btn" onclick="window.toggleGeminiChat()" aria-label="Open Gemini 3.8 Flash AI Concierge" title="Ask questions & suggestions about your Bali trip">
+    <div class="gemini-float-icon-wrap">
+      <span class="gemini-float-pulse-ring" aria-hidden="true"></span>
+      <span>✨</span>
+    </div>
+    <span>Ask Gemini AI</span>
+    <span class="gemini-float-model-tag">3.8 Flash</span>
+  </button>
+
+  <!-- Interactive AI Chat Widget Window -->
+  <aside id="geminiChatWidget" class="gemini-chat-widget" role="dialog" aria-modal="false" aria-label="Gemini 3.8 Flash Bali Travel Assistant">
+    <!-- Header -->
+    <header class="gemini-header">
+      <div class="gemini-header-left">
+        <div class="gemini-avatar-orb" aria-hidden="true">✨</div>
+        <div class="gemini-title-group">
+          <div class="gemini-brand-title">
+            <span>WanderPulse AI</span>
+            <span class="gemini-model-badge" id="geminiActiveModelBadge">Gemini 3.8 Flash</span>
+          </div>
+          <div class="gemini-status-text">
+            <span class="gemini-live-dot"></span>
+            <span id="geminiStatusLabel">Online • Trip Concierge</span>
+          </div>
+        </div>
+      </div>
+      <div class="gemini-header-actions">
+        <button type="button" class="gemini-tool-btn" id="geminiSettingsToggleBtn" onclick="window.toggleGeminiSettings()" title="API Key & Model Settings" aria-label="Settings">⚙️</button>
+        <button type="button" class="gemini-tool-btn" id="geminiMaximizeBtn" onclick="window.toggleGeminiMaximize()" title="Maximize / Restore View" aria-label="Maximize">⛶</button>
+        <button type="button" class="gemini-tool-btn" onclick="window.clearGeminiChatHistory()" title="Clear Chat History" aria-label="Clear chat">🗑️</button>
+        <button type="button" class="gemini-tool-btn" onclick="window.toggleGeminiChat(false)" title="Close Chat" aria-label="Close assistant">✕</button>
+      </div>
+    </header>
+
+    <!-- Context / Itinerary Sync Bar -->
+    <div class="gemini-context-bar">
+      <label class="gemini-sync-label">
+        <input type="checkbox" id="geminiSyncItineraryCheckbox" class="gemini-sync-checkbox" checked />
+        <span>Sync my saved itinerary</span>
+      </label>
+      <span class="gemini-sync-badge" id="geminiSyncBadge">0 spots synced</span>
+    </div>
+
+    <!-- Scrollable Chat Body -->
+    <div class="gemini-body" id="geminiChatBody">
+      <!-- Welcome Banner -->
+      <div class="gemini-welcome-card" id="geminiWelcomeCard">
+        <div class="gemini-welcome-title">
+          <span>🌺 Om Swastiastu! Welcome to Bali</span>
+        </div>
+        <p class="gemini-welcome-desc">
+          I am your <strong>WanderPulse AI Concierge</strong> powered by <strong>Google Gemini 3.8 Flash</strong>. Ask me anything about tailoring custom itineraries, secret waterfalls, temple dress codes, scooter safety, or daily budgets!
+        </p>
+        <div class="gemini-starter-chips">
+          <button type="button" class="gemini-chip-btn" onclick="window.sendGeminiStarterPrompt('Plan a 5-day romantic Bali itinerary for beaches and cultural temples')">🗺️ 5-Day Bali Highlights</button>
+          <button type="button" class="gemini-chip-btn" onclick="window.sendGeminiStarterPrompt('Mount Batur sunrise trek logistics, gear, and timings')">🌋 Mount Batur Sunrise</button>
+          <button type="button" class="gemini-chip-btn" onclick="window.sendGeminiStarterPrompt('Best authentic warungs and traditional food to eat in Ubud')">🍛 Ubud Warungs & Food</button>
+          <button type="button" class="gemini-chip-btn" onclick="window.sendGeminiStarterPrompt('Should I rent a scooter or hire a private driver in Bali?')">🚗 Scooter vs Driver</button>
+          <button type="button" class="gemini-chip-btn" onclick="window.sendGeminiStarterPrompt('Explain the 30-day e-VoA visa and Bali Tourist Levy rules')">🛂 Visa & Tourist Levy</button>
+          <button type="button" class="gemini-chip-btn" onclick="window.sendGeminiStarterPrompt('What is a realistic daily travel budget for Bali in USD?')">💰 Daily Budget Guide</button>
+        </div>
+      </div>
+
+      <!-- Dynamic Messages appended here -->
+      <div id="geminiMessagesContainer"></div>
+
+      <!-- Typing Indicator -->
+      <div class="gemini-typing-box" id="geminiTypingIndicator" style="display: none;">
+        <span class="gemini-typing-dot"></span>
+        <span class="gemini-typing-dot"></span>
+        <span class="gemini-typing-dot"></span>
+        <span style="font-size: 0.76rem; color: var(--text-secondary); margin-left: 6px;">Gemini is planning your trip...</span>
+      </div>
+    </div>
+
+    <!-- Input Footer -->
+    <footer class="gemini-footer">
+      <form id="geminiChatForm" class="gemini-input-form" onsubmit="window.handleGeminiFormSubmit(event)">
+        <textarea id="geminiChatInput" class="gemini-textarea" rows="1" placeholder="Ask Gemini anything about your Bali trip..." aria-label="Type your trip question"></textarea>
+        <button type="button" id="geminiVoiceBtn" class="gemini-mic-btn" onclick="window.toggleGeminiVoiceInput()" title="Voice Question (Speech to text)" aria-label="Voice input">🎙️</button>
+        <button type="submit" id="geminiSendBtn" class="gemini-send-btn" title="Send Question" aria-label="Send message">➤</button>
+      </form>
+      <div class="gemini-footer-legal">
+        <span>⚡ Google Gemini 3.8 Flash AI</span>
+        <span id="geminiProviderStatusText">WanderPulse Verified Intelligence</span>
+      </div>
+    </footer>
+
+    <!-- In-Chat Settings Panel -->
+    <div class="gemini-settings-panel" id="geminiSettingsPanel">
+      <div>
+        <div class="gemini-settings-header">
+          <div class="gemini-settings-title">
+            <span>⚙️ AI Assistant Settings</span>
+          </div>
+          <button type="button" class="gemini-tool-btn" onclick="window.toggleGeminiSettings(false)" aria-label="Close settings">✕</button>
+        </div>
+
+        <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+          WanderPulse runs with our comprehensive Bali Travel Concierge Intelligence by default. You can also provide a personal <strong>Google Gemini API Key</strong> for live direct queries.
+        </p>
+
+        <div class="gemini-form-group">
+          <label for="geminiApiKeyInput" class="gemini-form-label">Google Gemini API Key (Optional):</label>
+          <input type="password" id="geminiApiKeyInput" class="gemini-form-input" placeholder="AIzaSy... (stored locally)" autocomplete="off" />
+        </div>
+
+        <div class="gemini-form-group">
+          <label for="geminiModelSelect" class="gemini-form-label">Active Gemini Model:</label>
+          <select id="geminiModelSelect" class="gemini-form-select">
+            <option value="gemini-3.8-flash" selected>Gemini 3.8 Flash (Ultra-Fast & Smart)</option>
+            <option value="gemini-2.5-flash">Gemini 2.5 Flash (Balanced)</option>
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash (Legacy)</option>
+          </select>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.04); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-top: 14px;">
+          <div style="font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; color: var(--accent-cyan);">🔒 Privacy & Local Storage</div>
+          <div style="font-size: 0.74rem; color: var(--text-muted); line-height: 1.4;">
+            Your API key is never shared or stored on external servers without your permission. You can clear it at any time.
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-top: 20px;">
+        <button type="button" class="btn btn-outline" style="flex: 1; font-size: 0.82rem; padding: 8px;" onclick="window.clearGeminiApiKey()">Clear Key</button>
+        <button type="button" class="btn btn-primary" style="flex: 2; font-size: 0.82rem; padding: 8px;" onclick="window.saveGeminiApiKeySettings()">Save & Connect</button>
+      </div>
+    </div>
+  </aside>
+
   <!-- Dynamic Toast Container -->
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts (Cache-busted) -->
-  <script src="js/data.js?v=3.0.0"></script>
-  <script src="js/app.js?v=3.0.0"></script>
-  <script src="js/tilt3d.js?v=3.0.0"></script>
-  <script src="js/three-scene.js?v=3.0.0"></script>
+  <script src="js/data.js?v=3.1.0"></script>
+  <script src="js/app.js?v=3.1.0"></script>
+  <script src="js/tilt3d.js?v=3.1.0"></script>
+  <script src="js/three-scene.js?v=3.1.0"></script>
 </body>
 </html>

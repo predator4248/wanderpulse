@@ -213,9 +213,230 @@
     0 12px 32px rgba(0, 0, 0, 0.35);
 }
 
-/* Responsive adjustments for 3D */
+/* --- Live Google Maps Platform Wrapper & Controls --- */
+.map-view-switcher-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 6px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+}
+
+.map-view-tabs {
+  display: inline-flex;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 4px;
+  border-radius: var(--radius-full);
+}
+
+.map-view-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 7px 16px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--trans-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.map-view-tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.map-view-tab-btn.active {
+  background: var(--grad-aurora);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(139, 92, 246, 0.35);
+}
+
+.map-view-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.map-google-wrapper {
+  position: relative;
+  width: 100%;
+  height: 480px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg), 0 0 50px rgba(6, 182, 212, 0.15);
+  background: #0B0F19;
+}
+
+.google-map-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.google-map-overlay-controls {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  z-index: 5;
+  pointer-events: none;
+  flex-wrap: wrap;
+}
+
+.google-map-filters {
+  display: flex;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(14px);
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  pointer-events: auto;
+  overflow-x: auto;
+  max-width: calc(100% - 130px);
+}
+
+.gmap-filter-chip {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--trans-fast);
+}
+
+.gmap-filter-chip:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.gmap-filter-chip.active {
+  background: rgba(6, 182, 212, 0.2);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+.gmap-reset-btn {
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all var(--trans-fast);
+}
+
+.gmap-reset-btn:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+/* Custom Google Maps InfoWindow Dark Glass Styling */
+.gm-style .gm-style-iw-c {
+  background-color: rgba(15, 23, 42, 0.95) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(139, 92, 246, 0.25) !important;
+  padding: 12px !important;
+  color: #F1F5F9 !important;
+}
+
+.gm-style .gm-style-iw-tc::after {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+}
+
+.gm-style .gm-style-iw-d {
+  overflow: hidden !important;
+  color: #F1F5F9 !important;
+}
+
+.gm-style button.gm-ui-hover-effect {
+  filter: invert(1) brightness(1.5) !important;
+  top: 8px !important;
+  right: 8px !important;
+}
+
+.gmap-popup-card {
+  max-width: 250px;
+  font-family: inherit;
+}
+
+.gmap-popup-img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.gmap-popup-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gmap-popup-rating {
+  font-size: 0.78rem;
+  color: #FBBF24;
+  font-weight: 700;
+}
+
+.gmap-popup-addr {
+  font-size: 0.74rem;
+  color: #94A3B8;
+  margin-bottom: 10px;
+  line-height: 1.35;
+}
+
+.gmap-popup-btn {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  padding: 6px 12px;
+  background: var(--grad-aurora);
+  color: #FFFFFF !important;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.gmap-popup-btn:hover {
+  opacity: 0.9;
+}
+
+/* Responsive adjustments for 3D & Maps */
 @media (max-width: 768px) {
-  .map-3d-wrapper {
+  .map-3d-wrapper,
+  .map-google-wrapper {
     height: 380px;
   }
   [data-tilt-3d] {

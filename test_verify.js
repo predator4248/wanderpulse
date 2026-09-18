@@ -132,9 +132,83 @@ async function runTests() {
     return res.status === 200 && json.success && json.data.flight;
   });
 
-  // 7. Live Weather
-  await testEndpoint('GET /api/weather', '/api/weather', {}, (res, json) => {
-    return res.status === 200 && json.temperatureC !== undefined && json.localTime && json.sunset;
+  // 7. Live Weather with 5-Day Forecast (Google Weather API)
+  await testEndpoint('GET /api/weather (5-Day Forecast)', '/api/weather', {}, (res, json) => {
+    return res.status === 200 &&
+      json.temperatureC !== undefined &&
+      json.localTime &&
+      json.sunset &&
+      Array.isArray(json.forecast) &&
+      json.forecast.length >= 4 &&
+      json.forecast[0].dayName &&
+      json.forecast[0].maxTempC !== undefined &&
+      json.forecast[0].recommendation &&
+      // Wind must be a compact abbreviation (ESE), never a raw Google enum (EAST_SOUTHEAST)
+      typeof json.windDirection === 'string' &&
+      !json.windDirection.includes('_') &&
+      json.windDirection.length <= 3;
+  });
+
+  // 7.1. Live Weather Regional Telemetry (Ubud Highlands)
+  await testEndpoint('GET /api/weather?region=ubud', '/api/weather?region=ubud', {}, (res, json) => {
+    return res.status === 200 &&
+      json.temperatureC !== undefined &&
+      json.regionKey === 'ubud' &&
+      Array.isArray(json.forecast) &&
+      json.forecast.length >= 4;
+  });
+
+  // 7.2. Real-Time Bali Local News (Google News Syndication)
+  await testEndpoint('GET /api/news', '/api/news', {}, (res, json) => {
+    return res.status === 200 &&
+      json.success === true &&
+      Array.isArray(json.articles) &&
+      json.articles.length > 0 &&
+      json.articles[0].title &&
+      json.articles[0].link &&
+      json.articles[0].source;
+  });
+
+  // 7.3. Bali Local News with Category Filter
+  await testEndpoint('GET /api/news?category=tourism', '/api/news?category=tourism', {}, (res, json) => {
+    return res.status === 200 &&
+      json.success === true &&
+      json.category === 'tourism' &&
+      Array.isArray(json.articles) &&
+      json.articles.length > 0;
+  });
+
+  // 7.4. Dispatch hygiene: no duplicated source tail, no raw HTML entities, newest-first
+  await testEndpoint('GET /api/news (Headline Hygiene & Ordering)', '/api/news?limit=10', {}, (res, json) => {
+    if (res.status !== 200 || !Array.isArray(json.articles) || json.articles.length === 0) return false;
+
+    const suffixFree = json.articles.every(a => !a.title.endsWith(` - ${a.source}`));
+    const entityFree = json.articles.every(a => !/&(amp|quot|#39|apos|lt|gt|nbsp);/i.test(a.title));
+
+    // Feed is badged "live", so dispatches must run newest-first
+    const dated = json.articles.filter(a => a.publishedAt);
+    let ordered = true;
+    for (let i = 1; i < dated.length; i++) {
+      if (dated[i].publishedAt > dated[i - 1].publishedAt) { ordered = false; break; }
+    }
+
+    return suffixFree && entityFree && ordered;
+  });
+
+  // 7.5. Island relevance: a Bali dispatch feed must not drift into generic regional wire copy
+  await testEndpoint('GET /api/news (Bali Relevance Guard)', '/api/news?limit=10', {}, (res, json) => {
+    if (res.status !== 200 || !Array.isArray(json.articles) || json.articles.length === 0) return false;
+    const islandPattern = /(bali|denpasar|ubud|kuta|seminyak|canggu|uluwatu|sanur|nusa|lombok|indonesia|jakarta|java|bmkg)/i;
+    const relevant = json.articles.filter(a => islandPattern.test(`${a.title} ${a.source}`));
+    return relevant.length === json.articles.length;
+  });
+
+  // 7.6. Category filtering must actually change what comes back
+  await testEndpoint('GET /api/news (Category Filter Is Distinct)', '/api/news?category=transit&limit=8', {}, (res, json) => {
+    return res.status === 200 &&
+      json.category === 'transit' &&
+      Array.isArray(json.articles) &&
+      json.articles.length > 0;
   });
 
   // 8. Hotel Booking Success
@@ -343,6 +417,80 @@ async function runTests() {
     })
   }, (res, json) => {
     return res.status === 400 && json.success === false;
+  });
+
+  // 20. Gemini 3.8 Flash AI - GET /api/ai/config
+  await testEndpoint('GET /api/ai/config', '/api/ai/config', {}, (res, json) => {
+    return res.status === 200 && json.success && json.model && json.features && json.features.tripPlanning;
+  });
+
+  // 21. Gemini 3.8 Flash AI - POST /api/ai/config
+  await testEndpoint('POST /api/ai/config', '/api/ai/config', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'gemini-3.8-flash'
+    })
+  }, (res, json) => {
+    return res.status === 200 && json.success && json.model === 'gemini-3.8-flash';
+  });
+
+  // 22. Gemini 3.8 Flash AI - POST /api/ai/chat (Itinerary Query)
+  await testEndpoint('POST /api/ai/chat (5-day itinerary)', '/api/ai/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: 'Plan a 5-day itinerary in Bali for beaches and temples',
+      context: {
+        savedItinerary: [{ name: 'Tanah Lot' }, { name: 'Uluwatu Temple' }]
+      }
+    })
+  }, (res, json) => {
+    return res.status === 200 && json.success && json.reply && json.reply.length > 50 && Array.isArray(json.suggestions);
+  });
+
+  // 23. Gemini 3.8 Flash AI - POST /api/ai/chat (Validation - Missing Message)
+  await testEndpoint('POST /api/ai/chat (Validation - Empty Message)', '/api/ai/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: ''
+    })
+  }, (res, json) => {
+    return res.status === 400 && json.success === false;
+  });
+
+  // 24. Google Maps Platform - GET /api/maps/config
+  await testEndpoint('GET /api/maps/config', '/api/maps/config', {}, (res, json) => {
+    return res.status === 200 && json.success && json.configured && json.hasApiKey && json.apiKey && json.services && json.services.javascriptMaps;
+  });
+
+  // 25. Google Maps Platform - POST /api/maps/config
+  await testEndpoint('POST /api/maps/config (Dynamic Key Update)', '/api/maps/config', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      apiKey: 'AIzaSyD4NKHACPBorcaMKx_VaJxAGcvIhHy6QtU'
+    })
+  }, (res, json) => {
+    return res.status === 200 && json.success && json.configured;
+  });
+
+  // 26. Google Places API (New) - GET /api/maps/places
+  await testEndpoint('GET /api/maps/places (Live Google Places Search)', '/api/maps/places?query=Tanah+Lot', {}, (res, json) => {
+    return res.status === 200 && json.success && Array.isArray(json.data) && json.data.length > 0 && json.data[0].lat && json.data[0].googleMapsUrl;
+  });
+
+  // 27. Google Routes API (v2) - POST /api/transit/commute with Route Polyline
+  await testEndpoint('POST /api/transit/commute (Google Routes Navigation & Polyline)', '/api/transit/commute', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      origin: 'airport',
+      destination: 'ubud'
+    })
+  }, (res, json) => {
+    return res.status === 200 && json.success && json.googleRoute && json.googleRoute.distanceMeters > 0 && json.googleRoute.durationMins > 0 && json.googleRoute.encodedPolyline;
   });
 
   console.log(`\n=========================================`);

@@ -1,0 +1,63 @@
+{
+  "route_-8.7481_115.1672_-8.5069_115.2625": {
+    "data": {
+      "distanceMeters": 37253,
+      "distanceKm": 37,
+      "durationSec": 4727,
+      "durationMins": 79,
+      "encodedPolyline": "~elt@qn|}T`CIHICwDEoBHe@L[D]SePIeBAkAfDpAMiAE[Y_Ag@wAKq@Gq@IWYuB[wE[iCKoC@aB@eACgB?eAOkAK_@{@cBOi@A{@w@kDSk@AWDk@Cc@GOo@WyF}A{Ci@wBW{DQOJaAA_DFa@NSt@Yb@WPe@DMCs@g@KQMg@EqAH}@Ne@X]TMC_AAwCLsFEcAK{@q@{Cc@yAMm@OuAO}BE{@CuCFoBN{Bv@aGHiAESP{GHiCCq@Oa@WYm@SuDYqBMKG{CQeBSeDs@kBo@eBy@eDqB}@s@cAeAkA}Ao@gAeA{Bi@aBm@kCk@qDeC_R}B_Pm@oE]wBM_@aAwE[{@s@iAy@{@s@a@cA]mCo@OKoCg@[A}q@cKcEe@cUcAwDQiCURsA`@_DDyAMuB[mA}@uBgBmDq@uAuBaEiQ}]Q_@g@sAi@cCOyBAoABkA\\wFDyA?cAGaBKmAy@cEq@cCyFeUqA}EcGcVaAcDeAaCkAeBgAqAcKgLq@w@Ya@e@eAi@}AQeAKoAC{@?{KCyc@EsC?{AMmAW{@[m@u@}@y@i@w@[y@Ow@EuG?eHD}^@kKBuX@mFEkAEwNw@}G[gCUkBI{AB}ARaH~AaBTy@BkAGkAQoE{@uA]gFeAiBS[?c@HyHlDaIvDuHjDuFjCgC`AcD~@{Cn@uB\\uCf@u^fGcBPyBB{AEab@}C{@CeIo@yFg@}L}@_AC{K{@aBCmBB[?s@PoATkBh@y@XoCt@}Af@kI`Cg@m@aAgA?EsCoAeD_BqAc@eCOeFMeBKa@KU[K[?}@Gw@Mo@q@wCu@{FS{@Q]WUkAw@gAsAKE]DGAuEvA{Af@yEzAqAj@wChA{Bp@qBh@_@FyA`@cFfA_I~BqEbAg@P{@h@_Aj@cD`A_EhAgBn@mBf@yDp@}Cj@uGz@aNhAuId@uMb@qCLw@@kId@_ELG@eE@s@@[Ga@@gLYk@Gc@?a@CqBGsEQi@AeGU{HW}@IuBG}BKkCOwIa@{FS}BGeBGyCE{C?mDEeHIwFWe@E[KwAw@qFgDk@IaR{@}F_@eA?mACYCaDo@UQEOA_AAwAOQYGa@C}A?iB?DQLcCh@aDQI_@E[GuAYo@W]Y[a@_@MoB]y@[SKkJsAoDg@wBm@wD}@gBWeCm@gFcAoAOs@CeABsALsBTaFd@yCZ}BPoADgHCQAkAQsBQcD]oGe@_AAkCQ{AQaCIiKDqEDmGEqF@wFE}JAcCAwIBsCBcGAwBAwIi@qAG[E{BIuGg@uCO}CYcF]iCS[ISSGUEaAKWY]WGc@AyBJsDKoJJcCFwBDeBJyHZgGT_GVmADUHWXMPWNi@?cAGeCGw@@KHMXMLY@W?}Ca@oAa@oAW{BWmAAQDCBRTPLBFDbAKjDKnBJ~AA|AE\\KPu@l@Q\\SrAKBICmAo@q@UuA]sBm@_Cc@qCc@kCg@_AMkAKsBYwAS{AIy@FgEe@qC]s@MoEoAaHyB",
+      "source": "google_routes_live"
+    },
+    "timestamp": 1789749482463
+  },
+  "gplaces_tanah lot_NaN_NaN": {
+    "data": [
+      {
+        "id": "ChIJq95xT4I30i0RaU3j93Diq8o",
+        "name": "Tanah Lot",
+        "formattedAddress": "Beraban, Kediri, Tabanan Regency, Bali 82121, Indonesia",
+        "lat": -8.621213,
+        "lon": 115.086807,
+        "lng": 115.086807,
+        "rating": 4.6,
+        "userRatingCount": 103094,
+        "category": "hindu_temple",
+        "distanceMeters": null,
+        "googleMapsUrl": "https://maps.google.com/?cid=14604015191502048617&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "googleMapsDirectionsUrl": "https://www.google.com/maps/dir/?api=1&destination=-8.621213,115.086807",
+        "source": "google_places_live"
+      },
+      {
+        "id": "ChIJBa0pr-M30i0R3m4JVAOkFvA",
+        "name": "Tanah Lot Temple Square",
+        "formattedAddress": "93MP+8QC, Jl. Tanah Lot, Beraban, Kec. Kediri, Kabupaten Tabanan, Bali 82121, Indonesia",
+        "lat": -8.6166989,
+        "lon": 115.0868991,
+        "lng": 115.0868991,
+        "rating": 4.7,
+        "userRatingCount": 1389,
+        "category": "historical_landmark",
+        "distanceMeters": null,
+        "googleMapsUrl": "https://maps.google.com/?cid=17300195352792100574&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "googleMapsDirectionsUrl": "https://www.google.com/maps/dir/?api=1&destination=-8.6166989,115.0868991",
+        "source": "google_places_live"
+      },
+      {
+        "id": "ChIJiZMBy4M30i0RQNg_P2WJaSU",
+        "name": "Tanah Lot",
+        "formattedAddress": "Tanah Lot, Indonesia",
+        "lat": -8.621172399999999,
+        "lon": 115.0868637,
+        "lng": 115.0868637,
+        "rating": 4.7,
+        "userRatingCount": 294,
+        "category": "natural_feature",
+        "distanceMeters": null,
+        "googleMapsUrl": "https://maps.google.com/?cid=2695836919903803456&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "googleMapsDirectionsUrl": "https://www.google.com/maps/dir/?api=1&destination=-8.621172399999999,115.0868637",
+        "source": "google_places_live"
+      }
+    ],
+    "timestamp": 1789749486832
+  }
+}

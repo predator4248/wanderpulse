@@ -4,18 +4,18 @@
  * Cache-First with background revalidation for static assets.
  */
 
-const CACHE_NAME = 'wanderpulse-bali-v3.0';
+const CACHE_NAME = 'wanderpulse-bali-v3.1-gemini';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/css/main.css?v=2.3.0',
-  '/css/components.css?v=2.3.0',
-  '/css/3d-effects.css?v=2.3.0',
-  '/css/responsive.css?v=2.3.0',
-  '/js/data.js?v=2.3.0',
-  '/js/app.js?v=2.3.0',
-  '/js/tilt3d.js?v=2.3.0',
-  '/js/three-scene.js?v=2.3.0',
+  '/css/main.css?v=3.1.0',
+  '/css/components.css?v=3.1.0',
+  '/css/3d-effects.css?v=3.1.0',
+  '/css/responsive.css?v=3.1.0',
+  '/js/data.js?v=3.1.0',
+  '/js/app.js?v=3.1.0',
+  '/js/tilt3d.js?v=3.1.0',
+  '/js/three-scene.js?v=3.1.0',
   '/manifest.json'
 ];
 
