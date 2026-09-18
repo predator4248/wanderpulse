@@ -217,6 +217,7 @@ ul, ol {
 .text-grad-aurora {
   background: var(--grad-aurora);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
 }
@@ -224,6 +225,7 @@ ul, ol {
 .text-grad-sunset {
   background: var(--grad-sunset);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
 }
@@ -231,6 +233,7 @@ ul, ol {
 .text-grad-ocean {
   background: var(--grad-ocean);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
 }
@@ -238,6 +241,7 @@ ul, ol {
 .text-grad-royal {
   background: var(--grad-royal);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
 }

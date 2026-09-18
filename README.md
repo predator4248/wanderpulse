@@ -30,9 +30,11 @@ Refer to [**DEPLOYMENT.md**](./DEPLOYMENT.md) for full instructions:
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Start development server
-npm start
+pnpm start
+# or with auto-reload:
+pnpm dev
 ```
 Open [http://localhost:3000/](http://localhost:3000/) in your browser.

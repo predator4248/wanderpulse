@@ -45,6 +45,7 @@
   padding: 1.5px;
   background: var(--grad-rainbow-bar);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   opacity: 0;
@@ -332,6 +333,7 @@
   letter-spacing: 0.02em;
   background: var(--grad-aurora);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -1047,6 +1049,7 @@
   margin-bottom: 20px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -1617,6 +1620,7 @@
 /* Custom Range Input */
 .custom-range {
   -webkit-appearance: none;
+  appearance: none;
   width: 100%;
   height: 8px;
   border-radius: 4px;
@@ -3720,6 +3724,7 @@
 .sky-range-slider {
   width: 100%;
   -webkit-appearance: none;
+  appearance: none;
   height: 8px;
   border-radius: 4px;
   background: linear-gradient(90deg, #1E1B4B 0%, #FFA07A 25%, #FFFFFF 50%, #FF5E62 75%, #1E1B4B 100%);
