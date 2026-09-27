@@ -154,9 +154,9 @@
 
       <!-- Nav Actions (Soundscape, Wishlist, Currency, Theme) -->
       <div class="nav-actions">
-        <!-- Gemini 3.8 Flash AI Concierge Quick Trigger -->
-        <button id="headerGeminiBtn" class="gemini-header-btn header-quick-action" onclick="window.toggleGeminiChat(true)" aria-label="Ask Gemini 3.8 Flash AI" title="Ask questions & suggestions about your Bali trip">
-          ✨ <span class="gemini-header-text">Gemini AI</span>
+        <!-- PulseAI Real-Time Autonomous Agent Quick Trigger -->
+        <button id="headerPulseAiBtn" class="pulse-header-btn gemini-header-btn header-quick-action" onclick="window.togglePulseChat(true)" aria-label="Ask PulseAI Agent" title="Real-time universal AI assistant & travel concierge">
+          ⚡ <span class="pulse-header-text">PulseAI Agent</span>
         </button>
 
         <!-- Ambient Soundscape Toggle (Desktop Quick) -->
@@ -353,11 +353,11 @@
       <div class="drawer-nav-section" id="primaryNavMenu">
         <div class="drawer-nav-group-title">🌺 DISCOVER BALI</div>
         <div class="drawer-nav-links">
-          <a href="javascript:void(0)" class="drawer-nav-link nav-link drawer-close-on-click" onclick="window.toggleGeminiChat(true)">
-            <span class="link-icon">✨</span>
+          <a href="javascript:void(0)" class="drawer-nav-link nav-link drawer-close-on-click" onclick="window.togglePulseChat(true)">
+            <span class="link-icon">⚡</span>
             <div class="link-text">
-              <span class="link-title" style="color: var(--accent-cyan); font-weight: 800;">Gemini 3.8 Flash AI Concierge</span>
-              <span class="link-sub">Real-time questions, trip advice & customized itineraries</span>
+              <span class="link-title" style="color: var(--accent-cyan); font-weight: 800;">PulseAI Autonomous Agent</span>
+              <span class="link-sub">Real-time answers to ANY question, itineraries & coding</span>
             </div>
           </a>
           <a href="#hero" class="drawer-nav-link nav-link active drawer-close-on-click">
@@ -598,17 +598,17 @@
             </button>
           </div>
 
-          <!-- Hero Gemini 3.8 Flash AI Assistant Card -->
-          <div class="hero-gemini-card" id="heroGeminiCard">
-            <div class="hero-gemini-text">
-              <div class="hero-gemini-icon" aria-hidden="true">✨</div>
+          <!-- Hero PulseAI Real-Time Autonomous Agent Card -->
+          <div class="hero-pulse-card hero-gemini-card" id="heroPulseCard">
+            <div class="hero-pulse-text hero-gemini-text">
+              <div class="hero-pulse-icon hero-gemini-icon" aria-hidden="true">⚡</div>
               <div>
-                <div class="hero-gemini-heading">Gemini 3.8 Flash AI Concierge</div>
-                <div class="hero-gemini-sub">Ask trip questions, build tailored itineraries & discover secret spots</div>
+                <div class="hero-pulse-heading hero-gemini-heading">PulseAI • Real-Time Autonomous Agent</div>
+                <div class="hero-pulse-sub hero-gemini-sub">Ask ANY question in real time • Custom itineraries, coding, math & culture</div>
               </div>
             </div>
-            <button type="button" class="hero-gemini-btn" onclick="window.toggleGeminiChat(true)">
-              <span>Ask Gemini AI</span>
+            <button type="button" class="hero-pulse-btn hero-gemini-btn" onclick="window.togglePulseChat(true)">
+              <span>Ask PulseAI</span>
               <span aria-hidden="true">→</span>
             </button>
           </div>
@@ -3597,136 +3597,144 @@
   </div>
 
   <!-- ==========================================================================
-       9. GEMINI 3.8 FLASH AI TRIP ASSISTANT & CHAT CONCIERGE WIDGET
+       9. PULSE-AI REAL-TIME AUTONOMOUS ASSISTANT & CONCIERGE WIDGET
        ========================================================================== -->
   <!-- Floating Launch Button -->
-  <button type="button" id="geminiFloatBtn" class="gemini-float-btn" onclick="window.toggleGeminiChat()" aria-label="Open Gemini 3.8 Flash AI Concierge" title="Ask questions & suggestions about your Bali trip">
-    <div class="gemini-float-icon-wrap">
-      <span class="gemini-float-pulse-ring" aria-hidden="true"></span>
-      <span>✨</span>
+  <button type="button" id="pulseFloatBtn" class="pulse-float-btn gemini-float-btn" onclick="window.togglePulseChat()" aria-label="Open PulseAI Real-Time Agent" title="Ask ANY question: travel, coding, science, mathematics & itineraries">
+    <div class="pulse-float-icon-wrap gemini-float-icon-wrap">
+      <span class="pulse-float-pulse-ring gemini-float-pulse-ring" aria-hidden="true"></span>
+      <span>⚡</span>
     </div>
-    <span>Ask Gemini AI</span>
-    <span class="gemini-float-model-tag">3.8 Flash</span>
+    <span>Ask PulseAI</span>
+    <span class="pulse-float-model-tag gemini-float-model-tag" id="pulseFloatTag">Real-Time</span>
   </button>
 
   <!-- Interactive AI Chat Widget Window -->
-  <aside id="geminiChatWidget" class="gemini-chat-widget" role="dialog" aria-modal="false" aria-label="Gemini 3.8 Flash Bali Travel Assistant">
+  <aside id="pulseChatWidget" class="pulse-chat-widget gemini-chat-widget" role="dialog" aria-modal="false" aria-label="PulseAI Autonomous Travel & Knowledge Assistant">
     <!-- Header -->
-    <header class="gemini-header">
-      <div class="gemini-header-left">
-        <div class="gemini-avatar-orb" aria-hidden="true">✨</div>
-        <div class="gemini-title-group">
-          <div class="gemini-brand-title">
-            <span>WanderPulse AI</span>
-            <span class="gemini-model-badge" id="geminiActiveModelBadge">Gemini 3.8 Flash</span>
+    <header class="pulse-header gemini-header">
+      <div class="pulse-header-left gemini-header-left">
+        <div class="pulse-avatar-orb gemini-avatar-orb" aria-hidden="true">⚡</div>
+        <div class="pulse-title-group gemini-title-group">
+          <div class="pulse-brand-title gemini-brand-title">
+            <span>PulseAI Agent</span>
+            <span class="pulse-model-badge gemini-model-badge" id="pulseActiveModelBadge">Pulse-Omni v3.2</span>
           </div>
-          <div class="gemini-status-text">
-            <span class="gemini-live-dot"></span>
-            <span id="geminiStatusLabel">Online • Trip Concierge</span>
+          <div class="pulse-status-text gemini-status-text">
+            <span class="pulse-live-dot gemini-live-dot"></span>
+            <span id="pulseStatusLabel">Online • Real-Time AI</span>
           </div>
         </div>
       </div>
-      <div class="gemini-header-actions">
-        <button type="button" class="gemini-tool-btn" id="geminiSettingsToggleBtn" onclick="window.toggleGeminiSettings()" title="API Key & Model Settings" aria-label="Settings">⚙️</button>
-        <button type="button" class="gemini-tool-btn" id="geminiMaximizeBtn" onclick="window.toggleGeminiMaximize()" title="Maximize / Restore View" aria-label="Maximize">⛶</button>
-        <button type="button" class="gemini-tool-btn" onclick="window.clearGeminiChatHistory()" title="Clear Chat History" aria-label="Clear chat">🗑️</button>
-        <button type="button" class="gemini-tool-btn" onclick="window.toggleGeminiChat(false)" title="Close Chat" aria-label="Close assistant">✕</button>
+      <div class="pulse-header-actions gemini-header-actions">
+        <button type="button" class="pulse-tool-btn gemini-tool-btn" id="pulseSettingsToggleBtn" onclick="window.togglePulseSettings()" title="Model & Agent Persona Settings" aria-label="Settings">⚙️</button>
+        <button type="button" class="pulse-tool-btn gemini-tool-btn" id="pulseMaximizeBtn" onclick="window.togglePulseMaximize()" title="Maximize / Restore View" aria-label="Maximize">⛶</button>
+        <button type="button" class="pulse-tool-btn gemini-tool-btn" onclick="window.clearPulseChatHistory()" title="Clear Chat History" aria-label="Clear chat">🗑️</button>
+        <button type="button" class="pulse-tool-btn gemini-tool-btn" onclick="window.togglePulseChat(false)" title="Close Chat" aria-label="Close assistant">✕</button>
       </div>
     </header>
 
     <!-- Context / Itinerary Sync Bar -->
-    <div class="gemini-context-bar">
-      <label class="gemini-sync-label">
-        <input type="checkbox" id="geminiSyncItineraryCheckbox" class="gemini-sync-checkbox" checked />
+    <div class="pulse-context-bar gemini-context-bar">
+      <label class="pulse-sync-label gemini-sync-label">
+        <input type="checkbox" id="pulseSyncItineraryCheckbox" class="pulse-sync-checkbox gemini-sync-checkbox" checked />
         <span>Sync my saved itinerary</span>
       </label>
-      <span class="gemini-sync-badge" id="geminiSyncBadge">0 spots synced</span>
+      <span class="pulse-sync-badge gemini-sync-badge" id="pulseSyncBadge">0 spots synced</span>
     </div>
 
     <!-- Scrollable Chat Body -->
-    <div class="gemini-body" id="geminiChatBody">
+    <div class="pulse-body gemini-body" id="pulseChatBody">
       <!-- Welcome Banner -->
-      <div class="gemini-welcome-card" id="geminiWelcomeCard">
-        <div class="gemini-welcome-title">
-          <span>🌺 Om Swastiastu! Welcome to Bali</span>
+      <div class="pulse-welcome-card gemini-welcome-card" id="pulseWelcomeCard">
+        <div class="pulse-welcome-title gemini-welcome-title">
+          <span>🌺 Om Swastiastu! Meet PulseAI</span>
         </div>
-        <p class="gemini-welcome-desc">
-          I am your <strong>WanderPulse AI Concierge</strong> powered by <strong>Google Gemini 3.8 Flash</strong>. Ask me anything about tailoring custom itineraries, secret waterfalls, temple dress codes, scooter safety, or daily budgets!
+        <p class="pulse-welcome-desc gemini-welcome-desc">
+          I am your <strong>autonomous real-time AI assistant</strong>. I can answer <strong>any question</strong> with deep intelligence — tailored Bali travel itineraries, secret waterfalls, temple etiquette, budget calculations, as well as programming, science, mathematics, and real-time planning!
         </p>
-        <div class="gemini-starter-chips">
-          <button type="button" class="gemini-chip-btn" onclick="window.sendGeminiStarterPrompt('Plan a 5-day romantic Bali itinerary for beaches and cultural temples')">🗺️ 5-Day Bali Highlights</button>
-          <button type="button" class="gemini-chip-btn" onclick="window.sendGeminiStarterPrompt('Mount Batur sunrise trek logistics, gear, and timings')">🌋 Mount Batur Sunrise</button>
-          <button type="button" class="gemini-chip-btn" onclick="window.sendGeminiStarterPrompt('Best authentic warungs and traditional food to eat in Ubud')">🍛 Ubud Warungs & Food</button>
-          <button type="button" class="gemini-chip-btn" onclick="window.sendGeminiStarterPrompt('Should I rent a scooter or hire a private driver in Bali?')">🚗 Scooter vs Driver</button>
-          <button type="button" class="gemini-chip-btn" onclick="window.sendGeminiStarterPrompt('Explain the 30-day e-VoA visa and Bali Tourist Levy rules')">🛂 Visa & Tourist Levy</button>
-          <button type="button" class="gemini-chip-btn" onclick="window.sendGeminiStarterPrompt('What is a realistic daily travel budget for Bali in USD?')">💰 Daily Budget Guide</button>
+        <div class="pulse-starter-chips gemini-starter-chips">
+          <button type="button" class="pulse-chip-btn gemini-chip-btn" onclick="window.sendPulseStarterPrompt('Plan a 5-day romantic Bali itinerary for beaches and cultural temples')">🗺️ 5-Day Bali Highlights</button>
+          <button type="button" class="pulse-chip-btn gemini-chip-btn" onclick="window.sendPulseStarterPrompt('Write a python web scraper using BeautifulSoup')">💻 Python Web Scraper</button>
+          <button type="button" class="pulse-chip-btn gemini-chip-btn" onclick="window.sendPulseStarterPrompt('Mount Batur sunrise trek logistics, gear, and timings')">🌋 Mount Batur Sunrise</button>
+          <button type="button" class="pulse-chip-btn gemini-chip-btn" onclick="window.sendPulseStarterPrompt('What is quantum entanglement explained simply?')">⚛️ Quantum Entanglement</button>
+          <button type="button" class="pulse-chip-btn gemini-chip-btn" onclick="window.sendPulseStarterPrompt('Should I rent a scooter or hire a private driver in Bali?')">🚗 Scooter vs Driver</button>
+          <button type="button" class="pulse-chip-btn gemini-chip-btn" onclick="window.sendPulseStarterPrompt('Convert 150 USD to Indonesian Rupiah and calculate daily budget')">💰 Currency & Budget</button>
         </div>
       </div>
 
       <!-- Dynamic Messages appended here -->
-      <div id="geminiMessagesContainer"></div>
+      <div id="pulseMessagesContainer" class="pulse-messages-container"></div>
 
-      <!-- Typing Indicator -->
-      <div class="gemini-typing-box" id="geminiTypingIndicator" style="display: none;">
-        <span class="gemini-typing-dot"></span>
-        <span class="gemini-typing-dot"></span>
-        <span class="gemini-typing-dot"></span>
-        <span style="font-size: 0.76rem; color: var(--text-secondary); margin-left: 6px;">Gemini is planning your trip...</span>
+      <!-- Typing / Streaming Indicator -->
+      <div class="pulse-typing-box gemini-typing-box" id="pulseTypingIndicator" style="display: none;">
+        <span class="pulse-typing-dot gemini-typing-dot"></span>
+        <span class="pulse-typing-dot gemini-typing-dot"></span>
+        <span class="pulse-typing-dot gemini-typing-dot"></span>
+        <span id="pulseTypingText" style="font-size: 0.76rem; color: var(--text-secondary); margin-left: 6px;">PulseAI is reasoning in real time...</span>
       </div>
     </div>
 
     <!-- Input Footer -->
-    <footer class="gemini-footer">
-      <form id="geminiChatForm" class="gemini-input-form" onsubmit="window.handleGeminiFormSubmit(event)">
-        <textarea id="geminiChatInput" class="gemini-textarea" rows="1" placeholder="Ask Gemini anything about your Bali trip..." aria-label="Type your trip question"></textarea>
-        <button type="button" id="geminiVoiceBtn" class="gemini-mic-btn" onclick="window.toggleGeminiVoiceInput()" title="Voice Question (Speech to text)" aria-label="Voice input">🎙️</button>
-        <button type="submit" id="geminiSendBtn" class="gemini-send-btn" title="Send Question" aria-label="Send message">➤</button>
+    <footer class="pulse-footer gemini-footer">
+      <form id="pulseChatForm" class="pulse-input-form gemini-input-form" onsubmit="window.handlePulseFormSubmit(event)">
+        <textarea id="pulseChatInput" class="pulse-textarea gemini-textarea" rows="1" placeholder="Ask PulseAI anything (travel, coding, science, math)..." aria-label="Type your question"></textarea>
+        <button type="button" id="pulseVoiceBtn" class="pulse-mic-btn gemini-mic-btn" onclick="window.togglePulseVoiceInput()" title="Voice Question (Speech to text)" aria-label="Voice input">🎙️</button>
+        <button type="button" id="pulseStopBtn" class="pulse-stop-btn" style="display: none;" onclick="window.stopPulseGeneration()" title="Stop Generation" aria-label="Stop generation">⏹ Stop</button>
+        <button type="submit" id="pulseSendBtn" class="pulse-send-btn gemini-send-btn" title="Send Question" aria-label="Send message">➤</button>
       </form>
-      <div class="gemini-footer-legal">
-        <span>⚡ Google Gemini 3.8 Flash AI</span>
-        <span id="geminiProviderStatusText">WanderPulse Verified Intelligence</span>
+      <div class="pulse-footer-legal gemini-footer-legal">
+        <span>⚡ PulseAI Autonomous Engine</span>
+        <span id="pulseProviderStatusText">Real-Time Universal Intelligence</span>
       </div>
     </footer>
 
     <!-- In-Chat Settings Panel -->
-    <div class="gemini-settings-panel" id="geminiSettingsPanel">
+    <div class="pulse-settings-panel gemini-settings-panel" id="pulseSettingsPanel">
       <div>
-        <div class="gemini-settings-header">
-          <div class="gemini-settings-title">
-            <span>⚙️ AI Assistant Settings</span>
+        <div class="pulse-settings-header gemini-settings-header">
+          <div class="pulse-settings-title gemini-settings-title">
+            <span>⚙️ PulseAI Agent Settings</span>
           </div>
-          <button type="button" class="gemini-tool-btn" onclick="window.toggleGeminiSettings(false)" aria-label="Close settings">✕</button>
+          <button type="button" class="pulse-tool-btn gemini-tool-btn" onclick="window.togglePulseSettings(false)" aria-label="Close settings">✕</button>
         </div>
 
         <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
-          WanderPulse runs with our comprehensive Bali Travel Concierge Intelligence by default. You can also provide a personal <strong>Google Gemini API Key</strong> for live direct queries.
+          PulseAI operates natively in real-time with zero external configuration required. Choose your preferred AI persona below:
         </p>
 
-        <div class="gemini-form-group">
-          <label for="geminiApiKeyInput" class="gemini-form-label">Google Gemini API Key (Optional):</label>
-          <input type="password" id="geminiApiKeyInput" class="gemini-form-input" placeholder="AIzaSy... (stored locally)" autocomplete="off" />
-        </div>
-
-        <div class="gemini-form-group">
-          <label for="geminiModelSelect" class="gemini-form-label">Active Gemini Model:</label>
-          <select id="geminiModelSelect" class="gemini-form-select">
-            <option value="gemini-3.8-flash" selected>Gemini 3.8 Flash (Ultra-Fast & Smart)</option>
-            <option value="gemini-2.5-flash">Gemini 2.5 Flash (Balanced)</option>
-            <option value="gemini-1.5-flash">Gemini 1.5 Flash (Legacy)</option>
+        <div class="pulse-form-group gemini-form-group">
+          <label for="pulseModelSelect" class="pulse-form-label gemini-form-label">Active AI Agent Persona:</label>
+          <select id="pulseModelSelect" class="pulse-form-select gemini-form-select" onchange="window.handlePulseModelChange(this.value)">
+            <option value="pulse-omni" selected>Pulse-Omni (Auto) — Flagship reasoning & travel architect</option>
+            <option value="pulse-fast">Pulse-Fast — Lightning-fast direct answers & tips</option>
+            <option value="pulse-coder">Pulse-Coder — Software engineering & algorithms</option>
+            <option value="pulse-creative">Pulse-Creative — Immersive culture & storytelling</option>
           </select>
         </div>
 
-        <div style="background: rgba(255,255,255,0.04); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-top: 14px;">
-          <div style="font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; color: var(--accent-cyan);">🔒 Privacy & Local Storage</div>
-          <div style="font-size: 0.74rem; color: var(--text-muted); line-height: 1.4;">
-            Your API key is never shared or stored on external servers without your permission. You can clear it at any time.
+        <div style="background: rgba(255,255,255,0.04); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-top: 14px;">
+          <div style="font-size: 0.78rem; font-weight: 700; margin-bottom: 6px; color: var(--accent-cyan);">⚡ Autonomous Real-Time Engine</div>
+          <div style="font-size: 0.74rem; color: var(--text-muted); line-height: 1.45;">
+            PulseAI features instant local failover, live streaming SSE, multi-domain cognitive synthesis, and automatic mathematical evaluation. No external API keys are required!
           </div>
+        </div>
+
+        <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px;">
+          <label class="pulse-sync-label gemini-sync-label" style="font-size: 0.8rem;">
+            <input type="checkbox" id="pulseStreamToggle" checked />
+            <span>Enable Real-Time Word Streaming (SSE)</span>
+          </label>
+          <label class="pulse-sync-label gemini-sync-label" style="font-size: 0.8rem;">
+            <input type="checkbox" id="pulseAutoSpeechToggle" />
+            <span>Read AI responses aloud automatically (TTS)</span>
+          </label>
         </div>
       </div>
 
       <div style="display: flex; gap: 8px; margin-top: 20px;">
-        <button type="button" class="btn btn-outline" style="flex: 1; font-size: 0.82rem; padding: 8px;" onclick="window.clearGeminiApiKey()">Clear Key</button>
-        <button type="button" class="btn btn-primary" style="flex: 2; font-size: 0.82rem; padding: 8px;" onclick="window.saveGeminiApiKeySettings()">Save & Connect</button>
+        <button type="button" class="btn btn-outline" style="flex: 1; font-size: 0.82rem; padding: 8px;" onclick="window.clearPulseChatHistory()">Reset Chat</button>
+        <button type="button" class="btn btn-primary" style="flex: 2; font-size: 0.82rem; padding: 8px;" onclick="window.togglePulseSettings(false)">Apply & Close</button>
       </div>
     </div>
   </aside>

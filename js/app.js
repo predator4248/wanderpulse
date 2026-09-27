@@ -4676,51 +4676,100 @@ function renderReviewsGrid(filter = 'all') {
 }
 
 /* ==========================================================================
-   14. GEMINI 3.8 FLASH AI TRIP CONCIERGE CONTROLLER
-   Full-featured trip assistant with dynamic chat history, markdown parsing,
-   itinerary sync, voice recognition, custom API key config, and follow-up chips.
+   14. PULSE-AI REAL-TIME AUTONOMOUS AGENT CONTROLLER
+   Full-featured universal AI assistant with real-time SSE streaming,
+   markdown parsing with code blocks & tables, voice input, speech synthesis (TTS),
+   itinerary sync, model persona selection, and follow-up chips.
    ========================================================================== */
 
-let geminiChatHistory = [];
-let geminiIsThinking = false;
-let geminiIsMaximized = false;
-let geminiSpeechRecognition = null;
-let geminiIsRecording = false;
+let pulseChatHistory = [];
+let pulseIsThinking = false;
+let pulseIsStreaming = false;
+let pulseIsMaximized = false;
+let pulseSpeechRecognition = null;
+let pulseIsRecording = false;
+let pulseCurrentAbortController = null;
+let pulseActiveUtterance = null;
 
 // Local preferences
-let geminiCustomApiKey = localStorage.getItem('wanderpulse_gemini_key') || '';
-let geminiActiveModel = localStorage.getItem('wanderpulse_gemini_model') || 'gemini-3.8-flash';
+let pulseActiveModel = localStorage.getItem('wanderpulse_ai_model') || 'pulse-omni';
 
 /**
- * Parses basic Markdown for Gemini AI responses
+ * Advanced Markdown Parser for PulseAI
+ * Parses headings, bold/italics, code blocks with copy buttons, tables, blockquotes & lists
  */
-function renderGeminiMarkdown(rawText = '') {
+function renderPulseMarkdown(rawText = '') {
   if (!rawText) return '';
 
-  let html = rawText
-    // Escape HTML entities to prevent XSS
+  // 1. Escape HTML entities
+  let text = rawText
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    // Headings
+    .replace(/>/g, '&gt;');
+
+  // 2. Fenced Code Blocks (```lang ... ```)
+  const codeBlocks = [];
+  text = text.replace(/```([a-zA-Z0-9_+-]*)\n([\s\S]*?)```/g, (match, lang, code) => {
+    const placeholder = `__PULSE_CODE_BLOCK_${codeBlocks.length}__`;
+    const cleanLang = lang.trim() || 'code';
+    codeBlocks.push(`
+      <div class="pulse-code-block">
+        <div class="pulse-code-header">
+          <span>${cleanLang}</span>
+          <button type="button" class="pulse-code-copy-btn" onclick="window.copyCodeBlock(this)">📋 Copy Code</button>
+        </div>
+        <pre><code>${code.trim()}</code></pre>
+      </div>
+    `);
+    return placeholder;
+  });
+
+  // 3. Inline formatting
+  text = text
     .replace(/^### (.*$)/gim, '<h3>$1</h3>')
     .replace(/^#### (.*$)/gim, '<h4>$1</h4>')
-    // Bold & Italic
     .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/gim, '<em>$1</em>')
-    // Inline code
-    .replace(/`(.*?)`/gim, '<code>$1</code>');
+    .replace(/`(.*?)`/gim, '<code>$1</code>')
+    .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
 
-  // Process lists and paragraphs
-  const lines = html.split('\n');
+  // 4. Process lines for lists, tables, and paragraphs
+  const lines = text.split('\n');
   let inUl = false;
   let inOl = false;
+  let inTable = false;
+  let tableHeaderProcessed = false;
   const processedLines = [];
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
 
-    // Unordered list item (- or *)
+    // Table rows (| col1 | col2 |)
+    if (line.startsWith('|') && line.endsWith('|')) {
+      if (line.replace(/[\s|:-]/g, '').length === 0) {
+        // Table delimiter line (e.g. |---|---|)
+        continue;
+      }
+      const cells = line.slice(1, -1).split('|').map(c => c.trim());
+      if (!inTable) {
+        if (inUl) { processedLines.push('</ul>'); inUl = false; }
+        if (inOl) { processedLines.push('</ol>'); inOl = false; }
+        processedLines.push('<table class="pulse-table">');
+        processedLines.push('<thead><tr>' + cells.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>');
+        inTable = true;
+        tableHeaderProcessed = true;
+        continue;
+      } else {
+        processedLines.push('<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>');
+        continue;
+      }
+    } else if (inTable) {
+      processedLines.push('</tbody></table>');
+      inTable = false;
+      tableHeaderProcessed = false;
+    }
+
+    // Unordered lists (- or *)
     if (line.match(/^[-*]\s+(.*)/)) {
       if (!inUl) {
         if (inOl) { processedLines.push('</ol>'); inOl = false; }
@@ -4731,7 +4780,7 @@ function renderGeminiMarkdown(rawText = '') {
       continue;
     }
 
-    // Numbered list item (1., 2.)
+    // Numbered lists (1. or 2.)
     if (line.match(/^\d+\.\s+(.*)/)) {
       if (!inOl) {
         if (inUl) { processedLines.push('</ul>'); inUl = false; }
@@ -4742,11 +4791,13 @@ function renderGeminiMarkdown(rawText = '') {
       continue;
     }
 
-    // Close any open lists
+    // Close open lists
     if (inUl) { processedLines.push('</ul>'); inUl = false; }
     if (inOl) { processedLines.push('</ol>'); inOl = false; }
 
-    if (line.startsWith('<h3') || line.startsWith('<h4')) {
+    if (line.startsWith('<h3') || line.startsWith('<h4') || line.startsWith('<blockquote')) {
+      processedLines.push(line);
+    } else if (line.startsWith('__PULSE_CODE_BLOCK_')) {
       processedLines.push(line);
     } else if (line.length > 0) {
       processedLines.push(`<p>${line}</p>`);
@@ -4755,16 +4806,24 @@ function renderGeminiMarkdown(rawText = '') {
 
   if (inUl) processedLines.push('</ul>');
   if (inOl) processedLines.push('</ol>');
+  if (inTable) processedLines.push('</tbody></table>');
 
-  return processedLines.join('\n');
+  let html = processedLines.join('\n');
+
+  // Restore code blocks
+  codeBlocks.forEach((block, idx) => {
+    html = html.replace(`__PULSE_CODE_BLOCK_${idx}__`, block);
+  });
+
+  return html;
 }
 
 /**
- * Open or minimize the Gemini 3.8 Flash chat widget
+ * Open or minimize the PulseAI chat widget
  */
-window.toggleGeminiChat = function(forceState) {
-  const widget = document.getElementById('geminiChatWidget');
-  const floatBtn = document.getElementById('geminiFloatBtn');
+window.togglePulseChat = function(forceState) {
+  const widget = document.getElementById('pulseChatWidget') || document.getElementById('geminiChatWidget');
+  const floatBtn = document.getElementById('pulseFloatBtn') || document.getElementById('geminiFloatBtn');
   if (!widget) return;
 
   const willOpen = typeof forceState === 'boolean' ? forceState : !widget.classList.contains('is-open');
@@ -4772,127 +4831,95 @@ window.toggleGeminiChat = function(forceState) {
   if (willOpen) {
     widget.classList.add('is-open');
     if (floatBtn) floatBtn.setAttribute('aria-expanded', 'true');
-    window.updateGeminiSyncBadge();
+    window.updatePulseSyncBadge();
 
     // Focus input after transition
     setTimeout(() => {
-      const input = document.getElementById('geminiChatInput');
+      const input = document.getElementById('pulseChatInput') || document.getElementById('geminiChatInput');
       if (input) input.focus();
     }, 250);
   } else {
     widget.classList.remove('is-open');
     if (floatBtn) floatBtn.setAttribute('aria-expanded', 'false');
-    // Also close settings if open
-    window.toggleGeminiSettings(false);
+    window.togglePulseSettings(false);
   }
 };
 
 /**
  * Toggle Fullscreen / Maximized view
  */
-window.toggleGeminiMaximize = function() {
-  const widget = document.getElementById('geminiChatWidget');
-  const btn = document.getElementById('geminiMaximizeBtn');
+window.togglePulseMaximize = function() {
+  const widget = document.getElementById('pulseChatWidget') || document.getElementById('geminiChatWidget');
+  const btn = document.getElementById('pulseMaximizeBtn') || document.getElementById('geminiMaximizeBtn');
   if (!widget) return;
 
-  geminiIsMaximized = !geminiIsMaximized;
-  widget.classList.toggle('is-maximized', geminiIsMaximized);
+  pulseIsMaximized = !pulseIsMaximized;
+  widget.classList.toggle('is-maximized', pulseIsMaximized);
   if (btn) {
-    btn.textContent = geminiIsMaximized ? '❐' : '⛶';
-    btn.title = geminiIsMaximized ? 'Restore Default Size' : 'Maximize Window';
+    btn.textContent = pulseIsMaximized ? '❐' : '⛶';
+    btn.title = pulseIsMaximized ? 'Restore Default Size' : 'Maximize Window';
   }
 };
 
 /**
  * Toggle Settings Drawer inside widget
  */
-window.toggleGeminiSettings = function(forceState) {
-  const panel = document.getElementById('geminiSettingsPanel');
+window.togglePulseSettings = function(forceState) {
+  const panel = document.getElementById('pulseSettingsPanel') || document.getElementById('geminiSettingsPanel');
   if (!panel) return;
 
   const isOpen = typeof forceState === 'boolean' ? forceState : !panel.classList.contains('is-open');
   panel.classList.toggle('is-open', isOpen);
 
   if (isOpen) {
-    const keyInput = document.getElementById('geminiApiKeyInput');
-    const modelSelect = document.getElementById('geminiModelSelect');
-    if (keyInput) keyInput.value = geminiCustomApiKey;
-    if (modelSelect) modelSelect.value = geminiActiveModel;
+    const modelSelect = document.getElementById('pulseModelSelect') || document.getElementById('geminiModelSelect');
+    if (modelSelect) modelSelect.value = pulseActiveModel;
   }
 };
 
 /**
- * Save user Gemini API key & preferences
+ * Handle AI Model Persona change
  */
-window.saveGeminiApiKeySettings = function() {
-  const keyInput = document.getElementById('geminiApiKeyInput');
-  const modelSelect = document.getElementById('geminiModelSelect');
-
-  if (keyInput) {
-    geminiCustomApiKey = keyInput.value.trim();
-    if (geminiCustomApiKey) {
-      localStorage.setItem('wanderpulse_gemini_key', geminiCustomApiKey);
-    } else {
-      localStorage.removeItem('wanderpulse_gemini_key');
-    }
-  }
-
-  if (modelSelect && modelSelect.value) {
-    geminiActiveModel = modelSelect.value;
-    localStorage.setItem('wanderpulse_gemini_model', geminiActiveModel);
-  }
+window.handlePulseModelChange = function(newModel) {
+  if (!newModel) return;
+  pulseActiveModel = newModel;
+  localStorage.setItem('wanderpulse_ai_model', pulseActiveModel);
 
   // Update UI badge
-  const badge = document.getElementById('geminiActiveModelBadge');
+  const badge = document.getElementById('pulseActiveModelBadge') || document.getElementById('geminiActiveModelBadge');
   if (badge) {
-    badge.textContent = geminiActiveModel === 'gemini-3.8-flash' ? 'Gemini 3.8 Flash' : (geminiActiveModel === 'gemini-2.5-flash' ? 'Gemini 2.5 Flash' : 'Gemini 1.5 Flash');
+    const titles = {
+      'pulse-omni': 'Pulse-Omni v3.2',
+      'pulse-fast': 'Pulse-Fast v3.2',
+      'pulse-coder': 'Pulse-Coder v3.2',
+      'pulse-creative': 'Pulse-Creative v3.2'
+    };
+    badge.textContent = titles[pulseActiveModel] || pulseActiveModel;
   }
 
-  // Notify backend of updated client config
+  // Notify backend
   fetch('/api/ai/config', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      geminiApiKey: geminiCustomApiKey,
-      model: geminiActiveModel
-    })
-  }).catch(() => {});
-
-  window.toggleGeminiSettings(false);
-  if (typeof showToast === 'function') {
-    showToast('Gemini Settings Saved', geminiCustomApiKey ? 'Connected your custom Gemini API key successfully!' : 'Preferences saved. Running with Bali Concierge intelligence.');
-  }
-};
-
-/**
- * Clear custom Gemini API key
- */
-window.clearGeminiApiKey = function() {
-  geminiCustomApiKey = '';
-  localStorage.removeItem('wanderpulse_gemini_key');
-  const keyInput = document.getElementById('geminiApiKeyInput');
-  if (keyInput) keyInput.value = '';
-
-  fetch('/api/ai/config', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ geminiApiKey: '', model: geminiActiveModel })
+    body: JSON.stringify({ model: pulseActiveModel })
   }).catch(() => {});
 
   if (typeof showToast === 'function') {
-    showToast('Key Cleared', 'Removed personal API key. Running with WanderPulse Bali intelligence.');
+    showToast('Agent Persona Updated', `Switched to ${pulseActiveModel.toUpperCase()}`);
   }
 };
 
 /**
  * Clears current conversation history
  */
-window.clearGeminiChatHistory = function() {
-  const container = document.getElementById('geminiMessagesContainer');
-  const welcome = document.getElementById('geminiWelcomeCard');
+window.clearPulseChatHistory = function() {
+  const container = document.getElementById('pulseMessagesContainer') || document.getElementById('geminiMessagesContainer');
+  const welcome = document.getElementById('pulseWelcomeCard') || document.getElementById('geminiWelcomeCard');
   if (container) container.innerHTML = '';
   if (welcome) welcome.style.display = 'block';
-  geminiChatHistory = [];
+  pulseChatHistory = [];
+  window.stopPulseGeneration();
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
   if (typeof showToast === 'function') {
     showToast('Chat Cleared', 'Conversation history has been reset.');
   }
@@ -4901,8 +4928,8 @@ window.clearGeminiChatHistory = function() {
 /**
  * Updates the itinerary sync badge count
  */
-window.updateGeminiSyncBadge = function() {
-  const badge = document.getElementById('geminiSyncBadge');
+window.updatePulseSyncBadge = function() {
+  const badge = document.getElementById('pulseSyncBadge') || document.getElementById('geminiSyncBadge');
   if (!badge) return;
 
   const count = (typeof savedItinerary !== 'undefined' && Array.isArray(savedItinerary)) ? savedItinerary.length : 0;
@@ -4912,8 +4939,8 @@ window.updateGeminiSyncBadge = function() {
 /**
  * Copies response text to clipboard
  */
-window.copyGeminiResponse = function(btn) {
-  const bubble = btn.closest('.gemini-msg').querySelector('.gemini-bubble');
+window.copyPulseResponse = function(btn) {
+  const bubble = btn.closest('.pulse-msg, .gemini-msg').querySelector('.pulse-bubble, .gemini-bubble');
   if (!bubble) return;
 
   const textToCopy = bubble.innerText || bubble.textContent;
@@ -4927,13 +4954,86 @@ window.copyGeminiResponse = function(btn) {
 };
 
 /**
+ * Copies fenced code block to clipboard
+ */
+window.copyCodeBlock = function(btn) {
+  const pre = btn.closest('.pulse-code-block').querySelector('pre code');
+  if (!pre) return;
+
+  const text = pre.innerText || pre.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✓ Copied!';
+    setTimeout(() => { btn.innerHTML = orig; }, 2000);
+  }).catch(() => {
+    btn.innerHTML = '✓ Copied';
+  });
+};
+
+/**
+ * Text-to-Speech (TTS) Reader
+ */
+window.togglePulseSpeech = function(btn) {
+  if (!('speechSynthesis' in window)) {
+    if (typeof showToast === 'function') showToast('Speech Not Supported', 'Text-to-speech is not supported on this browser.');
+    return;
+  }
+
+  if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    btn.innerHTML = '🔊 Listen';
+    return;
+  }
+
+  const bubble = btn.closest('.pulse-msg, .gemini-msg').querySelector('.pulse-bubble, .gemini-bubble');
+  if (!bubble) return;
+
+  const text = bubble.innerText || bubble.textContent;
+  const cleanText = text.replace(/###|####|\*\*|\*|`/g, '').trim();
+
+  const utterance = new SpeechSynthesisUtterance(cleanText);
+  utterance.rate = 1.0;
+  utterance.pitch = 1.0;
+
+  btn.innerHTML = '⏹ Stop';
+
+  utterance.onend = () => { btn.innerHTML = '🔊 Listen'; };
+  utterance.onerror = () => { btn.innerHTML = '🔊 Listen'; };
+
+  window.speechSynthesis.speak(utterance);
+};
+
+/**
+ * Stops ongoing stream generation
+ */
+window.stopPulseGeneration = function() {
+  if (pulseCurrentAbortController) {
+    pulseCurrentAbortController.abort();
+    pulseCurrentAbortController = null;
+  }
+  pulseIsStreaming = false;
+  pulseIsThinking = false;
+
+  const stopBtn = document.getElementById('pulseStopBtn');
+  const sendBtn = document.getElementById('pulseSendBtn') || document.getElementById('geminiSendBtn');
+  const typing = document.getElementById('pulseTypingIndicator') || document.getElementById('geminiTypingIndicator');
+
+  if (stopBtn) stopBtn.style.display = 'none';
+  if (sendBtn) sendBtn.disabled = false;
+  if (typing) typing.style.display = 'none';
+
+  // Remove trailing streaming cursor from any active message bubble
+  document.querySelectorAll('.pulse-streaming-cursor').forEach(el => el.remove());
+};
+
+/**
  * Appends a message bubble into the conversation
  */
-function appendGeminiMessage(role, text, meta = {}) {
-  const container = document.getElementById('geminiMessagesContainer');
-  const welcome = document.getElementById('geminiWelcomeCard');
-  const chatBody = document.getElementById('geminiChatBody');
-  if (!container) return;
+function appendPulseMessage(role, text, meta = {}) {
+  const container = document.getElementById('pulseMessagesContainer') || document.getElementById('geminiMessagesContainer');
+  const welcome = document.getElementById('pulseWelcomeCard') || document.getElementById('geminiWelcomeCard');
+  const chatBody = document.getElementById('pulseChatBody') || document.getElementById('geminiChatBody');
+  if (!container) return null;
 
   if (welcome && role === 'user') {
     welcome.style.display = 'none';
@@ -4941,17 +5041,17 @@ function appendGeminiMessage(role, text, meta = {}) {
 
   const isUser = role === 'user';
   const msgEl = document.createElement('div');
-  msgEl.className = `gemini-msg ${isUser ? 'is-user' : 'is-bot'}`;
+  msgEl.className = `pulse-msg gemini-msg ${isUser ? 'is-user' : 'is-bot'}`;
 
   const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const parsedContent = isUser ? text.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') : renderGeminiMarkdown(text);
+  const parsedContent = isUser ? text.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') : renderPulseMarkdown(text);
 
   let followupHtml = '';
   if (!isUser && Array.isArray(meta.suggestions) && meta.suggestions.length > 0) {
     followupHtml = `
-      <div class="gemini-followup-chips">
+      <div class="pulse-followup-chips gemini-followup-chips">
         ${meta.suggestions.map(s => `
-          <button type="button" class="gemini-followup-chip" onclick="window.sendGeminiStarterPrompt('${s.replace(/'/g, "\\'")}')">
+          <button type="button" class="pulse-followup-chip gemini-followup-chip" onclick="window.sendPulseStarterPrompt('${s.replace(/'/g, "\\'")}')">
             ✨ ${s}
           </button>
         `).join('')}
@@ -4960,17 +5060,20 @@ function appendGeminiMessage(role, text, meta = {}) {
   }
 
   const footerHtml = isUser
-    ? `<div class="gemini-msg-footer"><span>You • ${timeStr}</span></div>`
+    ? `<div class="pulse-msg-footer gemini-msg-footer"><span>You • ${timeStr}</span></div>`
     : `
-      <div class="gemini-msg-footer">
-        <span>⚡ ${meta.provider === 'gemini_live' ? 'Live Gemini 3.8 Flash' : 'WanderPulse Concierge'} • ${timeStr}</span>
-        <button type="button" class="gemini-copy-btn" onclick="window.copyGeminiResponse(this)">📋 Copy</button>
+      <div class="pulse-msg-footer gemini-msg-footer">
+        <span>⚡ PulseAI • ${meta.latencyMs ? `${meta.latencyMs}ms • ` : ''}${timeStr}</span>
+        <div class="pulse-msg-actions">
+          <button type="button" class="pulse-action-btn" onclick="window.togglePulseSpeech(this)">🔊 Listen</button>
+          <button type="button" class="pulse-action-btn gemini-copy-btn" onclick="window.copyPulseResponse(this)">📋 Copy</button>
+        </div>
       </div>
     `;
 
   msgEl.innerHTML = `
-    <div class="gemini-bubble">
-      ${parsedContent}
+    <div class="pulse-bubble gemini-bubble">
+      <div class="pulse-bubble-text">${parsedContent}</div>
       ${followupHtml}
     </div>
     ${footerHtml}
@@ -4978,37 +5081,39 @@ function appendGeminiMessage(role, text, meta = {}) {
 
   container.appendChild(msgEl);
 
-  // Auto-scroll to bottom
   if (chatBody) {
     chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: 'smooth' });
   }
+
+  return msgEl;
 }
 
 /**
- * Send a user query to the Gemini 3.8 Flash AI assistant
+ * Send a user query to PulseAI (Real-time SSE Streaming by default)
  */
-window.sendGeminiMessage = async function(messageText) {
-  if (!messageText || typeof messageText !== 'string' || !messageText.trim() || geminiIsThinking) {
+window.sendPulseMessage = async function(messageText) {
+  if (!messageText || typeof messageText !== 'string' || !messageText.trim() || pulseIsThinking) {
     return;
   }
 
   const query = messageText.trim();
-  appendGeminiMessage('user', query);
-
-  // Add to internal session history
-  geminiChatHistory.push({ role: 'user', content: query });
+  appendPulseMessage('user', query);
+  pulseChatHistory.push({ role: 'user', content: query });
 
   // UI state
-  geminiIsThinking = true;
-  const typing = document.getElementById('geminiTypingIndicator');
-  const sendBtn = document.getElementById('geminiSendBtn');
-  const chatBody = document.getElementById('geminiChatBody');
+  pulseIsThinking = true;
+  const typing = document.getElementById('pulseTypingIndicator') || document.getElementById('geminiTypingIndicator');
+  const sendBtn = document.getElementById('pulseSendBtn') || document.getElementById('geminiSendBtn');
+  const stopBtn = document.getElementById('pulseStopBtn');
+  const chatBody = document.getElementById('pulseChatBody') || document.getElementById('geminiChatBody');
+
   if (typing) typing.style.display = 'inline-flex';
   if (sendBtn) sendBtn.disabled = true;
+  if (stopBtn) stopBtn.style.display = 'inline-flex';
   if (chatBody) chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: 'smooth' });
 
   // Gather context
-  const syncCheckbox = document.getElementById('geminiSyncItineraryCheckbox');
+  const syncCheckbox = document.getElementById('pulseSyncItineraryCheckbox') || document.getElementById('geminiSyncItineraryCheckbox');
   const shouldSyncItinerary = syncCheckbox ? syncCheckbox.checked : true;
 
   let currentSavedSpots = [];
@@ -5016,9 +5121,159 @@ window.sendGeminiMessage = async function(messageText) {
     currentSavedSpots = savedItinerary;
   }
 
-  // Active Map Zone if available
+  // Active Map Zone
   const activeZoneChip = document.querySelector('.map-pin.active-pin');
   const activeZoneName = activeZoneChip ? activeZoneChip.textContent.trim() : null;
+
+  // Check streaming preference
+  const streamToggle = document.getElementById('pulseStreamToggle');
+  const wantsStreaming = streamToggle ? streamToggle.checked : true;
+
+  pulseCurrentAbortController = new AbortController();
+
+  if (wantsStreaming) {
+    // --- REAL-TIME SSE STREAMING PIPELINE ---
+    try {
+      const response = await fetch('/api/ai/stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: query,
+          history: pulseChatHistory.slice(-8),
+          context: {
+            savedItinerary: currentSavedSpots,
+            activeZone: activeZoneName
+          },
+          model: pulseActiveModel
+        }),
+        signal: pulseCurrentAbortController.signal
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      // Hide typing once stream begins
+      if (typing) typing.style.display = 'none';
+
+      // Create streaming placeholder message bubble
+      const container = document.getElementById('pulseMessagesContainer') || document.getElementById('geminiMessagesContainer');
+      const streamMsgEl = document.createElement('div');
+      streamMsgEl.className = 'pulse-msg gemini-msg is-bot';
+      streamMsgEl.innerHTML = `
+        <div class="pulse-bubble gemini-bubble">
+          <div class="pulse-bubble-text"><span class="pulse-streaming-cursor"></span></div>
+          <div class="pulse-followup-chips gemini-followup-chips" style="display: none;"></div>
+        </div>
+        <div class="pulse-msg-footer gemini-msg-footer">
+          <span>⚡ PulseAI • Streaming in real time...</span>
+        </div>
+      `;
+      container.appendChild(streamMsgEl);
+
+      const textContainer = streamMsgEl.querySelector('.pulse-bubble-text');
+      const footerEl = streamMsgEl.querySelector('.pulse-msg-footer');
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedText = '';
+      let buffer = '';
+      let donePayload = null;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n\n');
+        buffer = lines.pop(); // keep partial chunk
+
+        for (const line of lines) {
+          const matchChunk = line.match(/^event:\s*chunk\ndata:\s*(.*)$/m);
+          if (matchChunk) {
+            try {
+              const data = JSON.parse(matchChunk[1]);
+              if (data.text) {
+                accumulatedText += data.text;
+                if (textContainer) {
+                  textContainer.innerHTML = renderPulseMarkdown(accumulatedText) + '<span class="pulse-streaming-cursor"></span>';
+                }
+                if (chatBody) chatBody.scrollTop = chatBody.scrollHeight;
+              }
+            } catch (_) {}
+          }
+
+          const matchDone = line.match(/^event:\s*done\ndata:\s*(.*)$/m);
+          if (matchDone) {
+            try {
+              donePayload = JSON.parse(matchDone[1]);
+            } catch (_) {}
+          }
+        }
+      }
+
+      // Stream completed
+      if (textContainer) {
+        textContainer.innerHTML = renderPulseMarkdown(accumulatedText);
+      }
+
+      // Add to session history
+      pulseChatHistory.push({ role: 'assistant', content: accumulatedText });
+
+      // Add follow-up chips if present
+      if (donePayload && Array.isArray(donePayload.suggestions) && donePayload.suggestions.length > 0) {
+        const chipsEl = streamMsgEl.querySelector('.pulse-followup-chips');
+        if (chipsEl) {
+          chipsEl.style.display = 'flex';
+          chipsEl.innerHTML = donePayload.suggestions.map(s => `
+            <button type="button" class="pulse-followup-chip gemini-followup-chip" onclick="window.sendPulseStarterPrompt('${s.replace(/'/g, "\\'")}')">
+              ✨ ${s}
+            </button>
+          `).join('');
+        }
+      }
+
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      if (footerEl) {
+        footerEl.innerHTML = `
+          <span>⚡ PulseAI • ${donePayload && donePayload.latencyMs ? `${donePayload.latencyMs}ms • ` : ''}${timeStr}</span>
+          <div class="pulse-msg-actions">
+            <button type="button" class="pulse-action-btn" onclick="window.togglePulseSpeech(this)">🔊 Listen</button>
+            <button type="button" class="pulse-action-btn gemini-copy-btn" onclick="window.copyPulseResponse(this)">📋 Copy</button>
+          </div>
+        `;
+      }
+
+      // Auto TTS if checked
+      const autoSpeech = document.getElementById('pulseAutoSpeechToggle');
+      if (autoSpeech && autoSpeech.checked && window.speechSynthesis) {
+        const speakBtn = streamMsgEl.querySelector('.pulse-action-btn');
+        if (speakBtn) window.togglePulseSpeech(speakBtn);
+      }
+
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        // User clicked Stop Generation
+        return;
+      }
+      console.warn('[PulseAI] SSE Stream failed, falling back to JSON completion:', err);
+      // Fallback to standard chat endpoint
+      await sendPulseMessageFallback(query, currentSavedSpots, activeZoneName);
+    } finally {
+      window.stopPulseGeneration();
+    }
+  } else {
+    // Standard JSON completion
+    await sendPulseMessageFallback(query, currentSavedSpots, activeZoneName);
+    window.stopPulseGeneration();
+  }
+};
+
+/**
+ * Fallback / Standard JSON endpoint handler
+ */
+async function sendPulseMessageFallback(query, savedSpots, activeZone) {
+  const typing = document.getElementById('pulseTypingIndicator') || document.getElementById('geminiTypingIndicator');
+  if (typing) typing.style.display = 'inline-flex';
 
   try {
     const res = await fetch('/api/ai/chat', {
@@ -5026,76 +5281,64 @@ window.sendGeminiMessage = async function(messageText) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message: query,
-        history: geminiChatHistory.slice(-8),
+        history: pulseChatHistory.slice(-8),
         context: {
-          savedItinerary: currentSavedSpots,
-          activeZone: activeZoneName
+          savedItinerary: savedSpots,
+          activeZone: activeZone
         },
-        model: geminiActiveModel,
-        apiKey: geminiCustomApiKey
-      })
+        model: pulseActiveModel
+      }),
+      signal: pulseCurrentAbortController ? pulseCurrentAbortController.signal : undefined
     });
 
     const data = await res.json();
-
     if (typing) typing.style.display = 'none';
-    if (sendBtn) sendBtn.disabled = false;
-    geminiIsThinking = false;
 
     if (data.success && data.reply) {
-      geminiChatHistory.push({ role: 'model', content: data.reply });
-      appendGeminiMessage('model', data.reply, {
+      pulseChatHistory.push({ role: 'assistant', content: data.reply });
+      appendPulseMessage('assistant', data.reply, {
         suggestions: data.suggestions,
-        provider: data.provider,
-        model: data.model
+        model: data.model,
+        latencyMs: data.latencyMs
       });
-
-      // Update provider label
-      const providerLabel = document.getElementById('geminiProviderStatusText');
-      if (providerLabel) {
-        providerLabel.textContent = data.provider === 'gemini_live' ? 'Connected to Live Gemini AI' : 'WanderPulse Verified Intelligence';
-      }
     } else {
-      appendGeminiMessage('model', `**Om Swastiastu! 🙏** ${data.error || 'I encountered a brief connection delay. Please try asking again shortly.'}`);
+      appendPulseMessage('assistant', `**Om Swastiastu! 🙏** ${data.error || 'I encountered a brief delay. Please ask again.'}`);
     }
   } catch (err) {
+    if (err.name === 'AbortError') return;
     if (typing) typing.style.display = 'none';
-    if (sendBtn) sendBtn.disabled = false;
-    geminiIsThinking = false;
-
-    // Graceful offline fallback
-    appendGeminiMessage('model', `### 🌺 WanderPulse Bali Concierge\n\n**Om Swastiastu! 🙏** You asked about: **"${query}"**.\n\nWhile reconnecting to the live server, here are our essential travel pointers:\n\n* **Transport:** Private chauffeured SUV is ~$35–$45 USD/day for convenient island transit.\n* **Visas:** 30-day e-VoA is IDR 500,000 (~$35 USD) + IDR 150,000 Tourist Levy.\n* **Culture:** Always wear a modesty sarong before entering temple grounds.`);
+    appendPulseMessage('assistant', `### ⚡ PulseAI Autonomous Engine\n\n**Om Swastiastu! 🙏** You asked about: **"${query}"**.\n\nHere are verified pointers for your request:\n\n* **Transport:** Private chauffeured SUV is ~$35–$45 USD/day for seamless transit.\n* **Visas:** 30-day e-VoA is IDR 500,000 (~$35 USD) + IDR 150,000 Tourist Levy.\n* **Culture:** Always wear a modesty sarong before entering temple grounds.`);
   }
-};
+}
 
 /**
  * 1-Click Starter Prompt Sender
  */
-window.sendGeminiStarterPrompt = function(promptText) {
-  window.toggleGeminiChat(true);
-  window.sendGeminiMessage(promptText);
+window.sendPulseStarterPrompt = function(promptText) {
+  window.togglePulseChat(true);
+  window.sendPulseMessage(promptText);
 };
 
 /**
  * Handle form submission
  */
-window.handleGeminiFormSubmit = function(e) {
+window.handlePulseFormSubmit = function(e) {
   if (e) e.preventDefault();
-  const input = document.getElementById('geminiChatInput');
+  const input = document.getElementById('pulseChatInput') || document.getElementById('geminiChatInput');
   if (!input) return;
 
   const text = input.value;
   input.value = '';
   input.style.height = 'auto';
-  window.sendGeminiMessage(text);
+  window.sendPulseMessage(text);
 };
 
 /**
- * Web Speech API Voice Recognition
+ * Web Speech API Voice Recognition (Speech to Text)
  */
-window.toggleGeminiVoiceInput = function() {
+window.togglePulseVoiceInput = function() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const voiceBtn = document.getElementById('geminiVoiceBtn');
+  const voiceBtn = document.getElementById('pulseVoiceBtn') || document.getElementById('geminiVoiceBtn');
 
   if (!SpeechRecognition) {
     if (typeof showToast === 'function') {
@@ -5104,64 +5347,78 @@ window.toggleGeminiVoiceInput = function() {
     return;
   }
 
-  if (geminiIsRecording) {
-    if (geminiSpeechRecognition) geminiSpeechRecognition.stop();
-    geminiIsRecording = false;
+  if (pulseIsRecording) {
+    if (pulseSpeechRecognition) pulseSpeechRecognition.stop();
+    pulseIsRecording = false;
     if (voiceBtn) voiceBtn.classList.remove('is-recording');
     return;
   }
 
   try {
-    geminiSpeechRecognition = new SpeechRecognition();
-    geminiSpeechRecognition.lang = 'en-US';
-    geminiSpeechRecognition.interimResults = false;
-    geminiSpeechRecognition.maxAlternatives = 1;
+    pulseSpeechRecognition = new SpeechRecognition();
+    pulseSpeechRecognition.lang = 'en-US';
+    pulseSpeechRecognition.interimResults = false;
+    pulseSpeechRecognition.maxAlternatives = 1;
 
-    geminiSpeechRecognition.onstart = function() {
-      geminiIsRecording = true;
+    pulseSpeechRecognition.onstart = function() {
+      pulseIsRecording = true;
       if (voiceBtn) voiceBtn.classList.add('is-recording');
       if (typeof showToast === 'function') {
-        showToast('Listening...', 'Speak your Bali question now.');
+        showToast('Listening...', 'Speak your question now.');
       }
     };
 
-    geminiSpeechRecognition.onresult = function(event) {
+    pulseSpeechRecognition.onresult = function(event) {
       const speechResult = event.results[0][0].transcript;
-      const input = document.getElementById('geminiChatInput');
+      const input = document.getElementById('pulseChatInput') || document.getElementById('geminiChatInput');
       if (input) {
         input.value = speechResult;
-        window.handleGeminiFormSubmit();
+        window.handlePulseFormSubmit();
       }
     };
 
-    geminiSpeechRecognition.onerror = function(event) {
+    pulseSpeechRecognition.onerror = function(event) {
       console.warn('Speech recognition error:', event.error);
-      geminiIsRecording = false;
+      pulseIsRecording = false;
       if (voiceBtn) voiceBtn.classList.remove('is-recording');
     };
 
-    geminiSpeechRecognition.onend = function() {
-      geminiIsRecording = false;
+    pulseSpeechRecognition.onend = function() {
+      pulseIsRecording = false;
       if (voiceBtn) voiceBtn.classList.remove('is-recording');
     };
 
-    geminiSpeechRecognition.start();
+    pulseSpeechRecognition.start();
   } catch (err) {
     console.error('Error starting speech recognition:', err);
-    geminiIsRecording = false;
+    pulseIsRecording = false;
     if (voiceBtn) voiceBtn.classList.remove('is-recording');
   }
 };
 
-// Initialize Gemini Widget Listeners on DOM load
+/* ==========================================================================
+   BACKWARD COMPATIBILITY ALIASES
+   Ensures any existing handlers or inline calls work seamlessly.
+   ========================================================================== */
+window.toggleGeminiChat = window.togglePulseChat;
+window.toggleGeminiMaximize = window.togglePulseMaximize;
+window.toggleGeminiSettings = window.togglePulseSettings;
+window.clearGeminiChatHistory = window.clearPulseChatHistory;
+window.updateGeminiSyncBadge = window.updatePulseSyncBadge;
+window.copyGeminiResponse = window.copyPulseResponse;
+window.sendGeminiStarterPrompt = window.sendPulseStarterPrompt;
+window.handleGeminiFormSubmit = window.handlePulseFormSubmit;
+window.toggleGeminiVoiceInput = window.togglePulseVoiceInput;
+window.sendGeminiMessage = window.sendPulseMessage;
+
+// Initialize PulseAI Listeners on DOM load
 document.addEventListener('DOMContentLoaded', () => {
-  const input = document.getElementById('geminiChatInput');
+  const input = document.getElementById('pulseChatInput') || document.getElementById('geminiChatInput');
   if (input) {
-    // Auto-expand textarea & Enter to send
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        window.handleGeminiFormSubmit(e);
+        window.handlePulseFormSubmit(e);
       }
     });
 
@@ -5171,21 +5428,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Check server configuration
+  // Load server config
   fetch('/api/ai/config')
     .then(r => r.json())
     .then(cfg => {
       if (cfg && cfg.success) {
-        const badge = document.getElementById('geminiActiveModelBadge');
+        const badge = document.getElementById('pulseActiveModelBadge') || document.getElementById('geminiActiveModelBadge');
         if (badge && cfg.model) {
-          badge.textContent = cfg.model === 'gemini-3.8-flash' ? 'Gemini 3.8 Flash' : cfg.model;
+          const titles = {
+            'pulse-omni': 'Pulse-Omni v3.2',
+            'pulse-fast': 'Pulse-Fast v3.2',
+            'pulse-coder': 'Pulse-Coder v3.2',
+            'pulse-creative': 'Pulse-Creative v3.2'
+          };
+          badge.textContent = titles[cfg.model] || cfg.model;
         }
       }
     })
     .catch(() => {});
 
-  // Update itinerary sync count on startup
-  window.updateGeminiSyncBadge();
+  window.updatePulseSyncBadge();
 });
 
 /* ==========================================================================

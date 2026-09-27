@@ -419,23 +419,23 @@ async function runTests() {
     return res.status === 400 && json.success === false;
   });
 
-  // 20. Gemini 3.8 Flash AI - GET /api/ai/config
+  // 20. PulseAI Real-Time Agent - GET /api/ai/config
   await testEndpoint('GET /api/ai/config', '/api/ai/config', {}, (res, json) => {
     return res.status === 200 && json.success && json.model && json.features && json.features.tripPlanning;
   });
 
-  // 21. Gemini 3.8 Flash AI - POST /api/ai/config
+  // 21. PulseAI Real-Time Agent - POST /api/ai/config
   await testEndpoint('POST /api/ai/config', '/api/ai/config', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'gemini-3.8-flash'
+      model: 'pulse-omni'
     })
   }, (res, json) => {
-    return res.status === 200 && json.success && json.model === 'gemini-3.8-flash';
+    return res.status === 200 && json.success && json.model === 'pulse-omni';
   });
 
-  // 22. Gemini 3.8 Flash AI - POST /api/ai/chat (Itinerary Query)
+  // 22. PulseAI Real-Time Agent - POST /api/ai/chat (Itinerary Query)
   await testEndpoint('POST /api/ai/chat (5-day itinerary)', '/api/ai/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -449,7 +449,7 @@ async function runTests() {
     return res.status === 200 && json.success && json.reply && json.reply.length > 50 && Array.isArray(json.suggestions);
   });
 
-  // 23. Gemini 3.8 Flash AI - POST /api/ai/chat (Validation - Missing Message)
+  // 23. PulseAI Real-Time Agent - POST /api/ai/chat (Validation - Missing Message)
   await testEndpoint('POST /api/ai/chat (Validation - Empty Message)', '/api/ai/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -458,6 +458,17 @@ async function runTests() {
     })
   }, (res, json) => {
     return res.status === 400 && json.success === false;
+  });
+
+  // 24. PulseAI Real-Time Agent - POST /api/ai/chat (Universal Question - Coding)
+  await testEndpoint('POST /api/ai/chat (Universal Coding Query)', '/api/ai/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: 'Write a javascript debounce function'
+    })
+  }, (res, json) => {
+    return res.status === 200 && json.success && json.reply && json.reply.includes('debounce');
   });
 
   // 24. Google Maps Platform - GET /api/maps/config

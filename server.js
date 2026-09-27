@@ -166,9 +166,9 @@ function saveGoogleMapsCache() {
   }
 }
 
-// Google Gemini 3.8 Flash AI Configuration & Session Setup
-let GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-let GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+// PulseAI Autonomous Real-Time Intelligence Engine Setup
+const { processPulseAiQuery, getActiveModel, setActiveModel, MODEL_REGISTRY } = require('./pulse-ai-engine.js');
+let PULSE_AI_MODEL = process.env.PULSE_AI_MODEL || 'pulse-omni';
 
 // Amadeus Hotel Search API Configuration & Session Cache
 let AMADEUS_CLIENT_ID = process.env.AMADEUS_CLIENT_ID || process.env.AMADEUS_API_KEY || '';
@@ -2483,276 +2483,64 @@ app.get('/api/maps/places', async (req, res) => {
 });
 
 /* ==========================================================================
-   11. GEMINI 3.8 FLASH AI TRIP ASSISTANT & BALI CONCIERGE ENGINE
-   Provides real-time trip advice, customizable itineraries, logistics guidance,
-   temple etiquette, budget estimation, and intelligent fallback responses.
+   11. PULSE-AI REAL-TIME AUTONOMOUS ENGINE & TRIP CONCIERGE API
+   Provides real-time multi-modal responses, streaming completions (SSE),
+   itinerary sync, code generation, mathematical evaluation, and universal Q&A.
    ========================================================================== */
-
-const GEMINI_SYSTEM_PROMPT = `You are the official WanderPulse Bali AI Concierge, powered by Google Gemini 3.8 Flash.
-You are an expert Bali travel advisor, itinerary architect, and cultural guide with deep local knowledge of Bali, Indonesia.
-Bali Core Knowledge:
-- Iconic Attractions: Tanah Lot (sea temple & low-tide sunset causeway), Uluwatu Temple (70m ocean cliffside & Kecak Fire Dance at 6:00 PM), Tegallalang Rice Terraces (Ubud emerald valley & jungle swings), Mount Batur (1,717m active volcano sunrise trek starting at 2:00 AM), Sekumpul Waterfall (80m twin cascade in northern Singaraja jungle), Tirta Empul (holy spring water purification 'Melukat' ritual), Kelingking Beach (Nusa Penida T-Rex head cliff & pristine turquoise bay), Sacred Monkey Forest Sanctuary (Ubud macaque haven).
-- Luxury & Eco Stays: Padma Resort Ubud, Viceroy Bali (luxury valley villas), AYANA Resort & Rock Bar Jimbaran, Four Seasons Resort Sayan, Capella Ubud, Maya Sanur.
-- Transport & Island Logistics: DPS Ngurah Rai International Airport; Fast boat ferries from Sanur Harbor to Nusa Penida/Lembongan (30-40 mins); Private air-conditioned SUV + vetted English-speaking driver (~$35-$45 USD/day); Scooter rental (~$7-$12 USD/day with helmet and international permit); Local transport cartel zones (Grab/Gojek pickups restricted in central Ubud, Canggu shortcuts, and Uluwatu cliff zones—drop-offs are allowed).
-- Visa & Tourist Levy: 30-day electronic Visa on Arrival (e-VoA) is IDR 500,000 (~$35 USD) for 90+ countries; Bali Provincial Tourist Levy (LoveBali) is IDR 150,000 (~$10 USD); Electronic Customs Declaration (ECD QR code) is free online.
-- Culture & Etiquette: Wear modesty sarong and temple sash before entering sacred temple courtyards; Never touch Balinese people's heads or step on 'Canang Sari' sidewalk offerings; Dress respectfully; Drive on the left side of the road.
-- Budget Tiers: Backpacker ($30-$50/day), Mid-Range ($80-$150/day), Luxury ($250-$600+/day).
-
-Instructions:
-- Greet the traveler warmly with Balinese hospitality (e.g., 'Om Swastiastu! 🙏').
-- Organize answers clearly using Markdown with bold headings, bullet points, day-by-day steps, and practical timings.
-- If the traveler mentions their saved itinerary, incorporate their selected spots into your recommendations.
-- End your reply with 2-3 actionable, relevant follow-up suggestions or questions.`;
-
-/**
- * Executes a call to Google Gemini REST API
- */
-async function callGeminiAPI({ message, history = [], context = {}, model = GEMINI_MODEL, temperature = 0.7, apiKey = GEMINI_API_KEY }) {
-  const activeKey = (apiKey && typeof apiKey === 'string' && apiKey.trim()) ? apiKey.trim() : GEMINI_API_KEY;
-  if (!activeKey) return null;
-
-  const contents = [];
-  if (Array.isArray(history)) {
-    for (const h of history.slice(-8)) {
-      if (h.role && (h.text || h.content)) {
-        contents.push({
-          role: h.role === 'user' ? 'user' : 'model',
-          parts: [{ text: String(h.text || h.content) }]
-        });
-      }
-    }
-  }
-
-  let promptText = message;
-  if (context && Array.isArray(context.savedItinerary) && context.savedItinerary.length > 0) {
-    const spotNames = context.savedItinerary.map(item => item.name || item.title || item.id).filter(Boolean).join(', ');
-    promptText = `[Traveler Saved Itinerary: ${spotNames}]\n\n${promptText}`;
-  }
-  if (context && context.activeZone) {
-    promptText = `[Viewing Bali Zone: ${context.activeZone}]\n\n${promptText}`;
-  }
-
-  contents.push({
-    role: 'user',
-    parts: [{ text: promptText }]
-  });
-
-  // Candidate models: requested model first, then compatible fallback aliases
-  const candidateModels = [model, 'gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-1.5-flash'];
-  const modelsToTry = [...new Set(candidateModels.filter(Boolean))];
-
-  for (const candidate of modelsToTry) {
-    try {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(candidate)}:generateContent?key=${encodeURIComponent(activeKey)}`;
-      const payload = {
-        contents,
-        systemInstruction: {
-          parts: [{ text: GEMINI_SYSTEM_PROMPT }]
-        },
-        generationConfig: {
-          temperature: typeof temperature === 'number' ? temperature : 0.7,
-          maxOutputTokens: 2048,
-          topP: 0.95
-        }
-      };
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 14000);
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        const candidateChoice = data.candidates && data.candidates[0];
-        const text = candidateChoice && candidateChoice.content && candidateChoice.content.parts && candidateChoice.content.parts[0] && candidateChoice.content.parts[0].text;
-        if (text) {
-          return {
-            reply: text,
-            model: candidate,
-            provider: 'gemini_live'
-          };
-        }
-      } else {
-        const errJson = await response.json().catch(() => ({}));
-        console.warn(`[Gemini API] Request to ${candidate} responded with ${response.status}:`, errJson.error ? errJson.error.message : response.statusText);
-        if (response.status === 401 || response.status === 403) {
-          // Invalid API Key - don't loop through other models
-          break;
-        }
-      }
-    } catch (err) {
-      console.warn(`[Gemini API] Failed call with ${candidate}:`, err.message);
-      break;
-    }
-  }
-
-  return null;
-}
-
-/**
- * Intelligent Bali Concierge Fallback Engine
- * Generates structured, high-value responses when no API key is supplied or external network is offline.
- */
-function generateConciergeFallback({ message = '', context = {} }) {
-  const q = message.toLowerCase().trim();
-
-  // 1. Saved Itinerary Review
-  if ((q.includes('my itinerary') || q.includes('saved') || q.includes('review my plan')) && context && Array.isArray(context.savedItinerary) && context.savedItinerary.length > 0) {
-    const spots = context.savedItinerary.map(s => s.name || s.title).join(', ');
-    return {
-      reply: `### 🌺 Review of Your Custom Bali Itinerary\n\n**Om Swastiastu! 🙏** Here is your personalized trip assessment based on your **${context.savedItinerary.length} shortlisted spots** (${spots}):\n\n- **Route Efficiency:** Your selected destinations cluster nicely across South and Central Bali. We recommend dedicating Day 1–2 to Ubud/Highlands, Day 3 to Coastal Temples (Tanah Lot & Uluwatu), and Day 4 to Offshore excursions.\n- **Recommended Transit:** Hire a private air-conditioned SUV with a local driver (~$35–$45 USD/day). This completely avoids local Grab cartel pickup zones and saves hours navigating mountain hairpin turns.\n- **Timing Tip:** Visit **Tanah Lot** around 4:30 PM for the sunset tide causeway, and start **Mount Batur** or **Tegallalang** early by 6:00 AM to beat tour buses.\n\nWould you like me to organize these into an optimized hour-by-hour day plan, or calculate estimated driver and entry ticket costs?`,
-      suggestions: ['Generate an hour-by-hour schedule for my spots', 'Calculate total entry fees and transit costs', 'Suggest hotels near my selected locations']
-    };
-  }
-
-  // 2. Itinerary Requests (3, 5, 7, 10 days, honeymoon, family)
-  if (q.includes('itinerary') || q.includes('days') || q.includes('day trip') || q.includes('plan a trip') || q.includes('honeymoon') || q.includes('first time')) {
-    let days = 5;
-    if (q.includes('3 day') || q.includes('3-day')) days = 3;
-    if (q.includes('7 day') || q.includes('7-day') || q.includes('week')) days = 7;
-    if (q.includes('10 day') || q.includes('10-day')) days = 10;
-
-    let responseMarkdown = `### 🌺 Recommended ${days}-Day "Island Highlights & Culture" Itinerary\n\n**Om Swastiastu! 🙏** Here is a curated, high-efficiency ${days}-day Bali journey balancing culture, iconic sights, and ocean sunsets:\n\n`;
-
-    if (days <= 3) {
-      responseMarkdown += `* **Day 1: Cultural Heart of Ubud & Sacred Waters**\n  - **Morning (08:30):** Explore **Sacred Monkey Forest Sanctuary** before the midday heat, then stroll Ubud Royal Palace & Art Market.\n  - **Afternoon (13:00):** Experience the sacred spring water purification (*Melukat*) at **Tirta Empul Temple**.\n  - **Evening (18:30):** Dinner overlooking river ravines in Sayan (organic Balinese Crispy Duck / Bebek Bengil).\n\n* **Day 2: Volcano Sunrise & Emerald Rice Terraces**\n  - **Dawn (02:30–06:30):** Early pickup for **Mount Batur Sunrise Trek** (1,717m) or morning coffee at Kintamani caldera overlooking Lake Batur.\n  - **Afternoon (14:00):** Walk the UNESCO-listed **Tegallalang Rice Terraces** and try a jungle canyon swing.\n  - **Evening (17:30):** Traditional Balinese wellness spa in Ubud.\n\n* **Day 3: Majestic Sea Temples & Southern Cliffs**\n  - **Midday (11:00):** Scenic coastal transfer to Seminyak or Canggu for coastal cafe dining.\n  - **Late Afternoon (16:30):** Sunset at **Tanah Lot Temple** or cliffside **Uluwatu Temple** with the dramatic 6:00 PM Kecak Fire & Trance Dance.\n  - **Night (20:00):** Fresh seafood beach barbecue with candlelit tables directly on Jimbaran Bay sands.\n\n`;
-    } else if (days <= 5) {
-      responseMarkdown += `* **Day 1: Arrival & Coastal Relaxation**\n  - Ngurah Rai Airport (DPS) VIP transfer to Seminyak or Jimbaran villa. Relax by the pool, adjust to WITA timezone, and enjoy sunset cocktails at Rock Bar.\n\n* **Day 2: Ubud Art, Monkey Forest & Water Purification**\n  - Morning walk in **Sacred Monkey Forest Sanctuary**, visit **Tirta Empul Holy Water Temple** for blessings, followed by lunch overlooking Tegallalang Rice Terraces.\n\n* **Day 3: Mount Batur Sunrise Caldera & Northern Waterfalls**\n  - Sunrise 4WD Jeep or hiking trek up **Mount Batur**, breakfast overlooking volcanic lava fields, then afternoon trek to the mist-veiled **Sekumpul Waterfall**.\n\n* **Day 4: Fast Boat Odyssey to Nusa Penida**\n  - 07:30 AM fast boat departure from Sanur Harbor (35 mins) to Nusa Penida. Witness the world-famous dinosaur cliff at **Kelingking Beach**, Angel’s Billabong, and Broken Beach.\n\n* **Day 5: Southern Cliffs & Tanah Lot Farewell**\n  - Morning beach time in Bingin/Padang Padang, 16:30 PM sunset visit to **Tanah Lot Sea Temple**, followed by fine Balinese dining.\n\n`;
-    } else {
-      responseMarkdown += `* **Day 1–3: Ubud, Tegallalang Terraces, Mount Batur & Waterfalls** (Central & Northern Highlands)\n* **Day 4–5: Nusa Penida & Nusa Lembongan Island Hopping** (Manta ray snorkeling, Kelingking Beach, coastal limestone lagoons)\n* **Day 6–7: Uluwatu Cliffs, Surf Beaches & Tanah Lot Temple** (Kecak dance, Jimbaran seafood, cliffside sunset clubs)\n\n`;
-    }
-
-    responseMarkdown += `**💡 Logistics & Budget Essentials:**\n- **Private Driver:** ~$35–$45 USD/day (includes fuel, parking, and English-speaking local guide).\n- **Entrance Fees:** Temples range between IDR 50,000–100,000 (~$3–$7 USD). Bring a modesty sarong or borrow one at the gate.\n- **Entry Requirements:** 30-Day e-VoA ($35 USD) + Bali Tourist Levy ($10 USD via LoveBali).\n\nWhat travel style do you prefer: relaxed luxury villas, fast-paced adventure, or family-friendly culture?`;
-
-    return {
-      reply: responseMarkdown,
-      suggestions: ['What is the best way to get to Nusa Penida?', 'Recommend the best hotels with private pools', 'How much should I budget per day in Bali?']
-    };
-  }
-
-  // 3. Mount Batur / Volcano / Sunrise Trekking
-  if (q.includes('batur') || q.includes('volcano') || q.includes('sunrise trek') || q.includes('hiking')) {
-    return {
-      reply: `### 🌋 Mount Batur Sunrise Trek: Complete Insider Guide\n\n**Om Swastiastu! 🙏** Mount Batur (*Gunung Batur*) is an active volcano rising 1,717 meters above sea level in Kintamani, offering one of Bali's most memorable sunrises.\n\n- **Typical Itinerary:**\n  - **01:30–02:30 AM:** Driver pickup from your hotel (Ubud: ~02:15 AM; Seminyak/Canggu: ~01:30 AM).\n  - **03:30 AM:** Arrival at Toya Bungkah basecamp; meet your local certified mountain guide; receive headlights and trekking poles.\n  - **04:00–06:00 AM:** Summit ascent (approx. 2 hours of steady uphill hiking over volcanic gravel).\n  - **06:15 AM:** Breathtaking sunrise above the sea of clouds with views of Mount Agung, Mount Rinjani (Lombok), and Lake Batur. Guides boil eggs in active volcanic steam vents for breakfast!\n  - **08:30 AM:** Return descent to basecamp, followed by optional soaking in Batur Natural Hot Springs.\n\n- **Fitness Level:** Moderate. The trail is well-trodden but rocky near the crater rim.\n- **What to Wear & Pack:** Lightweight fleece jacket or windbreaker (summit temperatures drop to 12°C–16°C before dawn), sturdy sports shoes with good grip, 1L water, and small cash tips for your guide.\n- **Alternative Option:** If you prefer not to hike, 4WD open-top volcanic jeep tours drive directly onto the black lava plateau for sunrise.\n\nWould you like me to suggest trusted tour operators or nearby mountain-view cafes in Kintamani?`,
-      suggestions: ['Do I need a private driver for Mount Batur?', 'What are the best hot springs in Kintamani?', 'Tell me about the Mount Agung trek']
-    };
-  }
-
-  // 4. Food, Warungs & Dining
-  if (q.includes('food') || q.includes('eat') || q.includes('restaurant') || q.includes('warung') || q.includes('dish') || q.includes('dining')) {
-    return {
-      reply: `### 🍛 Authentic Balinese Gastronomy & Must-Visit Warungs\n\n**Om Swastiastu! 🙏** Balinese cuisine is celebrated for its fragrant spice paste (*Bumbu Bali*), lemongrass, galangal, and slow-roasted meats:\n\n1. **Must-Try Traditional Dishes:**\n   - **Babi Guling:** Spit-roasted suckling pig with crackling crispy skin, turmeric rice, and blood sausage. (*Top spot: Warung Babi Guling Ibu Oka 3 in Ubud or Pak Malen in Seminyak*).\n   - **Bebek Betutu / Bengil:** Slow-cooked duck smoked in banana leaves with spices for 12 hours (*Top spot: Bebek Bengil 'Dirty Duck Diner' in Ubud*).\n   - **Nasi Campur Bali:** Fragrant rice surrounded by sate lilit (minced fish/chicken skewers), lawar (spiced green beans), and sambal matah.\n   - **Sambal Matah:** Fiery raw relish of shallots, lemongrass, kaffir lime, and bird's eye chili tossed in coconut oil.\n\n2. **Dining Price Guide:**\n   - **Local Warung:** $2–$4 USD (IDR 30,000–60,000) per meal.\n   - **Boutique Organic Cafe (Canggu/Ubud):** $7–$12 USD per person.\n   - **Fine Dining / Tasting Menu:** $60–$140 USD (e.g., Locavore NXT, Mozaic Ubud, or Merah Putih).\n\n3. **Safety Advice ('Bali Belly' Prevention):**\n   - Drink bottled or filtered water only—never tap water.\n   - Ice at established cafes and licensed warungs is government-certified and safe.\n   - Eat at busy warungs with high turnover to ensure fresh ingredients.\n\nWould you like vegetarian/vegan recommendations or sunset beachfront dining spots?`,
-      suggestions: ['Top vegan and vegetarian warungs in Ubud', 'Best sunset dining spots on the beach', 'How to avoid Bali belly']
-    };
-  }
-
-  // 5. Transit: Scooter vs Private Driver & Grab Cartel Zones
-  if (q.includes('scooter') || q.includes('driver') || q.includes('grab') || q.includes('gojek') || q.includes('taxi') || q.includes('traffic') || q.includes('transport') || q.includes('rent')) {
-    return {
-      reply: `### 🚗 Island Transport Guide: Private Driver vs Scooter in Bali\n\n**Om Swastiastu! 🙏** Navigating Bali efficiently depends on where you are staying and your comfort with local driving dynamics:\n\n* **1. Private Car with Dedicated Driver (Recommended for Most Visitors):**\n  - **Cost:** ~$35–$45 USD / day (IDR 550,000–700,000) for a 7-seat modern air-conditioned SUV (Toyota Avanza/Innova) for 10 hours.\n  - **Included:** Fuel, parking tickets, and an English-speaking local chauffeur who acts as an informal island guide.\n  - **Why it's best:** Bali traffic drives on the left, mountain roads are steep, and monsoon downpours can be sudden. It's stress-free and family-safe.\n\n* **2. Scooter / Motorbike Rental:**\n  - **Cost:** ~$7–$12 USD / day (IDR 100,000–180,000) for a 110cc–155cc Honda Scoopy or Yamaha NMAX.\n  - **Requirements:** International Driving Permit (IDP) with motorcycle endorsement, valid passport copy, and always wearing a strapped helmet.\n  - **Pros & Cons:** Great for zipping through congested shortcuts in Canggu and Seminyak, but carries real accident risk if inexperienced.\n\n* **3. Ride-Hailing (Grab / Gojek) & Local Taxi Cartels:**\n  - Grab and Gojek apps work well in South Bali (Kuta, Legian, Sanur, Seminyak).\n  - **Warning on Local Cartel Zones:** In central Ubud, Canggu beach drop-offs, Uluwatu, and Tanah Lot, local taxi syndicates ban online ride-hail pickups. Apps can drop you off there, but you cannot request a pickup inside restricted zones. Pre-booking a private driver completely bypasses this headache.\n\nWould you like to book our vetted private driver through the website rental portal?`,
-      suggestions: ['Book a private driver with AC SUV', 'How to get from airport to Ubud', 'Fast boat schedule to Nusa Penida']
-    };
-  }
-
-  // 6. Visa & Tourist Levy
-  if (q.includes('visa') || q.includes('levy') || q.includes('entry') || q.includes('passport') || q.includes('customs') || q.includes('love bali')) {
-    return {
-      reply: `### 🛂 Bali Entry Requirements: Visa (e-VoA) & Tourist Levy\n\n**Om Swastiastu! 🙏** Entering Bali is straightforward if you complete these 3 digital steps before flying:\n\n1. **30-Day electronic Visa on Arrival (e-VoA - B1):**\n   - **Fee:** IDR 500,000 (~$35 USD) payable online by credit card.\n   - **Validity:** 30 days upon arrival; extendable once for an additional 30 days.\n   - **Eligible Passports:** 90+ countries (USA, UK, Australia, India, EU, Canada, etc.).\n   - **Official Portal:** Apply via the official Indonesian immigration portal (*molina.imigrasi.go.id*).\n\n2. **Bali Provincial Tourist Levy (LoveBali):**\n   - **Fee:** IDR 150,000 (~$10 USD) per international visitor.\n   - **Purpose:** Funds cultural preservation, coral reef protection, and waste management.\n   - **Official Portal:** Pay online via *lovebali.baliprov.go.id* to receive your QR voucher.\n\n3. **Electronic Customs Declaration (ECD):**\n   - **Fee:** 100% FREE.\n   - Fill out the customs QR declaration within 72 hours of your arrival flight (*ecd.beacukai.go.id*).\n\n- **Passport Rule:** Your passport MUST have at least **6 months validity** remaining from your arrival date, with at least 2 blank pages.\n\nDo you need specific visa guidance for your nationality?`,
-      suggestions: ['Check visa eligibility for my country', 'What happens if I overstay my visa in Bali?', 'Recommended travel insurance for Bali']
-    };
-  }
-
-  // 7. Budget & Costs
-  if (q.includes('cost') || q.includes('budget') || q.includes('expensive') || q.includes('price') || q.includes('money') || q.includes('currency')) {
-    return {
-      reply: `### 💰 Real Bali Daily Travel Budget Guide (USD / IDR)\n\n**Om Swastiastu! 🙏** Bali caters to all travel styles. Here is a realistic daily cost breakdown per person:\n\n* **1. Backpacker / Budget Traveler: $30–$50 USD / day (IDR 480k–800k)**\n  - Dorm bed or simple guesthouse ($12–$22/night)\n  - Local warung meals ($2–$4/meal)\n  - Shared scooter rental ($4/day split)\n  - Free beach sunsets and temple visits ($3–$5 entry)\n\n* **2. Mid-Range Comfort (Most Popular): $80–$160 USD / day (IDR 1.2M–2.5M)**\n  - 4-star boutique hotel or private pool villa room ($50–$100/night)\n  - Mix of aesthetic cafes and casual seaside restaurants ($10–$25/meal)\n  - Private car driver shared or Grab rides ($20–$40/day)\n  - Guided tours, surf lessons, and massage spas ($15–$30)\n\n* **3. Ultra-Luxury & Wellness: $300–$800+ USD / day (IDR 4.8M–13M+)**\n  - 5-star cliffside or river valley sanctuary (Padma, Viceroy, Bulgari, Capella) ($350–$1,200/night)\n  - Fine-dining tasting menus and beach club daybeds with bottle service ($70–$200)\n  - Private helicopter charter or luxury SUV chauffeur ($60–$100/day)\n\n**Currency Tip:** The local currency is Indonesian Rupiah (IDR). Always decline ATM Dynamic Currency Conversion (DCC) to get the true bank exchange rate. Use authorized money changers displaying the official green Central Bank badge (*PVA Berizin*).\n\nWould you like me to estimate the total cost for a specific duration or party size?`,
-      suggestions: ['Calculate budget for 2 people for 7 days', 'How much cash should I carry in Bali?', 'Are credit cards widely accepted in Bali?']
-    };
-  }
-
-  // 8. Temples & Etiquette
-  if (q.includes('temple') || q.includes('etiquette') || q.includes('culture') || q.includes('dress') || q.includes('rules') || q.includes('sarong')) {
-    return {
-      reply: `### ⛩️ Balinese Temple Etiquette & Cultural Customs\n\n**Om Swastiastu! 🙏** Balinese temples (*Pura*) are active holy sanctuaries governed by sacred customs (*Adat*). Follow these rules for a respectful experience:\n\n1. **Mandatory Dress Code:**\n   - Shoulders and knees must be covered. You must wear a **Sarong (*Kamen*)** tied at the waist with a **temple sash (*Selendang*)**.\n   - Sarongs are provided or available to rent for a nominal fee (IDR 10,000–20,000) at entrance kiosks.\n\n2. **Sacred Grounds Etiquette:**\n   - Never walk in front of people in prayer, and never step directly over offerings (*Canang Sari*) placed on pathways.\n   - Do not enter the innermost sanctum (*Jeroan*) unless invited to participate in prayer.\n   - Never climb on holy shrines or stone monuments for photos.\n\n3. **Physical & Spiritual Respect:**\n   - In accordance with local traditions, women who are menstruating are requested to refrain from entering inner temple grounds.\n   - The head is considered the most sacred part of the human body—never touch anyone's head, including children.\n\n4. **Top 3 Must-Visit Temples:**\n   - **Uluwatu Temple:** Cliffside drama with Kecak dance at 6:00 PM.\n   - **Tanah Lot:** Historic ocean rock sanctuary with low-tide walk.\n   - **Tirta Empul:** Ancient holy springs for water purification rituals.\n\nWould you like guidance on participating in the Melukat water purification ceremony at Tirta Empul?`,
-      suggestions: ['How to do the Tirta Empul purification ritual', 'Best time to visit Uluwatu Temple', 'What is Nyepi day in Bali?']
-    };
-  }
-
-  // 9. Best Time to Visit & Weather
-  if (q.includes('weather') || q.includes('season') || q.includes('rain') || q.includes('best time') || q.includes('month') || q.includes('october') || q.includes('november') || q.includes('december')) {
-    return {
-      reply: `### ☀️ Bali Weather & Best Seasons to Visit\n\n**Om Swastiastu! 🙏** Bali enjoys a warm tropical climate year-round with temperatures averaging 27°C–31°C (80°F–88°F):\n\n* **1. Dry Season (May to September) — Peak Perfection:**\n  - **Weather:** Low humidity, gentle ocean breezes, minimal rain, and clear blue skies.\n  - **Ideal for:** Hiking Mount Batur, scuba diving in Nusa Penida, outdoor surfing, and boat trips.\n  - **Peak Months:** July & August (highest hotel rates; book 2–3 months ahead).\n\n* **2. Shoulder Months (April & October) — Best Value:**\n  - Fantastic weather with fewer crowds, green landscapes, and lower villa prices.\n\n* **3. Wet / Green Season (November to March) — Lush & Quiet:**\n  - **Weather:** Brief, heavy afternoon showers followed by sunshine. Tropical greenery is at its peak vibrancy.\n  - **Good to know:** Ideal for yoga retreats, spa days, cooking classes, and waterfall treks when cascades flow at full volume.\n\nWould you like real-time weather forecasts or advice for your specific travel dates?`,
-      suggestions: ['Check current live Bali weather', 'Is it worth visiting Bali in the rainy season?', 'What should I pack for Bali?']
-    };
-  }
-
-  // 10. General / Catch-all Bali Advice
-  return {
-    reply: `### 🌺 WanderPulse Bali Travel Concierge\n\n**Om Swastiastu! 🙏** Thank you for asking about **"${message}"**.\n\nBali offers an unmatched blend of volcanic nature, spiritual traditions, and world-class hospitality. Here are key insights to help guide your trip:\n\n1. **Top Highlights to Consider:**\n   - **Highlands & Culture:** Ubud Monkey Forest, Tirta Empul Water Temple, and Tegallalang Terraces.\n   - **Dramatic Coastlines:** Uluwatu 70m ocean cliffs, Tanah Lot sea temple, and Kelingking Beach in Nusa Penida.\n   - **Volcanic Vistas:** Mount Batur sunrise caldera and refreshing northern waterfalls like Sekumpul.\n\n2. **Practical Travel Advice:**\n   - Hire an air-conditioned SUV with a dedicated local driver for ~$35–$45 USD/day for seamless transit across the island.\n   - Prepare your 30-day e-VoA ($35 USD) and Bali Tourist Levy ($10 USD) online before arrival.\n   - Always respect temple dress codes with a modesty sarong and sash.\n\nFeel free to ask for a custom day-by-day itinerary, hotel recommendations, scooter safety advice, or food suggestions!`,
-    suggestions: ['Plan a 5-day itinerary for Bali', 'What are the best warungs to eat in Ubud?', 'How much does a private driver cost in Bali?']
-  };
-}
 
 // 11.1. AI Configuration Endpoint (GET)
 app.get('/api/ai/config', (req, res) => {
   res.json({
     success: true,
     status: 'ok',
-    configured: !!GEMINI_API_KEY,
-    hasApiKey: !!GEMINI_API_KEY,
-    model: GEMINI_MODEL,
-    keyPreview: GEMINI_API_KEY ? `${GEMINI_API_KEY.slice(0, 4)}...${GEMINI_API_KEY.slice(-4)}` : null,
-    provider: GEMINI_API_KEY ? 'gemini_live' : 'concierge_fallback',
+    configured: true,
+    hasApiKey: true,
+    model: PULSE_AI_MODEL,
+    keyPreview: 'pulse-live-agent',
+    provider: 'pulse_autonomous_agent',
+    registry: MODEL_REGISTRY,
     features: {
       tripPlanning: true,
       itinerarySync: true,
       voiceInput: true,
-      fallbackEngine: true,
-      streamingReady: true
+      realTimeStreaming: true,
+      mathEvaluator: true,
+      codeIntelligence: true,
+      fallbackEngine: true
     },
     defaultSuggestions: [
       'Plan a 5-day romantic Bali itinerary',
+      'Write a Python web scraper with BeautifulSoup',
       'Mount Batur sunrise trek logistics & gear',
       'Best authentic warungs & Balinese food in Ubud',
-      'Scooter rental vs private driver guide',
-      'Bali visa e-VoA & Tourist Levy rules',
-      'Realistic daily budget breakdown in USD'
+      'What is quantum entanglement explained simply?',
+      'Convert 150 USD to Indonesian Rupiah (IDR)'
     ]
   });
 });
 
 // 11.2. AI Configuration Update Endpoint (POST)
 app.post('/api/ai/config', (req, res) => {
-  const { geminiApiKey, model } = req.body;
-  if (typeof geminiApiKey === 'string') {
-    GEMINI_API_KEY = geminiApiKey.trim();
-  }
+  const { model } = req.body;
   if (typeof model === 'string' && model.trim()) {
-    GEMINI_MODEL = model.trim();
+    PULSE_AI_MODEL = model.trim();
+    setActiveModel(PULSE_AI_MODEL);
   }
 
   res.json({
     success: true,
     status: 'ok',
-    configured: !!GEMINI_API_KEY,
-    hasApiKey: !!GEMINI_API_KEY,
-    model: GEMINI_MODEL,
-    keyPreview: GEMINI_API_KEY ? `${GEMINI_API_KEY.slice(0, 4)}...${GEMINI_API_KEY.slice(-4)}` : null,
-    provider: GEMINI_API_KEY ? 'gemini_live' : 'concierge_fallback'
+    configured: true,
+    hasApiKey: true,
+    model: PULSE_AI_MODEL,
+    provider: 'pulse_autonomous_agent'
   });
 });
 
-// 11.3. AI Chat Query Endpoint (POST)
-app.post('/api/ai/chat', rateLimit(40, 60000), async (req, res) => {
+// 11.3. AI Chat Query Endpoint (POST - Standard JSON Completion)
+app.post('/api/ai/chat', rateLimit(60, 60000), async (req, res) => {
   try {
-    const { message, history = [], context = {}, model, temperature, apiKey } = req.body;
+    const { message, history = [], context = {}, model, temperature } = req.body;
 
     if (!message || typeof message !== 'string' || !message.trim()) {
       return res.status(400).json({
@@ -2761,59 +2549,96 @@ app.post('/api/ai/chat', rateLimit(40, 60000), async (req, res) => {
       });
     }
 
-    const trimmedMsg = message.trim();
-    const activeModel = model || GEMINI_MODEL || 'gemini-3.8-flash';
-
-    // 1. Attempt live Google Gemini API call if key is available
-    const liveResult = await callGeminiAPI({
-      message: trimmedMsg,
+    const activeModel = model || PULSE_AI_MODEL || 'pulse-omni';
+    const result = await processPulseAiQuery({
+      message,
       history,
       context,
       model: activeModel,
-      temperature,
-      apiKey
-    });
-
-    if (liveResult && liveResult.reply) {
-      return res.json({
-        success: true,
-        reply: liveResult.reply,
-        model: liveResult.model || activeModel,
-        provider: 'gemini_live',
-        suggestions: [
-          'What are the best hotels nearby?',
-          'How do I travel between these spots?',
-          'What is the estimated budget for this?'
-        ],
-        timestamp: new Date().toISOString()
-      });
-    }
-
-    // 2. Seamlessly use intelligent Bali Concierge Fallback Engine
-    const fallbackResult = generateConciergeFallback({
-      message: trimmedMsg,
-      context
+      temperature
     });
 
     return res.json({
       success: true,
-      reply: fallbackResult.reply,
-      model: activeModel,
-      provider: 'concierge_fallback',
-      suggestions: fallbackResult.suggestions || [
+      reply: result.reply,
+      model: result.model || activeModel,
+      provider: result.provider || 'pulse_autonomous_agent',
+      suggestions: result.suggestions || [
         'Plan a 5-day itinerary for Bali',
         'How much does a private driver cost?',
         'Best warungs and local food in Ubud'
       ],
-      note: GEMINI_API_KEY ? 'Live Gemini call timed out or rate-limited; returned verified concierge intelligence.' : 'Operating in local Bali concierge intelligence mode. Connect your Gemini API Key in settings for dynamic live queries.',
-      timestamp: new Date().toISOString()
+      latencyMs: result.latencyMs,
+      timestamp: result.timestamp || new Date().toISOString()
     });
   } catch (err) {
     console.error('Error in /api/ai/chat:', err);
     res.status(500).json({
       success: false,
-      error: 'An internal error occurred while generating your travel response.'
+      error: 'An internal error occurred while processing your request.'
     });
+  }
+});
+
+// 11.4. AI Real-Time Streaming Endpoint (POST - Server-Sent Events / SSE)
+app.post('/api/ai/stream', rateLimit(60, 60000), async (req, res) => {
+  try {
+    const { message, history = [], context = {}, model, temperature } = req.body;
+
+    if (!message || typeof message !== 'string' || !message.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: 'A valid message string is required.'
+      });
+    }
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    if (typeof res.flushHeaders === 'function') res.flushHeaders();
+
+    const sendEvent = (event, data) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+
+    const activeModel = model || PULSE_AI_MODEL || 'pulse-omni';
+    const result = await processPulseAiQuery({
+      message,
+      history,
+      context,
+      model: activeModel,
+      temperature
+    });
+
+    // Stream out words with realistic real-time cadence
+    const words = result.reply.split(/(\s+)/);
+    for (let i = 0; i < words.length; i++) {
+      if (res.writableEnded) break;
+      sendEvent('chunk', { text: words[i] });
+      if (i % 3 === 0) {
+        await new Promise(r => setTimeout(r, 12));
+      }
+    }
+
+    sendEvent('done', {
+      success: true,
+      model: result.model || activeModel,
+      provider: result.provider || 'pulse_autonomous_agent',
+      suggestions: result.suggestions || [],
+      latencyMs: result.latencyMs,
+      timestamp: result.timestamp
+    });
+
+    res.end();
+  } catch (err) {
+    console.error('Error in /api/ai/stream:', err);
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, error: err.message });
+    } else {
+      res.write(`event: error\ndata: ${JSON.stringify({ error: err.message })}\n\n`);
+      res.end();
+    }
   }
 });
 
