@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -37,10 +37,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
   <!-- Stylesheets (Cache-busted for instant edge update) -->
-  <link rel="stylesheet" href="css/main.css?v=3.0.0" />
-  <link rel="stylesheet" href="css/components.css?v=3.0.0" />
-  <link rel="stylesheet" href="css/3d-effects.css?v=3.0.0" />
-  <link rel="stylesheet" href="css/responsive.css?v=3.0.0" />
+  <link rel="stylesheet" href="css/main.css?v=3.2.0" />
+  <link rel="stylesheet" href="css/components.css?v=3.2.0" />
+  <link rel="stylesheet" href="css/3d-effects.css?v=3.2.0" />
+  <link rel="stylesheet" href="css/responsive.css?v=3.2.0" />
 
   <!-- Three.js Real-Time 3D WebGL Engine -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -295,7 +295,7 @@
               <span class="control-emoji">🌓</span>
               <div>
                 <div class="control-name">Visual Theme Mode</div>
-                <div id="drawerThemeDesc" class="control-desc">Dark Obsidian Glow</div>
+                <div id="drawerThemeDesc" class="control-desc">Light Coastal Breeze</div>
               </div>
             </div>
             <button id="drawerThemeBtn" class="btn btn-sm btn-outline">
@@ -2997,7 +2997,7 @@
           <div class="hotel-detail-right">
             <div class="hotel-rating-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
               <span class="section-tag tag-coral" id="hotelTierBadge">5-Star Luxury Villa</span>
-              <span style="font-size: 0.9rem; font-weight: 800; color: #FBBF24;">★ <span id="hotelRatingScore">4.9</span> (<span id="hotelReviewsCount">1,420</span> reviews)</span>
+              <span style="font-size: 0.9rem; font-weight: 800; color: var(--star-color);">★ <span id="hotelRatingScore">4.9</span> (<span id="hotelReviewsCount">1,420</span> reviews)</span>
             </div>
             <h2 id="hotelDetailTitle" style="font-size: 1.6rem; margin: 4px 0 6px;">Viceroy Bali Valley Sanctuary</h2>
             <p id="hotelDetailLocation" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">📍 Valley of the Kings, Ubud • 4 km to Monkey Forest</p>
@@ -3038,7 +3038,7 @@
                   <span>🛰️ Amadeus GDS Live Offer Rate</span>
                   <span class="amadeus-rate-badge" id="modalGdsRateCode">RATE: BAR1</span>
                 </div>
-                <span style="font-size: 0.74rem; color: #34D399; font-weight: 700;">✓ Instant GDS Voucher</span>
+                <span style="font-size: 0.74rem; color: var(--accent-emerald); font-weight: 700;">✓ Instant GDS Voucher</span>
               </div>
               <div style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45;" id="modalGdsPolicyText">
                 Free cancellation up to 48 hours before check-in. Verified Best Available Rate via Amadeus Global Distribution System.
@@ -3184,7 +3184,7 @@
             </div>
             <div class="pass-pnr-box" style="text-align: right;">
               <span style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.8); display: block;">Booking PNR</span>
-              <strong id="passPnrCode" style="font-size: 1.15rem; letter-spacing: 1.5px; color: #FBBF24;">DPS-AIR-94821</strong>
+              <strong id="passPnrCode" style="font-size: 1.15rem; letter-spacing: 1.5px; color: var(--star-color);">DPS-AIR-94821</strong>
             </div>
           </div>
 
@@ -3276,16 +3276,16 @@
       <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px; margin-bottom: 16px;">
         <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Active Services Status</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8rem;">
-          <div style="display: flex; align-items: center; gap: 6px; color: #10B981;">
+          <div style="display: flex; align-items: center; gap: 6px; color: var(--accent-emerald);">
             <span>●</span> Maps JavaScript API (Active)
           </div>
-          <div style="display: flex; align-items: center; gap: 6px; color: #10B981;">
+          <div style="display: flex; align-items: center; gap: 6px; color: var(--accent-emerald);">
             <span>●</span> Places API New (Active)
           </div>
-          <div style="display: flex; align-items: center; gap: 6px; color: #10B981;">
+          <div style="display: flex; align-items: center; gap: 6px; color: var(--accent-emerald);">
             <span>●</span> Routes API v2 (Active)
           </div>
-          <div style="display: flex; align-items: center; gap: 6px; color: #10B981;">
+          <div style="display: flex; align-items: center; gap: 6px; color: var(--accent-emerald);">
             <span>●</span> High-Precision GIS Sync
           </div>
         </div>
@@ -3486,7 +3486,7 @@
           <div class="boarding-pass-card" style="padding: 24px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
               <span class="section-tag tag-coral">Confirmed Reservation</span>
-              <strong id="rentalVoucherCode" style="font-size: 1.15rem; color: #FBBF24; letter-spacing: 1px;">BALI-RIDE-94821</strong>
+              <strong id="rentalVoucherCode" style="font-size: 1.15rem; color: var(--star-color); letter-spacing: 1px;">BALI-RIDE-94821</strong>
             </div>
             <h3 id="rentalVoucherTitle" style="font-size: 1.2rem; margin-bottom: 6px;">Private AC SUV + Dedicated Driver</h3>
             <p id="rentalVoucherDetails" style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">3 Days • Seminyak Pickup • Maya Lin</p>
@@ -3743,9 +3743,9 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts (Cache-busted) -->
-  <script src="js/data.js?v=3.1.0"></script>
-  <script src="js/app.js?v=3.1.0"></script>
-  <script src="js/tilt3d.js?v=3.1.0"></script>
-  <script src="js/three-scene.js?v=3.1.0"></script>
+  <script src="js/data.js?v=3.2.0"></script>
+  <script src="js/app.js?v=3.2.0"></script>
+  <script src="js/tilt3d.js?v=3.2.0"></script>
+  <script src="js/three-scene.js?v=3.2.0"></script>
 </body>
 </html>

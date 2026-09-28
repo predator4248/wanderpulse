@@ -72,7 +72,7 @@
   white-space: nowrap;
 }
 
-.btn-primary-grad {
+.btn-primary-grad, .btn-primary {
   background: var(--grad-aurora);
   color: #FFFFFF;
   box-shadow: var(--shadow-glow-violet);
@@ -80,7 +80,7 @@
   overflow: hidden;
   z-index: 1;
 }
-.btn-primary-grad::after {
+.btn-primary-grad::after, .btn-primary::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -89,11 +89,11 @@
   transition: opacity var(--trans-normal);
   z-index: -1;
 }
-.btn-primary-grad:hover {
+.btn-primary-grad:hover, .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 25px rgba(255, 94, 98, 0.4);
 }
-.btn-primary-grad:hover::after {
+.btn-primary-grad:hover::after, .btn-primary:hover::after {
   opacity: 1;
 }
 
@@ -733,7 +733,7 @@
   border-radius: var(--radius-full);
   background: rgba(16, 185, 129, 0.1);
   border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #10B981;
+  color: var(--accent-emerald);
   font-size: 0.85rem;
   font-weight: 700;
   margin-bottom: 24px;
@@ -1011,7 +1011,7 @@
   border: 1px solid rgba(255, 255, 255, 0.15);
   padding: 4px 10px;
   border-radius: var(--radius-full);
-  color: #FBBF24;
+  color: var(--star-color);
   font-size: 0.85rem;
   font-weight: 700;
   display: flex;
@@ -1147,7 +1147,7 @@
   line-height: 1.3;
 }
 .hotel-stars {
-  color: #FBBF24;
+  color: var(--star-color);
   font-size: 0.88rem;
   display: flex;
   gap: 2px;
@@ -2035,7 +2035,7 @@
   gap: 16px;
 }
 .review-stars {
-  color: #FBBF24;
+  color: var(--star-color);
   font-size: 0.95rem;
   display: flex;
   gap: 3px;
@@ -2373,6 +2373,25 @@
   border-color: var(--accent-cyan);
   color: var(--accent-cyan);
 }
+/* Header PulseAI trigger had no styles, so it fell back to the browser's black button text */
+.pulse-header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--accent-amber);
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--trans-fast);
+}
+.pulse-header-btn .pulse-header-text { color: var(--text-primary); }
+.pulse-header-btn:hover { border-color: var(--accent-violet); }
 .soundscape-btn.active-audio {
   background: rgba(6, 182, 212, 0.2);
   border-color: var(--accent-cyan);
@@ -2746,6 +2765,7 @@
 .phrase-audio-btn {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -2877,8 +2897,8 @@
   border-radius: var(--radius-full);
   text-transform: uppercase;
 }
-.tag-halal { background: rgba(16, 185, 129, 0.15); color: #10B981; }
-.tag-vegan { background: rgba(6, 182, 212, 0.15); color: #06B6D4; }
+.tag-halal { background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); }
+.tag-vegan { background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); }
 .tag-spicy { background: rgba(239, 68, 68, 0.15); color: #EF4444; }
 .tag-classic { background: rgba(255, 153, 0, 0.15); color: #FF9900; }
 
@@ -4066,7 +4086,7 @@
   gap: 5px;
   background: rgba(251, 191, 36, 0.12);
   border: 1px solid rgba(251, 191, 36, 0.3);
-  color: #FBBF24;
+  color: var(--star-color);
   font-size: 0.72rem;
   font-weight: 700;
   padding: 2px 7px;
@@ -4166,7 +4186,7 @@
   font-weight: 800;
   font-size: 0.75rem;
   background: rgba(6, 182, 212, 0.15);
-  color: #06b6d4;
+  color: var(--accent-cyan);
   padding: 3px 8px;
   border-radius: var(--radius-sm);
   letter-spacing: 1px;
@@ -4471,7 +4491,7 @@
   font-size: 0.75rem;
   font-weight: 700;
   background: rgba(251, 191, 36, 0.15);
-  color: #FBBF24;
+  color: var(--star-color);
   padding: 2px 6px;
   border-radius: var(--radius-sm);
 }
@@ -5945,7 +5965,7 @@
   gap: 4px;
   font-size: 0.75rem;
   font-weight: 700;
-  color: #38bdf8;
+  color: var(--accent-sky);
   background: rgba(56, 189, 248, 0.12);
   padding: 3px 10px;
   border-radius: var(--radius-full);
@@ -6149,7 +6169,7 @@
 
 .news-source-badge {
   background: rgba(56, 189, 248, 0.12);
-  color: #38bdf8;
+  color: var(--accent-sky);
   font-size: 0.72rem;
   font-weight: 700;
   padding: 3px 10px;
@@ -6223,3 +6243,90 @@
 
 
 
+
+/* ==========================================================================
+   LIGHT THEME CONTRAST FIXES
+   Many components above hard-code dark backgrounds or white text, which the
+   theme tokens can't reach. These overrides keep text readable in light mode.
+   ========================================================================== */
+
+/* 1. Overlays that stay dark in both themes (on photos, tickets, code, map popups):
+      restore the dark-theme tokens locally so their text stays light */
+[data-theme="light"] :is(
+  .floating-weather-badge, .floating-transit-badge, .spot-rating-badge,
+  .gallery-viewport, .gallery-nav-btn, .hotel-hero-img-wrap, .hotel-photo-badge,
+  .boarding-pass-card, .card-gallery-trigger-badge, .modal-dossier-dialog,
+  .modal-panorama-dialog, .panorama-info-box, .panorama-compass-badge,
+  .panorama-loc-tabs, .panorama-tool-btn, .panorama-loading-badge,
+  .pulse-code-block, .gm-style .gm-style-iw-c
+) {
+  --text-primary: #F9FAFB;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.2);
+  --bg-input: rgba(30, 41, 59, 0.7);
+  --bg-card: rgba(17, 24, 39, 0.75);
+  --badge-bg: rgba(255, 255, 255, 0.06);
+  --accent-coral: #FF5E62;
+  --accent-amber: #FF9900;
+  --accent-emerald: #10B981;
+  --accent-cyan: #06B6D4;
+  --accent-blue: #3B82F6;
+  --accent-violet: #8B5CF6;
+  --accent-pink: #EC4899;
+  --accent-sky: #38BDF8;
+  --star-color: #FBBF24;
+}
+
+/* 2. Page surfaces with hard-coded dark fills: switch to light surfaces */
+[data-theme="light"] :is(
+  .three-lines-drawer, .rental-option-card, .hero-pulse-card, .hero-gemini-card,
+  .weather-current-card, .forecast-day-card, .news-card
+) {
+  background: var(--bg-card);
+}
+[data-theme="light"] .three-lines-drawer { background: rgba(255, 255, 255, 0.97); }
+[data-theme="light"] .drawer-header { background: rgba(248, 250, 252, 0.92); }
+[data-theme="light"] :is(.rental-option-card, .news-card):hover { background: var(--bg-card-hover); }
+[data-theme="light"] :is(
+  .spot-verified-location-box, .visa-result-summary, .weather-region-tab:not(.active),
+  .weather-unit-toggle, .weather-metrics-strip .metric-box, .news-pill:not(.active),
+  .news-search-input, .news-refresh-btn, .pulse-typing-box, .gemini-typing-box
+) {
+  background: var(--bg-input);
+}
+[data-theme="light"] :is(.weather-region-tab:not(.active), .news-refresh-btn):hover { background: #E2E8F0; }
+[data-theme="light"] .weather-region-tab.active {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.14) 0%, rgba(139, 92, 246, 0.12) 100%);
+}
+[data-theme="light"] .forecast-day-card.today-card {
+  background: linear-gradient(180deg, rgba(14, 165, 233, 0.12) 0%, rgba(255, 255, 255, 0.9) 100%);
+}
+[data-theme="light"] .news-search-input:focus { background: #FFFFFF; }
+[data-theme="light"] .api-select option { background: #FFFFFF; color: var(--text-primary); }
+[data-theme="light"] :is(.map-3d-controls, .google-map-filters, .gmap-reset-btn) {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+/* 3. White text that sat on those dark fills: follow the theme instead */
+[data-theme="light"] :is(
+  .current-region-title, .current-temp-number, .condition-headline, .forecast-heading,
+  .forecast-day-card .day-temp-high, .news-title, .news-search-input,
+  .news-pill:not(.active):hover, .news-read-link:hover, .forecast-day-card .day-badge,
+  .weather-region-tab.active, .weather-unit-toggle .unit-label.active
+) {
+  color: var(--text-primary);
+}
+[data-theme="light"] .weather-region-tab.active .tab-sub { color: var(--text-secondary); }
+
+/* 4. Bright neon text that washes out on white */
+[data-theme="light"] :is(.status-free, .hotel-gds-pill, .amadeus-card-chip, .activity-hero-badge) { color: var(--accent-emerald); }
+[data-theme="light"] .status-voa { color: var(--accent-blue); }
+[data-theme="light"] .tag-classic { color: var(--accent-amber); }
+[data-theme="light"] .live-dispatch-badge { color: #B91C1C; }
+
+/* 5. Card edges drawn in translucent white vanish on a light page */
+[data-theme="light"] :is(.news-card, .forecast-day-card, .weather-current-card, .rental-option-card) {
+  border-color: var(--border-subtle);
+}

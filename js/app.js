@@ -53,15 +53,14 @@ document.addEventListener('DOMContentLoaded', () => {
 function initTheme() {
   const themeBtn = document.getElementById('themeToggleBtn');
   const drawerThemeBtn = document.getElementById('drawerThemeBtn');
-  const savedTheme = localStorage.getItem('wanderpulse_theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', savedTheme);
-  updateThemeIcon(savedTheme);
+  // Every visit opens in light mode; the toggle switches for the current visit only
+  document.documentElement.setAttribute('data-theme', 'light');
+  updateThemeIcon('light');
 
   function cycleTheme() {
     const current = document.documentElement.getAttribute('data-theme');
     const next = current === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('wanderpulse_theme', next);
     updateThemeIcon(next);
     showToast('Theme Changed', `Switched to ${next} appearance mode.`);
   }
@@ -529,7 +528,7 @@ window.openAttractionModal = function(spotId) {
         <p style="color: var(--accent-cyan); font-weight: 600; font-size: 0.9rem;">${spot.location} • ${spot.distanceAirport}</p>
       </div>
       <div style="text-align: right;">
-        <span style="font-size: 1.4rem; font-weight: 800; color: #FBBF24;">★ ${spot.rating}</span>
+        <span style="font-size: 1.4rem; font-weight: 800; color: var(--star-color);">★ ${spot.rating}</span>
         <p style="font-size: 0.78rem; color: var(--text-muted);">${spot.reviews.toLocaleString()} traveler reviews</p>
       </div>
     </div>
@@ -1503,7 +1502,7 @@ async function updateCommuteResults() {
         <div class="commute-mode-card best-recommendation" style="border-color: rgba(6, 182, 212, 0.5);">
           <span class="badge-best-choice" style="background: var(--accent-cyan);">Ocean Route</span>
           <div class="commute-card-header">
-            <div class="commute-mode-icon" style="background: rgba(6, 182, 212, 0.15); color: #06B6D4;">🛥️</div>
+            <div class="commute-mode-icon" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan);">🛥️</div>
             <div>
               <h4 style="font-size: 1rem; margin-bottom: 2px;">Marine Fast Boat</h4>
               <span style="font-size: 0.75rem; color: var(--text-secondary);">${data.boatDetails.operator}</span>
@@ -1513,7 +1512,7 @@ async function updateCommuteResults() {
             <span class="commute-price-tag">${formatPrice(data.boatDetails.ticketUSD)}</span>
             <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">1 Passenger Seat + 25kg Bag</span>
           </div>
-          <div class="commute-time-tag" style="color: #06b6d4;">🌊 ${data.boatDetails.crossingDuration} Sea Crossing</div>
+          <div class="commute-time-tag" style="color: var(--accent-cyan);">🌊 ${data.boatDetails.crossingDuration} Sea Crossing</div>
           <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin: 0;">
             ${data.boatDetails.departureHarbor} ➔ ${data.boatDetails.arrivalHarbor}. Modern floating berth boarding.
           </p>
@@ -2581,7 +2580,7 @@ function renderGeoapifyResults(items, source = 'verified_gis_database') {
           <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 6px;">
             <span class="section-tag tag-violet" style="font-size: 0.68rem; margin: 0; padding: 2px 7px;">${item.categoryLabel || item.category || 'Bali Point of Interest'}</span>
             ${distBadge}
-            ${item.rating ? `<span style="font-size: 0.78rem; font-weight: 800; color: #FBBF24; margin-left: auto;">★ ${item.rating}</span>` : ''}
+            ${item.rating ? `<span style="font-size: 0.78rem; font-weight: 800; color: var(--star-color); margin-left: auto;">★ ${item.rating}</span>` : ''}
           </div>
           <h4 class="geoapify-place-title">${item.name}</h4>
           <p class="geoapify-place-address">
@@ -4400,7 +4399,7 @@ window.openTripDossierModal = function() {
       </div>
       <div style="text-align: right;">
         <span style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); display: block;">Dossier Reference</span>
-        <strong style="font-size: 1.15rem; color: #FBBF24; letter-spacing: 1.5px;">${tripId}</strong>
+        <strong style="font-size: 1.15rem; color: var(--star-color); letter-spacing: 1.5px;">${tripId}</strong>
         <span style="font-size: 0.75rem; color: var(--text-secondary); display: block; margin-top: 2px;">Lead: ${travelerName}</span>
       </div>
     </div>
@@ -4447,7 +4446,7 @@ window.openTripDossierModal = function() {
             </div>
             <div style="text-align: right;">
               <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; display: block;">PNR Code</span>
-              <strong style="color: #FBBF24; font-size: 1.1rem;">${transitVoucher ? transitVoucher.pnr : 'DPS-AIR-94821'}</strong>
+              <strong style="color: var(--star-color); font-size: 1.1rem;">${transitVoucher ? transitVoucher.pnr : 'DPS-AIR-94821'}</strong>
             </div>
           </div>
           <div style="font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 8px; display: flex; justify-content: space-between;">
@@ -4467,7 +4466,7 @@ window.openTripDossierModal = function() {
             </div>
             <div style="text-align: right;">
               <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; display: block;">Ride Voucher</span>
-              <strong style="color: #FBBF24; font-size: 1.1rem;">${rentalVoucher ? rentalVoucher.bookingId : 'BALI-RIDE-7X9A2K'}</strong>
+              <strong style="color: var(--star-color); font-size: 1.1rem;">${rentalVoucher ? rentalVoucher.bookingId : 'BALI-RIDE-7X9A2K'}</strong>
             </div>
           </div>
           <div style="font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 8px; display: flex; justify-content: space-between;">
@@ -4657,7 +4656,7 @@ function renderReviewsGrid(filter = 'all') {
     <article class="glass-card review-card rainbow-hover" data-tilt-3d style="padding: 24px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
         <span class="section-tag tag-cyan" style="font-size: 0.72rem; margin: 0;">${r.targetName || 'Bali Travel'}</span>
-        <div style="color: #FBBF24; font-size: 0.95rem;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+        <div style="color: var(--star-color); font-size: 0.95rem;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
       </div>
       <p class="review-quote" style="font-size: 0.92rem; line-height: 1.6; color: var(--text-primary); margin: 12px 0 16px;">
         "${r.tipText}"
@@ -5674,7 +5673,7 @@ function initBaliNewsHub() {
       gridEl.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; padding: 48px 20px; background: rgba(30, 41, 59, 0.4); border-radius: var(--radius-lg); border: 1px dashed rgba(255, 255, 255, 0.1);">
           <div style="font-size: 2.5rem; margin-bottom: 12px;">📰</div>
-          <h3 style="color: #fff; font-size: 1.15rem; margin-bottom: 8px;">No Island Dispatches Found</h3>
+          <h3 style="color: var(--text-primary); font-size: 1.15rem; margin-bottom: 8px;">No Island Dispatches Found</h3>
           <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 460px; margin: 0 auto 16px;">No articles currently match your search filter "${escapeHtml(currentNewsState.searchQuery)}". Try clearing your search or switching categories.</p>
           <button type="button" class="btn btn-outline btn-sm" onclick="window.resetBaliNewsFilters()">Reset Filters</button>
         </div>

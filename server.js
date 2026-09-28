@@ -1780,8 +1780,9 @@ function decodeHtmlEntities(str = '') {
 function stripSourceSuffix(title = '', source = '') {
   if (!title || !source) return title;
   const suffix = ` - ${source}`;
-  if (title.length > suffix.length && title.toLowerCase().endsWith(suffix.toLowerCase())) {
-    return title.slice(0, -suffix.length).trim();
+  // Loop: some publishers put their own name in the headline, so Google's tail doubles it
+  while (title.length > suffix.length && title.toLowerCase().endsWith(suffix.toLowerCase())) {
+    title = title.slice(0, -suffix.length).trim();
   }
   return title;
 }

@@ -72,6 +72,9 @@
   --shadow-glow-rainbow: 0 10px 40px rgba(139, 92, 246, 0.2);
 
   --badge-bg: rgba(255, 255, 255, 0.06);
+
+  --accent-sky: #38BDF8;
+  --star-color: #FBBF24;
 }
 
 /* --- Light Theme --- */
@@ -90,6 +93,17 @@
   --text-secondary: #475569;
   --text-muted: #64748B;
   --text-inverse: #FFFFFF;
+
+  /* Deeper accents: the neon dark-mode hues wash out as text on white */
+  --accent-coral: #E11D48;
+  --accent-amber: #C2410C;
+  --accent-emerald: #047857;
+  --accent-cyan: #0E7490;
+  --accent-blue: #1D4ED8;
+  --accent-violet: #6D28D9;
+  --accent-pink: #BE185D;
+  --accent-sky: #0369A1;
+  --star-color: #B45309;
 
   --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
   --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);

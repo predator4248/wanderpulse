@@ -404,7 +404,7 @@
 
 .gmap-popup-rating {
   font-size: 0.78rem;
-  color: #FBBF24;
+  color: var(--star-color);
   font-weight: 700;
 }
 
