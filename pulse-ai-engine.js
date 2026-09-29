@@ -50,6 +50,8 @@ const MODEL_REGISTRY = {
 };
 
 // System prompt providing agent persona and deep Bali grounding
+const LIVE_TIMEOUT_MS = 20000;
+
 const PULSE_SYSTEM_PROMPT = `You are PulseAI, the official autonomous real-time AI Agent for WanderPulse.
 You are an exceptionally capable, friendly, and articulate intelligence.
 You can answer ANY question with authority, clarity, and precision:
@@ -318,23 +320,14 @@ function tryBaliKnowledge(query, context = {}) {
  * Formulates structured, intelligent responses to any open-ended question.
  */
 function synthesizeGeneralKnowledge(query) {
-  const cleanQ = query.trim();
-
-  // Science / Nature / Physics
-  if (/quantum|relativity|gravity|black hole|atom|molecule|dna|cell|evolution|photosynthesis|climate/i.test(cleanQ)) {
-    return {
-      reply: `### 🔬 Scientific Concept Breakdown\n\nYou asked about **"${cleanQ}"**.\n\nHere is a clear, systematic breakdown of this principle:\n\n1. **Core Definition & Significance:**\n   - This concept is foundational to our understanding of the physical and natural world.\n   - It governs how matter, energy, and biological systems interact across macroscopic and microscopic scales.\n\n2. **How It Works in Practice:**\n   - **Mechanics:** The phenomenon operates through predictable natural laws and conservation principles.\n   - **Observable Effects:** Real-world experiments and observations consistently validate these principles in modern technology and biology.\n\n3. **Modern Applications:**\n   - Advanced computing, medical diagnostics, energy generation, and environmental modeling.\n\nWould you like a deeper dive into the mathematical formulation, historical discovery, or practical real-world experiments?`,
-      suggestions: ['Explain this concept with an everyday analogy', 'What are the main real-world applications?', 'What scientists contributed to this discovery?']
-    };
-  }
-
-  // Open-ended general question synthesis
+  // The live model was unreachable and no built-in guide covers this question.
+  // Say so plainly rather than returning generic text dressed up as an answer.
   return {
-    reply: `### 💡 PulseAI Intelligence Analysis\n\nThank you for asking about **"${cleanQ}"**.\n\nHere are key insights and practical takeaways:\n\n* **Overview & Context:**\n  This topic involves balancing practical efficiency, verified best practices, and context-specific requirements. Understanding the core drivers allows you to make informed decisions.\n\n* **Key Principles to Consider:**\n  1. **Clarity & Purpose:** Define your exact goals and constraints before committing to a specific approach.\n  2. **Efficiency & Scalability:** Look for solutions that provide strong reliability with minimal unnecessary complexity.\n  3. **Continuous Optimization:** Validate assumptions with real-world feedback and test data.\n\n* **Recommended Next Steps:**\n  - Break down your project or query into manageable stages.\n  - Apply established design patterns or expert guidelines.\n\nFeel free to ask for concrete examples, code implementations, travel itineraries, or comparative pros and cons!`,
+    reply: `### ⏳ PulseAI is busy right now\n\nI couldn't reach the live AI service to answer this, so I don't want to guess. Please try again in a moment.\n\nIn the meantime I can still help instantly with **Bali itineraries**, **getting around**, **currency conversions** and **quick calculations**.`,
     suggestions: [
-      'Give me a concrete step-by-step example',
-      'What are the pros and cons of this approach?',
-      'Plan a 5-day holiday itinerary in Bali'
+      'Plan a 5-day Bali itinerary',
+      'How do I get from the airport to Ubud?',
+      'Convert 150 USD to IDR'
     ]
   };
 }
@@ -345,7 +338,8 @@ function synthesizeGeneralKnowledge(query) {
 async function callLiveNeuralEngine({ message, history = [], context = {}, model = ACTIVE_MODEL, temperature = 0.7 }) {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4500); // 4.5s fast timeout
+    // Full answers routinely take 5-15s to generate; 4.5s cut most of them off
+    const timeoutId = setTimeout(() => controller.abort(), LIVE_TIMEOUT_MS);
 
     const messages = [
       { role: 'system', content: PULSE_SYSTEM_PROMPT }
@@ -378,7 +372,7 @@ async function callLiveNeuralEngine({ message, history = [], context = {}, model
       content: contextualizedMsg
     });
 
-    const response = await fetch('https://text.pollinations.ai/', {
+    const requestLiveModel = () => fetch('https://text.pollinations.ai/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -388,6 +382,13 @@ async function callLiveNeuralEngine({ message, history = [], context = {}, model
       }),
       signal: controller.signal
     });
+
+    let response = await requestLiveModel();
+    // The anonymous tier allows one queued request per IP and answers 429 when busy
+    if (response.status === 429) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      response = await requestLiveModel();
+    }
 
     clearTimeout(timeoutId);
 
@@ -402,7 +403,7 @@ async function callLiveNeuralEngine({ message, history = [], context = {}, model
       }
     }
   } catch (err) {
-    // Graceful silent failover to cognitive synthesizer
+    console.warn('[PulseAI] Live model unavailable:', err.name === 'AbortError' ? 'timed out' : err.message);
   }
 
   return null;

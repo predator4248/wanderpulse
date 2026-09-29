@@ -1002,16 +1002,14 @@ if (bookingForm) {
       const result = await res.json();
       if (result.success) {
         closeModal('bookingModal');
-        showToast('Reservation Confirmed (Node.js API)', `Voucher ${result.confirmation.voucherCode} generated for ${guestName} at ${activeBookingHotel.name}.`);
+        showToast('Reservation Confirmed', `Voucher ${result.confirmation.voucherCode} generated for ${guestName} at ${activeBookingHotel.name}.`);
         return;
       }
+      showToast('Not Confirmed', result.error || 'Your reservation could not be confirmed. Please check the details and try again.');
     } catch (err) {
-      console.warn('API booking fallback to local:', err);
+      console.warn('Hotel booking failed:', err);
+      showToast('Not Confirmed', "We couldn't reach our booking server, so nothing was booked. Please check your connection and try again.");
     }
-
-    const voucherCode = 'BALI-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-    closeModal('bookingModal');
-    showToast('Reservation Confirmed!', `Voucher ${voucherCode} for ${guestName} at ${activeBookingHotel.name} (${roomType}). Confirmation sent.`);
   });
 }
 
@@ -1419,7 +1417,7 @@ async function updateCommuteResults() {
           </svg>
           Open Turn-by-Turn in Google Maps
         </a>
-        <button type="button" class="btn btn-outline btn-sm" onclick="window.viewCommuteOnGoogleMap('${origKey}', '${destKey}', ${data.googleRoute && data.googleRoute.encodedPolyline ? `'${data.googleRoute.encodedPolyline}'` : 'null'})" style="padding: 6px 14px; font-size: 0.8rem; font-weight: 700; color: var(--accent-cyan); border-color: rgba(6, 182, 212, 0.4);">
+        <button type="button" class="btn btn-outline btn-sm" onclick="window.viewCommuteOnGoogleMap('${originKey}', '${destKey}', ${data.googleRoute && data.googleRoute.encodedPolyline ? `'${data.googleRoute.encodedPolyline}'` : 'null'})" style="padding: 6px 14px; font-size: 0.8rem; font-weight: 700; color: var(--accent-cyan); border-color: rgba(6, 182, 212, 0.4);">
           🗺️ Show Route on Google Map
         </button>
       </div>
@@ -2067,52 +2065,6 @@ window.viewCommuteOnGoogleMap = function(origKey, destKey, encodedPolyline) {
 };
 
 // Google Maps Key Modal Controls
-window.toggleGoogleMapsKeyModal = function() {
-  const modal = document.getElementById('googleMapsKeyModal');
-  if (modal) modal.classList.toggle('open');
-};
-
-window.saveGoogleMapsKey = function() {
-  const input = document.getElementById('googleMapsApiKeyInput');
-  const key = input ? input.value.trim() : '';
-  if (key) {
-    localStorage.setItem('wanderpulse_google_maps_key', key);
-    fetch('/api/maps/config', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apiKey: key })
-    }).then(r => r.json()).then(res => {
-      if (res.success && typeof window.showToast === 'function') {
-        window.showToast('Key Saved', 'Google Maps Platform key updated successfully!');
-      }
-    }).catch(() => {});
-  }
-  window.toggleGoogleMapsKeyModal();
-};
-
-window.testGoogleMapsKey = function() {
-  const input = document.getElementById('googleMapsApiKeyInput');
-  const key = input ? input.value.trim() : '';
-  fetch(`/api/maps/places?query=Ubud&apiKey=${encodeURIComponent(key)}`)
-    .then(r => r.json())
-    .then(res => {
-      if (res.status === 'ok' && res.count > 0) {
-        if (typeof window.showToast === 'function') {
-          window.showToast('Google API Connected', `Verified live Google Places search (${res.count} results).`);
-        }
-      } else {
-        if (typeof window.showToast === 'function') {
-          window.showToast('Connection Test', 'Endpoint reached using verified GIS parity mode.');
-        }
-      }
-    })
-    .catch(err => {
-      if (typeof window.showToast === 'function') {
-        window.showToast('Connection Error', err.message);
-      }
-    });
-};
-
 const MAP_ZONES = {
   'ubud': {
     title: 'Sacred Monkey Forest & Ubud',
@@ -2309,6 +2261,24 @@ function fallbackCopyText(text, successMsg) {
   document.body.removeChild(ta);
 }
 
+// The Maps key is no longer hard-coded in index.html; fetch it from the server and load the SDK
+function loadGoogleMapsSdk() {
+  if (typeof google !== 'undefined' && google.maps) {
+    window.initGoogleMapsPlatform();
+    return;
+  }
+  fetch('/api/maps/config')
+    .then(r => r.json())
+    .then(cfg => {
+      if (!cfg || !cfg.browserKey) return;
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(cfg.browserKey)}&libraries=places,geometry&loading=async&callback=initGoogleMapsPlatform`;
+      script.async = true;
+      document.head.appendChild(script);
+    })
+    .catch(err => console.warn('[WanderPulse] Google Maps unavailable:', err));
+}
+
 function initMapInteractions() {
   const pins = document.querySelectorAll('.map-pin');
   pins.forEach(pin => {
@@ -2317,10 +2287,7 @@ function initMapInteractions() {
     });
   });
 
-  // Attempt Google Maps initialization if SDK already loaded
-  if (typeof google !== 'undefined' && google.maps && typeof window.initGoogleMapsPlatform === 'function') {
-    window.initGoogleMapsPlatform();
-  }
+  loadGoogleMapsSdk();
 
   // Default to Ubud
   window.selectMapZone('ubud');
@@ -2336,20 +2303,13 @@ function initGeoapifyPlacesExplorer() {
   const searchInput = document.getElementById('geoapifySearchInput');
   const clearBtn = document.getElementById('geoapifyClearBtn');
 
-  // Load saved custom key from localStorage or backend config
-  const savedKey = localStorage.getItem('wanderpulse_geoapify_key');
-  const keyInput = document.getElementById('geoapifyApiKeyInput');
-  if (savedKey && keyInput) {
-    keyInput.value = savedKey;
-  }
-
   // Update status badge based on config
   fetch('/api/places/config')
     .then(r => r.json())
     .then(cfg => {
       const badge = document.getElementById('geoapifyStatusBadge');
       if (badge) {
-        if (cfg.hasApiKey || savedKey) {
+        if (cfg.hasApiKey) {
           badge.textContent = 'Geoapify API Active (Live)';
           badge.className = 'visa-status-pill status-free';
         } else {
@@ -2377,54 +2337,6 @@ function initGeoapifyPlacesExplorer() {
   // Load initial default places (top sights)
   loadGeoapifyPlaces({ categories: activeGeoapifyCategory });
 }
-
-window.toggleGeoapifyKeyModal = function() {
-  const modal = document.getElementById('geoapifyKeyModal');
-  if (!modal) return;
-  modal.classList.toggle('open');
-};
-
-window.saveGeoapifyKey = function() {
-  const input = document.getElementById('geoapifyApiKeyInput');
-  const key = input ? input.value.trim() : '';
-  if (key) {
-    localStorage.setItem('wanderpulse_geoapify_key', key);
-    fetch('/api/places/config', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apiKey: key })
-    }).catch(() => {});
-    if (typeof window.showToast === 'function') {
-      window.showToast('Geoapify Key Saved', 'Connected your Geoapify API key for live POI searches!');
-    }
-  } else {
-    localStorage.removeItem('wanderpulse_geoapify_key');
-    if (typeof window.showToast === 'function') {
-      window.showToast('Key Cleared', 'Using default verified Bali GIS precision database.');
-    }
-  }
-
-  const badge = document.getElementById('geoapifyStatusBadge');
-  if (badge) {
-    badge.textContent = key ? 'Geoapify API Active (Live)' : 'Zero Discrepancy Verified';
-  }
-
-  window.toggleGeoapifyKeyModal();
-  window.triggerGeoapifySearch();
-};
-
-window.resetGeoapifyKey = function() {
-  localStorage.removeItem('wanderpulse_geoapify_key');
-  const input = document.getElementById('geoapifyApiKeyInput');
-  if (input) input.value = '';
-  const badge = document.getElementById('geoapifyStatusBadge');
-  if (badge) badge.textContent = 'Zero Discrepancy Verified';
-  if (typeof window.showToast === 'function') {
-    window.showToast('Geoapify Key Removed', 'Reverted to zero-discrepancy verified Bali database.');
-  }
-  window.toggleGeoapifyKeyModal();
-  window.triggerGeoapifySearch();
-};
 
 window.triggerGeoapifySearch = function() {
   const input = document.getElementById('geoapifySearchInput');
@@ -2492,7 +2404,6 @@ function loadGeoapifyPlaces(params = {}) {
   if (loading) loading.style.display = 'block';
   if (grid) grid.style.opacity = '0.5';
 
-  const userKey = localStorage.getItem('wanderpulse_google_maps_key') || localStorage.getItem('wanderpulse_geoapify_key');
   const queryParams = new URLSearchParams();
 
   if (params.query) queryParams.set('query', params.query);
@@ -2500,13 +2411,8 @@ function loadGeoapifyPlaces(params = {}) {
   if (params.lat) queryParams.set('lat', params.lat);
   if (params.lon) queryParams.set('lon', params.lon);
   if (params.radius) queryParams.set('radius', params.radius);
-  if (userKey) queryParams.set('apiKey', userKey);
 
   const headers = {};
-  if (userKey) {
-    headers['x-google-maps-key'] = userKey;
-    headers['x-geoapify-key'] = userKey;
-  }
 
   // If search query is present, query Google Places API (New) endpoint
   const targetUrl = params.query 
@@ -3232,15 +3138,14 @@ function initNewsletter() {
       const data = await res.json();
       if (data.success) {
         document.getElementById('newsletterEmail').value = '';
-        showToast('Subscribed (Node.js API)', data.message);
+        showToast('Subscribed', data.message);
         return;
       }
+      showToast('Not Subscribed', data.error || 'Please check your email address and try again.');
     } catch (err) {
-      console.warn('Newsletter API fallback:', err);
+      console.warn('Newsletter signup failed:', err);
+      showToast('Not Subscribed', "We couldn't reach the server. Please try again shortly.");
     }
-
-    document.getElementById('newsletterEmail').value = '';
-    showToast('Subscribed!', `Welcome! Bali travel updates and transit discounts will be sent to ${email}.`);
   });
 }
 
@@ -3827,25 +3732,8 @@ function initTransitBooking() {
           showToast('Booking Error', data.error || 'Unable to confirm transit ticket.');
         }
       } catch (err) {
-        console.warn('Transit Booking API fallback:', err);
-        // Resilient client-side ticket generation fallback
-        const fallbackTicket = generateClientTicket({
-          mode: activeTransitMode,
-          origin,
-          departDate,
-          passengers,
-          travelClass,
-          leadPassenger,
-          email
-        });
-        renderBoardingPass(fallbackTicket);
-        closeModal('transitBookingModal');
-        const eTicketModal = document.getElementById('eTicketModal');
-        if (eTicketModal) {
-          eTicketModal.classList.add('open');
-          document.body.style.overflow = 'hidden';
-        }
-        showToast('E-Ticket Ready', `PNR ${fallbackTicket.pnr} confirmed offline.`);
+        console.warn('Transit booking failed:', err);
+        showToast('Not Confirmed', "We couldn't reach our booking server, so nothing was booked. Please check your connection and try again.");
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
@@ -4026,34 +3914,6 @@ function renderBoardingPass(ticket) {
   if (barcodeEl) barcodeEl.textContent = ticket.barcodeNumber || '0948 2819 4028 1092';
 }
 
-function generateClientTicket(params) {
-  const modePrefix = params.mode === 'train' ? 'KAI-TRN' : (params.mode === 'bus' ? 'DPS-BUS' : (params.mode === 'boat' ? 'DPS-SEA' : (params.mode === 'airport-transfer' ? 'DPS-TRF' : 'DPS-AIR')));
-  const pnr = `${modePrefix}-${Math.floor(100000 + Math.random() * 900000)}`;
-
-  const originList = TRANSIT_ORIGINS_BY_MODE[params.mode] || TRANSIT_ORIGINS_BY_MODE.flight;
-  const match = originList.find(o => o.value === params.origin) || originList[0];
-
-  return {
-    pnr,
-    mode: params.mode,
-    operator: params.mode === 'train' ? 'Kereta Api Indonesia (KAI Executive)' : (params.mode === 'bus' ? 'Gunung Harta VIP Sleeper' : (params.mode === 'boat' ? 'Eka Jaya Fast Boat / Maruti Duta Express' : (params.mode === 'airport-transfer' ? 'Official DPS Airport Chauffeur Dispatch' : 'Garuda Indonesia / Singapore Airlines'))),
-    origin: params.origin,
-    originCity: match.city,
-    originCode: match.code,
-    destination: params.mode === 'boat' ? 'Nusa Penida / Gili Islands' : (params.mode === 'airport-transfer' ? 'Hotel / Villa Lobby' : 'Bali (DPS)'),
-    duration: match.duration,
-    date: params.departDate,
-    depTime: '08:30 WITA',
-    boardingTime: '07:45 WITA',
-    leadPassenger: params.leadPassenger,
-    passengers: params.passengers,
-    cabinClass: params.travelClass === 'business' ? 'Business Class Suite' : (params.travelClass === 'premium-economy' ? 'Premium Economy' : 'Economy Saver'),
-    seat: params.mode === 'boat' ? 'Vessel Seat 14A' : (params.mode === 'airport-transfer' ? 'Chauffeur Van Unit 4' : 'Seat 14A'),
-    gatePlatform: params.mode === 'flight' ? 'Gate 4B' : (params.mode === 'train' ? 'Platform 3' : (params.mode === 'boat' ? 'Sanur Floating Berth 2' : (params.mode === 'airport-transfer' ? 'Arrivals Meeting Pillar 4' : 'Bay 12'))),
-    barcodeNumber: `${Math.floor(1000 + Math.random() * 9000)} ${Math.floor(1000 + Math.random() * 9000)} ${Math.floor(1000 + Math.random() * 9000)}`
-  };
-}
-
 window.closeModal = function(modalId) {
   if (modalId === 'panoramaModal' && typeof window.close360Panorama === 'function') {
     window.close360Panorama();
@@ -4099,13 +3959,15 @@ window.showToast = function(title, message) {
     document.body.appendChild(container);
   }
 
+  // Failure toasts get a warning badge instead of the success tick
+  const isProblem = /\b(not|error|failed|unable|couldn\'t)\b/i.test(title);
   const toast = document.createElement('div');
   toast.className = 'toast-notification';
   toast.innerHTML = `
-    <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--grad-aurora); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 800; flex-shrink: 0;">✓</div>
+    <div style="width: 24px; height: 24px; border-radius: 50%; background: ${isProblem ? '#DC2626' : 'var(--grad-aurora)'}; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 800; flex-shrink: 0;">${isProblem ? '!' : '✓'}</div>
     <div>
-      <h5 style="font-size: 0.92rem; font-weight: 800; color: var(--text-primary); margin-bottom: 2px;">${title}</h5>
-      <p style="font-size: 0.82rem; color: var(--text-secondary);">${message}</p>
+      <h5 style="font-size: 0.92rem; font-weight: 800; color: var(--text-primary); margin-bottom: 2px;">${escapeHtml(title)}</h5>
+      <p style="font-size: 0.82rem; color: var(--text-secondary);">${escapeHtml(message)}</p>
     </div>
   `;
 
@@ -4242,26 +4104,8 @@ function initRentalBooking() {
           showToast('Booking Error', data.error || 'Could not confirm rental.');
         }
       } catch (err) {
-        const fakeVoucher = {
-          bookingId: `BALI-RIDE-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-          vehicleTitle: payload.vehicleType === 'car-driver' ? 'Private AC SUV + Dedicated Driver' : 'Honda Scoopy 110cc',
-          durationDays: payload.durationDays,
-          pickupLocation: payload.pickupLocation,
-          renterName: payload.renterName,
-          dispatchContact: 'Ketut Dharma (Senior Bali Chauffeur - WhatsApp: +62 812-3988-1200)'
-        };
-        localStorage.setItem('wanderpulse_rental_voucher', JSON.stringify(fakeVoucher));
-        const formBox = document.getElementById('rentalBookingForm');
-        const voucherBox = document.getElementById('rentalConfirmedVoucherBox');
-        if (formBox) formBox.style.display = 'none';
-        if (voucherBox) {
-          voucherBox.style.display = 'block';
-          document.getElementById('rentalVoucherCode').textContent = fakeVoucher.bookingId;
-          document.getElementById('rentalVoucherTitle').textContent = fakeVoucher.vehicleTitle;
-          document.getElementById('rentalVoucherDetails').textContent = `${fakeVoucher.durationDays} Days • ${fakeVoucher.pickupLocation} • ${fakeVoucher.renterName}`;
-          document.getElementById('rentalVoucherContact').textContent = fakeVoucher.dispatchContact;
-        }
-        showToast('Rental Confirmed', `Voucher ${fakeVoucher.bookingId} generated!`);
+        console.warn('Rental booking failed:', err);
+        showToast('Not Confirmed', "We couldn't reach our booking server, so nothing was booked. Please check your connection and try again.");
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
@@ -4593,17 +4437,8 @@ function initCommunityReviews() {
           showToast('Notice', json.error || 'Could not submit review.');
         }
       } catch (err) {
-        const mockReview = {
-          id: `rev-${Date.now()}`,
-          ...payload,
-          verifiedVisitor: true,
-          createdAt: new Date().toISOString()
-        };
-        cachedReviews.unshift(mockReview);
-        renderReviewsGrid('all');
-        closeModal('reviewModal');
-        form.reset();
-        showToast('Tip Shared!', 'Your insider travel advice has been added to the community guide.');
+        console.warn('Review submit failed:', err);
+        showToast('Not Posted', "We couldn't reach the server, so your tip wasn't posted. Please try again.");
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
@@ -4625,6 +4460,12 @@ async function loadCommunityReviews(filter = 'all') {
     console.warn('Could not load reviews from API, using fallback data');
   }
   renderReviewsGrid(filter);
+}
+
+// A malformed rating would make '★'.repeat throw and blank the whole grid
+function reviewStars(rating) {
+  const n = parseInt(rating, 10);
+  return Number.isFinite(n) ? Math.max(1, Math.min(5, n)) : 5;
 }
 
 function renderReviewsGrid(filter = 'all') {
@@ -4655,16 +4496,16 @@ function renderReviewsGrid(filter = 'all') {
   grid.innerHTML = filtered.map(r => `
     <article class="glass-card review-card rainbow-hover" data-tilt-3d style="padding: 24px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span class="section-tag tag-cyan" style="font-size: 0.72rem; margin: 0;">${r.targetName || 'Bali Travel'}</span>
-        <div style="color: var(--star-color); font-size: 0.95rem;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+        <span class="section-tag tag-cyan" style="font-size: 0.72rem; margin: 0;">${escapeHtml(r.targetName || 'Bali Travel')}</span>
+        <div style="color: var(--star-color); font-size: 0.95rem;">${'★'.repeat(reviewStars(r.rating))}${'☆'.repeat(5 - reviewStars(r.rating))}</div>
       </div>
       <p class="review-quote" style="font-size: 0.92rem; line-height: 1.6; color: var(--text-primary); margin: 12px 0 16px;">
-        "${r.tipText}"
+        "${escapeHtml(r.tipText)}"
       </p>
       <div class="review-author-row" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
         <div class="author-info">
-          <strong class="author-name" style="font-size: 0.88rem; display: block;">${r.author}</strong>
-          <span class="author-origin" style="font-size: 0.76rem; color: var(--text-muted);">${r.origin || 'Verified Visitor'}</span>
+          <strong class="author-name" style="font-size: 0.88rem; display: block;">${escapeHtml(r.author)}</strong>
+          <span class="author-origin" style="font-size: 0.76rem; color: var(--text-muted);">${escapeHtml(r.origin || 'Verified Visitor')}</span>
         </div>
         <span style="font-size: 0.72rem; color: var(--accent-emerald); font-weight: 700; background: rgba(16,185,129,0.12); padding: 3px 8px; border-radius: var(--radius-full);">
           ✓ Verified Tip
@@ -4700,11 +4541,13 @@ let pulseActiveModel = localStorage.getItem('wanderpulse_ai_model') || 'pulse-om
 function renderPulseMarkdown(rawText = '') {
   if (!rawText) return '';
 
-  // 1. Escape HTML entities
+  // 1. Escape HTML entities. Models often put <br> inside table cells; keep those as line breaks.
   let text = rawText
+    .replace(/<br\s*\/?>/gi, '\u0000BR\u0000')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replace(/>/g, '&gt;')
+    .replace(/\u0000BR\u0000/g, '<br>');
 
   // 2. Fenced Code Blocks (```lang ... ```)
   const codeBlocks = [];
@@ -4895,13 +4738,6 @@ window.handlePulseModelChange = function(newModel) {
     };
     badge.textContent = titles[pulseActiveModel] || pulseActiveModel;
   }
-
-  // Notify backend
-  fetch('/api/ai/config', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: pulseActiveModel })
-  }).catch(() => {});
 
   if (typeof showToast === 'function') {
     showToast('Agent Persona Updated', `Switched to ${pulseActiveModel.toUpperCase()}`);

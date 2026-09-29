@@ -404,8 +404,7 @@ function initRegionalMap3DScene() {
   terrainGeo.computeVertexNormals();
 
   const terrainMat = new THREE.MeshLambertMaterial({
-    vertexColors: true,
-    flatShading: true
+    vertexColors: true
   });
   const terrainMesh = new THREE.Mesh(terrainGeo, terrainMat);
   islandGroup.add(terrainMesh);

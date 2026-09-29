@@ -310,6 +310,7 @@
 }
 
 .gmap-filter-chip {
+  flex-shrink: 0; /* keep labels readable; the bar scrolls sideways instead */
   background: transparent;
   border: 1px solid transparent;
   color: var(--text-secondary);

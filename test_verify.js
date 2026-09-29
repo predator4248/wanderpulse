@@ -7,6 +7,18 @@ const http = require('http');
 const { spawn } = require('child_process');
 
 const TEST_PORT = 3099;
+const fs = require('fs');
+const path = require('path');
+const DATA_DIR = path.join(__dirname, 'data');
+const dataSnapshot = new Map(
+  fs.readdirSync(DATA_DIR).map(f => [f, fs.readFileSync(path.join(DATA_DIR, f))])
+);
+function restoreDataFiles() {
+  for (const f of fs.readdirSync(DATA_DIR)) {
+    if (!dataSnapshot.has(f)) fs.unlinkSync(path.join(DATA_DIR, f));
+  }
+  for (const [f, buf] of dataSnapshot) fs.writeFileSync(path.join(DATA_DIR, f), buf);
+}
 process.env.PORT = String(TEST_PORT);
 
 console.log('🚀 Starting WanderPulse Bali Test Verification Suite...');
@@ -44,7 +56,9 @@ async function runTests() {
   async function testEndpoint(name, url, options = {}, validator) {
     try {
       const res = await fetch(baseUrl + url, options);
-      const json = await res.json();
+      const text = await res.text();
+      let json;
+      try { json = JSON.parse(text); } catch (e) { json = { nonJsonBody: text.slice(0, 120) }; }
       const isValid = validator(res, json);
       if (isValid) {
         console.log(`  ✅ PASS: ${name}`);
@@ -424,16 +438,12 @@ async function runTests() {
     return res.status === 200 && json.success && json.model && json.features && json.features.tripPlanning;
   });
 
-  // 21. PulseAI Real-Time Agent - POST /api/ai/config
-  await testEndpoint('POST /api/ai/config', '/api/ai/config', {
+  // 21. Visitors must not be able to change the AI model for everyone
+  await testEndpoint('POST /api/ai/config is not exposed', '/api/ai/config', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'pulse-omni'
-    })
-  }, (res, json) => {
-    return res.status === 200 && json.success && json.model === 'pulse-omni';
-  });
+    body: JSON.stringify({ model: 'pulse-fast' })
+  }, (res) => res.status === 404);
 
   // 22. PulseAI Real-Time Agent - POST /api/ai/chat (Itinerary Query)
   await testEndpoint('POST /api/ai/chat (5-day itinerary)', '/api/ai/chat', {
@@ -473,19 +483,47 @@ async function runTests() {
 
   // 24. Google Maps Platform - GET /api/maps/config
   await testEndpoint('GET /api/maps/config', '/api/maps/config', {}, (res, json) => {
-    return res.status === 200 && json.success && json.configured && json.hasApiKey && json.apiKey && json.services && json.services.javascriptMaps;
+    // Only the browser key is handed out; the server key is never echoed
+    return res.status === 200 && json.success && json.configured && json.browserKey && !('apiKey' in json) && json.services && json.services.javascriptMaps;
   });
 
-  // 25. Google Maps Platform - POST /api/maps/config
-  await testEndpoint('POST /api/maps/config (Dynamic Key Update)', '/api/maps/config', {
+  // 25. API keys can't be swapped by visitors
+  for (const configPath of ['/api/maps/config', '/api/places/config', '/api/hotels/config']) {
+    await testEndpoint(`POST ${configPath} is not exposed`, configPath, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey: 'attacker-key', geoapifyApiKey: 'attacker-key' })
+    }, (res) => res.status === 404);
+  }
+
+  // 25b. Only public assets are served: never customer data, source, or git internals
+  for (const privatePath of ['/data/transit_bookings.json', '/data/reservations.json', '/.git/config', '/.env', '/server.js', '/package.json', '/cloudflared.exe']) {
+    await testEndpoint(`Private file blocked: ${privatePath}`, privatePath, {}, (res) => res.status === 404);
+  }
+  await testEndpoint('Public asset served: /css/main.css', '/css/main.css', {}, (res) => res.status === 200);
+  await testEndpoint('Unknown page returns 404', '/no-such-page', {}, (res) => res.status === 404);
+
+  // 25c. Reviews are stored as plain text (stored-XSS guard)
+  await testEndpoint('POST /api/reviews strips HTML', '/api/reviews', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      apiKey: 'AIzaSyD4NKHACPBorcaMKx_VaJxAGcvIhHy6QtU'
+      author: '<img src=x onerror=alert(1)>Mallory',
+      origin: '<script>x</script>Nowhere',
+      rating: 5,
+      tipText: '<b>Bold</b> claim about Ubud rice terraces'
     })
   }, (res, json) => {
-    return res.status === 200 && json.success && json.configured;
+    const r = json.review || {};
+    return res.status === 201 && ![r.author, r.origin, r.tipText].some(v => /[<>]/.test(v || '')) && r.author === 'Mallory';
   });
+
+  // 25d. Newsletter rejects malformed addresses
+  await testEndpoint('POST /api/newsletter (Invalid Email)', '/api/newsletter', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'not-an-email' })
+  }, (res, json) => res.status === 400 && json.success === false);
 
   // 26. Google Places API (New) - GET /api/maps/places
   await testEndpoint('GET /api/maps/places (Live Google Places Search)', '/api/maps/places?query=Tanah+Lot', {}, (res, json) => {
@@ -509,6 +547,7 @@ async function runTests() {
   console.log(`=========================================\n`);
 
   serverProcess.kill();
+  restoreDataFiles();
 
   if (failed > 0) {
     process.exit(1);
@@ -520,5 +559,6 @@ async function runTests() {
 runTests().catch(err => {
   console.error('Fatal test error:', err);
   serverProcess.kill();
+  restoreDataFiles();
   process.exit(1);
 });

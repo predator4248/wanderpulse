@@ -546,3 +546,20 @@
     break-inside: avoid;
   }
 }
+
+/* Comfortable touch targets on phones */
+@media (max-width: 640px) {
+  .modal-close-btn {
+    min-width: 40px;
+    min-height: 40px;
+  }
+  .gmap-filter-chip {
+    min-height: 34px;
+  }
+  .google-map-filters {
+    max-width: calc(100% - 24px);
+  }
+  .news-read-link {
+    padding: 8px 0;
+  }
+}

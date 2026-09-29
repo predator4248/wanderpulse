@@ -633,6 +633,12 @@
   transition: all var(--trans-fast);
   text-decoration: none;
 }
+button.drawer-nav-link {
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
 .drawer-nav-link:hover, .drawer-nav-link.active {
   background: rgba(255, 255, 255, 0.06);
   border-color: var(--border-medium);
@@ -5533,11 +5539,23 @@
 
 /* --- Mobile Responsive Enhancements --- */
 @media (max-width: 640px) {
+  /* Icon-only on phones: the full pill covered form fields */
   .pulse-float-btn, .gemini-float-btn {
-    bottom: 20px;
-    right: 18px;
-    padding: 10px 16px;
+    bottom: 16px;
+    right: 16px;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    justify-content: center;
     font-size: 0.85rem;
+  }
+  .pulse-float-btn > span, .gemini-float-btn > span {
+    display: none;
+  }
+  /* Get out of the way while someone is typing into a form */
+  body:has(:is(input, select, textarea):focus) .pulse-float-btn {
+    opacity: 0;
+    pointer-events: none;
   }
   .pulse-chat-widget, .gemini-chat-widget {
     bottom: 0;

@@ -5,3 +5,4 @@ scratch/
 .system_generated/
 *.log
 *.exe
+data/newsletter_subscribers.json

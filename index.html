@@ -37,16 +37,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
   <!-- Stylesheets (Cache-busted for instant edge update) -->
-  <link rel="stylesheet" href="css/main.css?v=3.2.0" />
-  <link rel="stylesheet" href="css/components.css?v=3.2.0" />
-  <link rel="stylesheet" href="css/3d-effects.css?v=3.2.0" />
-  <link rel="stylesheet" href="css/responsive.css?v=3.2.0" />
+  <link rel="stylesheet" href="css/main.css?v=3.3.0" />
+  <link rel="stylesheet" href="css/components.css?v=3.3.0" />
+  <link rel="stylesheet" href="css/3d-effects.css?v=3.3.0" />
+  <link rel="stylesheet" href="css/responsive.css?v=3.3.0" />
 
   <!-- Three.js Real-Time 3D WebGL Engine -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <!-- Google Maps JavaScript API Platform (Real-Time GPS & Interactive Explorer) -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD4NKHACPBorcaMKx_VaJxAGcvIhHy6QtU&libraries=places,geometry&callback=initGoogleMapsPlatform" async defer></script>
 
   <!-- Schema.org JSON-LD Structured Data for SEO -->
   <script type="application/ld+json">
@@ -353,13 +352,13 @@
       <div class="drawer-nav-section" id="primaryNavMenu">
         <div class="drawer-nav-group-title">🌺 DISCOVER BALI</div>
         <div class="drawer-nav-links">
-          <a href="javascript:void(0)" class="drawer-nav-link nav-link drawer-close-on-click" onclick="window.togglePulseChat(true)">
+          <button type="button" class="drawer-nav-link nav-link drawer-close-on-click" onclick="window.togglePulseChat(true)">
             <span class="link-icon">⚡</span>
             <div class="link-text">
               <span class="link-title" style="color: var(--accent-cyan); font-weight: 800;">PulseAI Autonomous Agent</span>
               <span class="link-sub">Real-time answers to ANY question, itineraries & coding</span>
             </div>
-          </a>
+          </button>
           <a href="#hero" class="drawer-nav-link nav-link active drawer-close-on-click">
             <span class="link-icon">🏠</span>
             <div class="link-text">
@@ -2210,9 +2209,6 @@
               <span class="pulse-dot" style="width: 6px; height: 6px; background: #10B981; border-radius: 50%; display: inline-block; margin-right: 4px;"></span>
               Google Maps Live
             </span>
-            <button type="button" class="btn btn-outline btn-sm" onclick="window.toggleGoogleMapsKeyModal()" style="font-size: 0.78rem; padding: 4px 10px; border-radius: var(--radius-full);">
-              ⚙️ Maps Key
-            </button>
           </div>
         </div>
 
@@ -2288,11 +2284,6 @@
               <h3 style="font-size: 1.25rem; font-weight: 800; margin: 0;">Bali Places & Google Maps Precision Explorer</h3>
               <span class="visa-status-pill status-free" id="geoapifyStatusBadge">Google Places Active</span>
             </div>
-            <div style="display: flex; gap: 8px;">
-              <button type="button" class="btn btn-outline btn-sm" onclick="window.toggleGoogleMapsKeyModal()" style="font-size: 0.78rem; padding: 5px 12px; border-radius: var(--radius-full);">
-                🗺️ Maps API Key
-              </button>
-            </div>
           </div>
 
           <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 8px 0 16px;">
@@ -2303,7 +2294,7 @@
           <div class="geoapify-search-bar">
             <div class="geoapify-input-wrap">
               <span class="geoapify-search-icon">🔍</span>
-              <input type="text" id="geoapifySearchInput" placeholder="Search any Bali place (e.g. Tirta Empul, Canggu cafe, Seminyak beach...)" autocomplete="off" />
+              <input type="text" id="geoapifySearchInput" aria-label="Search places in Bali" placeholder="Search any Bali place (e.g. Tirta Empul, Canggu cafe, Seminyak beach...)" autocomplete="off" />
               <button type="button" id="geoapifyClearBtn" class="geoapify-clear-btn" style="display: none;" onclick="window.clearGeoapifySearch()">✕</button>
             </div>
             <button type="button" class="btn btn-primary" id="geoapifySearchBtn" onclick="window.triggerGeoapifySearch()" style="padding: 10px 20px; font-weight: 700;">
@@ -2942,7 +2933,7 @@
         <div class="gallery-viewport">
           <button type="button" class="gallery-nav-btn nav-prev" id="galleryPrevBtn" onclick="window.galleryPrevPhoto(event)" aria-label="Previous Photo">❮</button>
           <div class="gallery-main-img-wrap">
-            <img id="galleryMainImg" src="" alt="Location Photo" />
+            <img id="galleryMainImg" alt="Location Photo" />
           </div>
           <button type="button" class="gallery-nav-btn nav-next" id="galleryNextBtn" onclick="window.galleryNextPhoto(event)" aria-label="Next Photo">❯</button>
         </div>
@@ -2980,7 +2971,7 @@
           <div class="hotel-detail-left">
             <div class="hotel-hero-img-wrap">
               <button type="button" class="gallery-nav-btn nav-prev" id="hotelPrevBtn" onclick="window.hotelPrevPhoto(event)" aria-label="Previous Hotel Photo" style="width: 38px; height: 38px; font-size: 1rem; left: 12px;">❮</button>
-              <img id="hotelDetailMainImg" src="" alt="Hotel Property" />
+              <img id="hotelDetailMainImg" alt="Hotel Property" />
               <div class="hotel-photo-badge" id="hotelPhotoCounter">1 of 4 Photos</div>
               <button type="button" class="gallery-nav-btn nav-next" id="hotelNextBtn" onclick="window.hotelNextPhoto(event)" aria-label="Next Hotel Photo" style="width: 38px; height: 38px; font-size: 1rem; right: 12px;">❯</button>
             </div>
@@ -3014,7 +3005,7 @@
             <!-- Active Room Preview Box -->
             <div class="active-room-card" id="activeRoomCard">
               <div class="active-room-img-wrap">
-                <img id="activeRoomImg" src="" alt="Selected Room" />
+                <img id="activeRoomImg" alt="Selected Room" />
               </div>
               <div class="active-room-info">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -3254,79 +3245,6 @@
           <button type="button" class="btn btn-outline" onclick="closeModal('eTicketModal')" style="flex: 1;">Close</button>
           <button type="button" class="btn btn-primary-grad" onclick="window.print()" style="flex: 2;">🖨️ Print / Save PDF E-Ticket</button>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 4.85. GOOGLE MAPS PLATFORM API KEY SETTINGS MODAL -->
-  <div class="modal-backdrop" id="googleMapsKeyModal" role="dialog" aria-modal="true" aria-labelledby="gmapsModalTitle">
-    <div class="modal-dialog" style="max-width: 520px;">
-      <button class="modal-close-btn" onclick="window.toggleGoogleMapsKeyModal()" aria-label="Close modal">✕</button>
-      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-        <span style="font-size: 1.8rem;">🗺️</span>
-        <div>
-          <h3 id="gmapsModalTitle" style="font-size: 1.3rem; margin: 0;">Google Maps Platform</h3>
-          <span style="font-size: 0.8rem; color: var(--accent-cyan);">Maps JS SDK • Places API (New) • Routes API</span>
-        </div>
-      </div>
-      <p style="font-size: 0.86rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 14px;">
-        Your platform is powered by live Google Maps services with real-time transit polylines, 6-decimal coordinate accuracy, and interactive destination explorer.
-      </p>
-
-      <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px; margin-bottom: 16px;">
-        <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Active Services Status</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8rem;">
-          <div style="display: flex; align-items: center; gap: 6px; color: var(--accent-emerald);">
-            <span>●</span> Maps JavaScript API (Active)
-          </div>
-          <div style="display: flex; align-items: center; gap: 6px; color: var(--accent-emerald);">
-            <span>●</span> Places API New (Active)
-          </div>
-          <div style="display: flex; align-items: center; gap: 6px; color: var(--accent-emerald);">
-            <span>●</span> Routes API v2 (Active)
-          </div>
-          <div style="display: flex; align-items: center; gap: 6px; color: var(--accent-emerald);">
-            <span>●</span> High-Precision GIS Sync
-          </div>
-        </div>
-      </div>
-
-      <div class="form-group" style="margin-bottom: 16px;">
-        <label for="googleMapsApiKeyInput" style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">
-          Google Maps API Key:
-        </label>
-        <input type="text" id="googleMapsApiKeyInput" class="form-input" placeholder="AIzaSy..." value="AIzaSyD4NKHACPBorcaMKx_VaJxAGcvIhHy6QtU" style="font-family: monospace; font-size: 0.85rem;" />
-      </div>
-      <div style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
-        <button type="button" class="btn btn-outline" onclick="window.testGoogleMapsKey()">Test Connection</button>
-        <button type="button" class="btn btn-primary" onclick="window.saveGoogleMapsKey()">Save Key</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 4.9. GEOAPIFY API KEY SETTINGS MODAL -->
-  <div class="modal-backdrop" id="geoapifyKeyModal" role="dialog" aria-modal="true" aria-labelledby="geoapifyModalTitle">
-    <div class="modal-dialog" style="max-width: 500px;">
-      <button class="modal-close-btn" onclick="window.toggleGeoapifyKeyModal()" aria-label="Close modal">✕</button>
-      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-        <span style="font-size: 1.5rem;">⚙️</span>
-        <div>
-          <h3 id="geoapifyModalTitle" style="font-size: 1.3rem; margin: 0;">Geoapify API Settings</h3>
-          <span style="font-size: 0.8rem; color: var(--accent-cyan);">Places API v2 Configuration</span>
-        </div>
-      </div>
-      <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 16px;">
-        By default, WanderPulse uses our verified, zero-discrepancy Bali GIS coordinate database matching Google Maps 100%. You can also supply a personal <strong>Geoapify API Key</strong> to unlock dynamic live querying across 50,000+ local points of interest.
-      </p>
-      <div class="form-group" style="margin-bottom: 16px;">
-        <label for="geoapifyApiKeyInput" style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">
-          Geoapify API Key (Optional):
-        </label>
-        <input type="text" id="geoapifyApiKeyInput" class="form-input" placeholder="Paste your Geoapify API Key here..." style="font-family: monospace; font-size: 0.85rem;" />
-      </div>
-      <div style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
-        <button type="button" class="btn btn-outline" onclick="window.resetGeoapifyKey()">Clear Key</button>
-        <button type="button" class="btn btn-primary" onclick="window.saveGeoapifyKey()">Save & Connect</button>
       </div>
     </div>
   </div>
@@ -3743,9 +3661,9 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts (Cache-busted) -->
-  <script src="js/data.js?v=3.2.0"></script>
-  <script src="js/app.js?v=3.2.0"></script>
-  <script src="js/tilt3d.js?v=3.2.0"></script>
-  <script src="js/three-scene.js?v=3.2.0"></script>
+  <script src="js/data.js?v=3.3.0"></script>
+  <script src="js/app.js?v=3.3.0"></script>
+  <script src="js/tilt3d.js?v=3.3.0"></script>
+  <script src="js/three-scene.js?v=3.3.0"></script>
 </body>
 </html>

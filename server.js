@@ -42,6 +42,10 @@ app.use((req, res, next) => {
   next();
 });
 
+// Behind Vercel / Render / cloudflared, req.ip must come from X-Forwarded-For
+// or every visitor shares the proxy's IP (and one rate-limit bucket)
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -53,6 +57,7 @@ const RESERVATIONS_FILE = path.join(DATA_DIR, 'reservations.json');
 const TRANSIT_BOOKINGS_FILE = path.join(DATA_DIR, 'transit_bookings.json');
 const RENTAL_BOOKINGS_FILE = path.join(DATA_DIR, 'rental_bookings.json');
 const REVIEWS_FILE = path.join(DATA_DIR, 'reviews.json');
+const NEWSLETTER_FILE = path.join(DATA_DIR, 'newsletter_subscribers.json');
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
@@ -69,13 +74,49 @@ if (!fs.existsSync(REVIEWS_FILE)) {
   fs.writeFileSync(REVIEWS_FILE, JSON.stringify([], null, 2), 'utf-8');
 }
 
+// Prepend a record to a JSON array file. Throws on failure so callers never
+// report a booking as confirmed when it wasn't saved.
+function prependRecord(file, record) {
+  const raw = fs.existsSync(file) ? fs.readFileSync(file, 'utf-8') : '[]';
+  const existing = JSON.parse(raw || '[]');
+  existing.unshift(record);
+  fs.writeFileSync(file, JSON.stringify(existing, null, 2), 'utf-8');
+}
+
+function saveFailed(res, what, err) {
+  console.error(`Could not save ${what}:`, err.message);
+  return res.status(500).json({
+    success: false,
+    error: `We couldn't save your ${what} right now, so it has NOT been confirmed. Please try again shortly.`
+  });
+}
+
+// Plain text only: strip tags, collapse whitespace, cap length
+function cleanText(value, maxLen) {
+  return String(value == null ? '' : value)
+    .replace(/<[^>]*>/g, '')
+    .replace(/[<>]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, maxLen);
+}
+
 // In-Memory Lightweight Rate Limiter for Post Endpoints
+// Buckets are per client IP *and* route, so one endpoint's traffic can't exhaust another's
 const rateLimitMap = new Map();
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, data] of rateLimitMap) {
+    if (now > data.resetAt) rateLimitMap.delete(key);
+  }
+}, 5 * 60000).unref();
+
 function rateLimit(limitCount = 20, windowMs = 60000) {
   return (req, res, next) => {
-    const ip = req.ip || req.connection.remoteAddress || 'unknown';
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    const bucketKey = `${ip}|${req.baseUrl}${req.path}`;
     const now = Date.now();
-    const clientData = rateLimitMap.get(ip) || { count: 0, resetAt: now + windowMs };
+    const clientData = rateLimitMap.get(bucketKey) || { count: 0, resetAt: now + windowMs };
 
     if (now > clientData.resetAt) {
       clientData.count = 1;
@@ -89,7 +130,7 @@ function rateLimit(limitCount = 20, windowMs = 60000) {
         });
       }
     }
-    rateLimitMap.set(ip, clientData);
+    rateLimitMap.set(bucketKey, clientData);
     next();
   };
 }
@@ -111,8 +152,15 @@ app.get(['/', '/index.html'], (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Serve static frontend files (HTML, CSS, JS, Assets)
-app.use(express.static(path.join(__dirname)));
+// Serve ONLY the public frontend folders. Serving the project root exposed data/
+// (customer bookings), .git/, server.js and binaries to anyone who asked for them.
+const STATIC_OPTIONS = { dotfiles: 'deny', index: false, fallthrough: true };
+app.use('/css', express.static(path.join(__dirname, 'css'), STATIC_OPTIONS));
+app.use('/js', express.static(path.join(__dirname, 'js'), STATIC_OPTIONS));
+app.use('/images', express.static(path.join(__dirname, 'images'), STATIC_OPTIONS));
+app.get('/manifest.json', (req, res) => {
+  res.sendFile(path.join(__dirname, 'manifest.json'));
+});
 
 /* ==========================================================================
    MOCK / REAL-TIME DATA SOURCES (Synchronized with js/data.js)
@@ -127,7 +175,7 @@ const BALI_REGIONS = dataModule.BALI_REGIONS || {};
 const LOCAL_TRAVEL_MODES = dataModule.LOCAL_TRAVEL_MODES || [];
 const BALI_MARINE_HARBORS = dataModule.BALI_MARINE_HARBORS || [];
 
-let GEOAPIFY_API_KEY = process.env.GEOAPIFY_API_KEY || '';
+const GEOAPIFY_API_KEY = process.env.GEOAPIFY_API_KEY || '';
 const GEOAPIFY_CACHE_FILE = path.join(DATA_DIR, 'geoapify_cache.json');
 let geoapifyCache = {};
 try {
@@ -147,7 +195,10 @@ function saveGeoapifyCache() {
 }
 
 // Google Maps Platform API Configuration & Session Cache
-let GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY || 'AIzaSyD4NKHACPBorcaMKx_VaJxAGcvIhHy6QtU';
+// Keys come only from the environment (.env locally, host settings in production)
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY || '';
+// The browser necessarily sees its Maps key, so it should be a separate, referrer-restricted key
+const GOOGLE_MAPS_BROWSER_KEY = process.env.GOOGLE_MAPS_BROWSER_KEY || GOOGLE_MAPS_API_KEY;
 const GOOGLE_MAPS_CACHE_FILE = path.join(DATA_DIR, 'google_maps_cache.json');
 let googleMapsCache = {};
 try {
@@ -167,13 +218,13 @@ function saveGoogleMapsCache() {
 }
 
 // PulseAI Autonomous Real-Time Intelligence Engine Setup
-const { processPulseAiQuery, getActiveModel, setActiveModel, MODEL_REGISTRY } = require('./pulse-ai-engine.js');
-let PULSE_AI_MODEL = process.env.PULSE_AI_MODEL || 'pulse-omni';
+const { processPulseAiQuery, MODEL_REGISTRY } = require('./pulse-ai-engine.js');
+const PULSE_AI_MODEL = process.env.PULSE_AI_MODEL || 'pulse-omni';
 
 // Amadeus Hotel Search API Configuration & Session Cache
-let AMADEUS_CLIENT_ID = process.env.AMADEUS_CLIENT_ID || process.env.AMADEUS_API_KEY || '';
-let AMADEUS_CLIENT_SECRET = process.env.AMADEUS_CLIENT_SECRET || process.env.AMADEUS_API_SECRET || '';
-let AMADEUS_ENV = process.env.AMADEUS_ENV || 'test';
+const AMADEUS_CLIENT_ID = process.env.AMADEUS_CLIENT_ID || process.env.AMADEUS_API_KEY || '';
+const AMADEUS_CLIENT_SECRET = process.env.AMADEUS_CLIENT_SECRET || process.env.AMADEUS_API_SECRET || '';
+const AMADEUS_ENV = process.env.AMADEUS_ENV || 'test';
 const getAmadeusBaseUrl = () => AMADEUS_ENV === 'production' ? 'https://api.amadeus.com' : 'https://test.api.amadeus.com';
 
 let amadeusTokenCache = {
@@ -524,8 +575,7 @@ app.get('/api/hotels/geoapify', async (req, res) => {
   const lat = parseFloat(req.query.lat) || -8.498425;
   const lon = parseFloat(req.query.lon) || 115.275811;
   const radius = parseInt(req.query.radius, 10) || 25000;
-  const clientKey = req.headers['x-geoapify-key'] || req.query.apiKey;
-  const apiKey = clientKey || GEOAPIFY_API_KEY;
+  const apiKey = GEOAPIFY_API_KEY;
 
   if (apiKey) {
     try {
@@ -797,7 +847,6 @@ app.get('/api/hotels/config', (req, res) => {
     geoapify: {
       configured: !!GEOAPIFY_API_KEY,
       hasApiKey: !!GEOAPIFY_API_KEY,
-      keyPreview: GEOAPIFY_API_KEY ? `${GEOAPIFY_API_KEY.slice(0, 4)}...${GEOAPIFY_API_KEY.slice(-4)}` : null,
       source: GEOAPIFY_API_KEY ? 'geoapify_live' : 'verified_gis_database'
     },
     amadeus: {
@@ -806,38 +855,6 @@ app.get('/api/hotels/config', (req, res) => {
       hasClientSecret: !!AMADEUS_CLIENT_SECRET,
       env: AMADEUS_ENV,
       source: (AMADEUS_CLIENT_ID && AMADEUS_CLIENT_SECRET) ? 'amadeus_live_gds' : 'amadeus_verified_gds'
-    }
-  });
-});
-
-app.post('/api/hotels/config', (req, res) => {
-  const { geoapifyApiKey, amadeusClientId, amadeusClientSecret, amadeusEnv } = req.body;
-  if (typeof geoapifyApiKey === 'string') {
-    GEOAPIFY_API_KEY = geoapifyApiKey.trim();
-  }
-  if (typeof amadeusClientId === 'string') {
-    AMADEUS_CLIENT_ID = amadeusClientId.trim();
-    amadeusTokenCache = { accessToken: null, expiresAt: 0 };
-  }
-  if (typeof amadeusClientSecret === 'string') {
-    AMADEUS_CLIENT_SECRET = amadeusClientSecret.trim();
-    amadeusTokenCache = { accessToken: null, expiresAt: 0 };
-  }
-  if (typeof amadeusEnv === 'string' && ['test', 'production'].includes(amadeusEnv)) {
-    AMADEUS_ENV = amadeusEnv;
-    amadeusTokenCache = { accessToken: null, expiresAt: 0 };
-  }
-
-  res.json({
-    success: true,
-    status: 'ok',
-    geoapify: {
-      configured: !!GEOAPIFY_API_KEY,
-      hasApiKey: !!GEOAPIFY_API_KEY
-    },
-    amadeus: {
-      configured: !!(AMADEUS_CLIENT_ID && AMADEUS_CLIENT_SECRET),
-      env: AMADEUS_ENV
     }
   });
 });
@@ -1102,12 +1119,9 @@ app.post('/api/book', rateLimit(15, 60000), (req, res) => {
 
   // Persist to data/reservations.json
   try {
-    const raw = fs.readFileSync(RESERVATIONS_FILE, 'utf-8');
-    const existing = JSON.parse(raw || '[]');
-    existing.unshift(confirmation);
-    fs.writeFileSync(RESERVATIONS_FILE, JSON.stringify(existing.slice(0, 100), null, 2), 'utf-8');
+    prependRecord(RESERVATIONS_FILE, confirmation);
   } catch (err) {
-    console.warn('Could not persist reservation to file:', err.message);
+    return saveFailed(res, 'reservation', err);
   }
 
   res.status(201).json({
@@ -1126,7 +1140,8 @@ app.post('/api/transit/book', rateLimit(20, 60000), (req, res) => {
   const leadPassengerName = req.body.leadPassengerName || req.body.leadPassenger;
   const passengers = req.body.passengers;
   const travelClass = req.body.travelClass || 'standard';
-  const passportOrId = req.body.passportOrId || 'N/A';
+  const rawPassport = cleanText(req.body.passportOrId, 40);
+  const passportOrId = rawPassport ? `••••${rawPassport.slice(-4)}` : 'N/A';
   const email = req.body.email;
   const extraBaggageKg = req.body.extraBaggageKg || req.body.baggageFee || 0;
   const mealPreference = req.body.mealPreference || 'Standard Island Meal';
@@ -1228,12 +1243,9 @@ app.post('/api/transit/book', rateLimit(20, 60000), (req, res) => {
 
   // Persist to data/transit_bookings.json
   try {
-    const raw = fs.readFileSync(TRANSIT_BOOKINGS_FILE, 'utf-8');
-    const existing = JSON.parse(raw || '[]');
-    existing.unshift(bookingRecord);
-    fs.writeFileSync(TRANSIT_BOOKINGS_FILE, JSON.stringify(existing.slice(0, 100), null, 2), 'utf-8');
+    prependRecord(TRANSIT_BOOKINGS_FILE, bookingRecord);
   } catch (err) {
-    console.warn('Could not persist transit booking to file:', err.message);
+    return saveFailed(res, 'ticket booking', err);
   }
 
   res.status(201).json({
@@ -1307,12 +1319,9 @@ app.post('/api/rental/book', rateLimit(20, 60000), (req, res) => {
   };
 
   try {
-    const raw = fs.readFileSync(RENTAL_BOOKINGS_FILE, 'utf-8');
-    const existing = JSON.parse(raw || '[]');
-    existing.unshift(voucher);
-    fs.writeFileSync(RENTAL_BOOKINGS_FILE, JSON.stringify(existing.slice(0, 100), null, 2), 'utf-8');
+    prependRecord(RENTAL_BOOKINGS_FILE, voucher);
   } catch (err) {
-    console.warn('Could not persist rental booking:', err.message);
+    return saveFailed(res, 'rental booking', err);
   }
 
   res.status(201).json({
@@ -1351,27 +1360,33 @@ app.post('/api/reviews', rateLimit(20, 60000), (req, res) => {
     });
   }
 
+  const cleanAuthor = cleanText(author, 60);
+  const cleanTip = cleanText(tipText, 1000);
+  if (!cleanAuthor || cleanTip.length < 3) {
+    return res.status(400).json({
+      success: false,
+      error: 'Please enter your name and a tip (plain text only).'
+    });
+  }
+
   const numRating = Math.max(1, Math.min(5, parseInt(rating, 10) || 5));
   const newReview = {
     id: `rev-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-    targetId: targetId || 'general',
-    targetName: targetName || 'Bali General Travel',
-    author: author.trim(),
-    origin: (origin && origin.trim()) || 'International Traveler',
+    targetId: cleanText(targetId, 60) || 'general',
+    targetName: cleanText(targetName, 80) || 'Bali General Travel',
+    author: cleanAuthor,
+    origin: cleanText(origin, 60) || 'International Traveler',
     rating: numRating,
-    tipText: tipText.trim(),
-    visitDate: visitDate || new Date().toISOString().split('T')[0],
+    tipText: cleanTip,
+    visitDate: /^\d{4}-\d{2}-\d{2}$/.test(String(visitDate)) ? visitDate : new Date().toISOString().split('T')[0],
     verifiedVisitor: true,
     createdAt: new Date().toISOString()
   };
 
   try {
-    const raw = fs.readFileSync(REVIEWS_FILE, 'utf-8');
-    const existing = JSON.parse(raw || '[]');
-    existing.unshift(newReview);
-    fs.writeFileSync(REVIEWS_FILE, JSON.stringify(existing.slice(0, 200), null, 2), 'utf-8');
+    prependRecord(REVIEWS_FILE, newReview);
   } catch (err) {
-    console.warn('Could not persist review:', err.message);
+    return saveFailed(res, 'tip', err);
   }
 
   res.status(201).json({
@@ -1385,9 +1400,19 @@ app.post('/api/reviews', rateLimit(20, 60000), (req, res) => {
 
 // 6. Newsletter Subscription API (Rate limited)
 app.post('/api/newsletter', rateLimit(10, 60000), (req, res) => {
-  const { email } = req.body;
-  if (!email || !email.includes('@') || email.length < 5) {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  if (email.length > 254 || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]{2,}$/.test(email)) {
     return res.status(400).json({ success: false, error: 'Please enter a valid email address' });
+  }
+
+  try {
+    const raw = fs.existsSync(NEWSLETTER_FILE) ? fs.readFileSync(NEWSLETTER_FILE, 'utf-8') : '[]';
+    const subscribers = JSON.parse(raw || '[]');
+    if (!subscribers.some(sub => sub.email === email)) {
+      prependRecord(NEWSLETTER_FILE, { email, subscribedAt: new Date().toISOString() });
+    }
+  } catch (err) {
+    return saveFailed(res, 'subscription', err);
   }
 
   res.json({
@@ -2089,8 +2114,7 @@ app.get('/api/places/geoapify', async (req, res) => {
   const categories = req.query.categories || 'tourism.sights,tourism.attraction';
   const radius = parseInt(req.query.radius, 10) || 15000;
   const placeId = req.query.id;
-  const clientKey = req.headers['x-geoapify-key'] || req.query.apiKey;
-  const apiKey = clientKey || GEOAPIFY_API_KEY;
+  const apiKey = GEOAPIFY_API_KEY;
 
   // A. Direct Verified ID Lookup
   if (placeId && GEOAPIFY_VERIFIED[placeId]) {
@@ -2300,23 +2324,9 @@ app.get('/api/places/config', (req, res) => {
     status: 'ok',
     configured: !!GEOAPIFY_API_KEY,
     hasApiKey: !!GEOAPIFY_API_KEY,
-    keyPreview: GEOAPIFY_API_KEY ? `${GEOAPIFY_API_KEY.slice(0, 4)}...${GEOAPIFY_API_KEY.slice(-4)}` : null,
     source: GEOAPIFY_API_KEY ? 'geoapify_live' : 'verified_gis_database',
     mode: GEOAPIFY_API_KEY ? 'geoapify_live' : 'verified_gis'
   });
-});
-
-app.post('/api/places/config', (req, res) => {
-  const { apiKey } = req.body;
-  if (typeof apiKey === 'string') {
-    GEOAPIFY_API_KEY = apiKey.trim();
-    return res.json({
-      success: true,
-      configured: !!GEOAPIFY_API_KEY,
-      mode: GEOAPIFY_API_KEY ? 'geoapify_live' : 'verified_gis'
-    });
-  }
-  res.status(400).json({ success: false, error: 'apiKey must be a string' });
 });
 
 /* ==========================================================================
@@ -2330,8 +2340,7 @@ app.get('/api/maps/config', (req, res) => {
     status: 'ok',
     configured: !!GOOGLE_MAPS_API_KEY,
     hasApiKey: !!GOOGLE_MAPS_API_KEY,
-    apiKey: GOOGLE_MAPS_API_KEY,
-    keyPreview: GOOGLE_MAPS_API_KEY ? `${GOOGLE_MAPS_API_KEY.slice(0, 6)}...${GOOGLE_MAPS_API_KEY.slice(-4)}` : null,
+    browserKey: GOOGLE_MAPS_BROWSER_KEY,
     provider: 'Google Maps Platform',
     services: {
       javascriptMaps: true,
@@ -2346,27 +2355,12 @@ app.get('/api/maps/config', (req, res) => {
   });
 });
 
-app.post('/api/maps/config', (req, res) => {
-  const { apiKey } = req.body;
-  if (typeof apiKey === 'string') {
-    GOOGLE_MAPS_API_KEY = apiKey.trim();
-    return res.json({
-      success: true,
-      status: 'ok',
-      configured: !!GOOGLE_MAPS_API_KEY,
-      keyPreview: GOOGLE_MAPS_API_KEY ? `${GOOGLE_MAPS_API_KEY.slice(0, 6)}...${GOOGLE_MAPS_API_KEY.slice(-4)}` : null
-    });
-  }
-  res.status(400).json({ success: false, error: 'apiKey must be a string' });
-});
-
 // 10.4b. Google Places API (New) Discovery & Search Endpoint
 app.get('/api/maps/places', async (req, res) => {
   const query = (req.query.query || req.query.text || '').trim();
   const lat = parseFloat(req.query.lat);
   const lon = parseFloat(req.query.lon || req.query.lng);
-  const clientKey = req.headers['x-google-maps-key'] || req.query.apiKey;
-  const apiKey = clientKey || GOOGLE_MAPS_API_KEY;
+  const apiKey = GOOGLE_MAPS_API_KEY;
 
   const cacheKey = `gplaces_${query.toLowerCase()}_${lat}_${lon}`;
   if (googleMapsCache[cacheKey] && (Date.now() - googleMapsCache[cacheKey].timestamp < 86400000)) {
@@ -2521,23 +2515,6 @@ app.get('/api/ai/config', (req, res) => {
 });
 
 // 11.2. AI Configuration Update Endpoint (POST)
-app.post('/api/ai/config', (req, res) => {
-  const { model } = req.body;
-  if (typeof model === 'string' && model.trim()) {
-    PULSE_AI_MODEL = model.trim();
-    setActiveModel(PULSE_AI_MODEL);
-  }
-
-  res.json({
-    success: true,
-    status: 'ok',
-    configured: true,
-    hasApiKey: true,
-    model: PULSE_AI_MODEL,
-    provider: 'pulse_autonomous_agent'
-  });
-});
-
 // 11.3. AI Chat Query Endpoint (POST - Standard JSON Completion)
 app.post('/api/ai/chat', rateLimit(60, 60000), async (req, res) => {
   try {
@@ -2550,7 +2527,7 @@ app.post('/api/ai/chat', rateLimit(60, 60000), async (req, res) => {
       });
     }
 
-    const activeModel = model || PULSE_AI_MODEL || 'pulse-omni';
+    const activeModel = MODEL_REGISTRY[model] ? model : PULSE_AI_MODEL;
     const result = await processPulseAiQuery({
       message,
       history,
@@ -2603,7 +2580,7 @@ app.post('/api/ai/stream', rateLimit(60, 60000), async (req, res) => {
       res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
     };
 
-    const activeModel = model || PULSE_AI_MODEL || 'pulse-omni';
+    const activeModel = MODEL_REGISTRY[model] ? model : PULSE_AI_MODEL;
     const result = await processPulseAiQuery({
       message,
       history,
@@ -2643,16 +2620,14 @@ app.post('/api/ai/stream', rateLimit(60, 60000), async (req, res) => {
   }
 });
 
-// Explicit fallback for SPA and static asset routing (prevents Cannot GET 404 errors)
-app.get('*', (req, res, next) => {
+// Unknown routes: real 404s (the site is a single page, so there are no client-side routes to fall back to)
+app.use((req, res) => {
   if (req.path.startsWith('/api/')) {
-    return res.status(404).json({ success: false, error: `Endpoint ${req.path} not found` });
+    return res.status(404).json({ success: false, error: 'Endpoint not found' });
   }
-  const staticPath = path.join(__dirname, req.path);
-  if (fs.existsSync(staticPath) && fs.statSync(staticPath).isFile()) {
-    return res.sendFile(staticPath);
-  }
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.status(404).type('html').send(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Page not found | WanderPulse Bali</title>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,sans-serif;background:#F8FAFC;color:#0F172A;text-align:center;padding:16px}a{color:#6D28D9;font-weight:700}</style></head>
+<body><main><h1>Page not found</h1><p>This page doesn't exist.</p><p><a href="/">Back to WanderPulse Bali</a></p></main></body></html>`);
 });
 
 // Start Server if executed directly, export for serverless environments (Vercel, Render)
