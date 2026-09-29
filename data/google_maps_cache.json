@@ -8,7 +8,7 @@
       "encodedPolyline": "~elt@qn|}T`CIHICwDEoBHe@L[D]SePIeBAkAfDpAMiAE[Y_Ag@wAKq@Gq@IWYuB[wE[iCKoC@aB@eACgB?eAOkAK_@{@cBOi@A{@w@kDSk@AWDk@Cc@GOo@WyF}A{Ci@wBW{DQOJaAA_DFa@NSt@Yb@WPe@DMCs@g@KQMg@EqAH}@Ne@X]TMC_AAwCLsFEcAK{@q@{Cc@yAMm@OuAO}BE{@CuCFoBN{Bv@aGHiAESP{GHiCCq@Oa@WYm@SuDYqBMKG{CQeBSeDs@kBo@eBy@eDqB}@s@cAeAkA}Ao@gAeA{Bi@aBm@kCk@qDeC_R}B_Pm@oE]wBM_@aAwE[{@s@iAy@{@s@a@cA]mCo@OKoCg@[A}q@cKcEe@cUcAwDQiCURsA`@_DDyAMuB[mA}@uBgBmDq@uAuBaEiQ}]Q_@g@sAi@cCOyBAoABkA\\wFDyA?cAGaBKmAy@cEq@cCyFeUqA}EcGcVaAcDeAaCkAeBgAqAcKgLq@w@Ya@e@eAi@}AQeAKoAC{@?{KCyc@EsC?{AMmAW{@[m@u@}@y@i@w@[y@Ow@EuG?eHD}^@kKBuX@mFEkAEwNw@}G[gCUkBI{AB}ARaH~AaBTy@BkAGkAQoE{@uA]gFeAiBS[?c@HyHlDaIvDuHjDuFjCgC`AcD~@{Cn@uB\\uCf@u^fGcBPyBB{AEab@}C{@CeIo@yFg@}L}@_AC{K{@aBCmBB[?s@PoATkBh@y@XoCt@}Af@kI`Cg@m@aAgA?EsCoAeD_BqAc@eCOeFMeBKa@KU[K[?}@Gw@Mo@q@wCu@{FS{@Q]WUkAw@gAsAKE]DGAuEvA{Af@yEzAqAj@wChA{Bp@qBh@_@FyA`@cFfA_I~BqEbAg@P{@h@_Aj@cD`A_EhAgBn@mBf@yDp@}Cj@uGz@aNhAuId@uMb@qCLw@@kId@_ELG@eE@s@@[Ga@@gLYk@Gc@?a@CqBGsEQi@AeGU{HW}@IuBG}BKkCOwIa@{FS}BGeBGyCE{C?mDEeHIwFWe@E[KwAw@qFgDk@IaR{@}F_@eA?mACYCaDo@UQEOA_AAwAOQYGa@C}A?iB?DQLcCh@aDQI_@E[GuAYo@W]Y[a@_@MoB]y@[SKkJsAoDg@wBm@wD}@gBWeCm@gFcAoAOs@CeABsALsBTaFd@yCZ}BPoADgHCQAkAQsBQcD]oGe@_AAkCQ{AQaCIiKDqEDmGEqF@wFE}JAcCAwIBsCBcGAwBAwIi@qAG[E{BIuGg@uCO}CYcF]iCS[ISSGUEaAKWY]WGc@AyBJsDKoJJcCFwBDeBJyHZgGT_GVmADUHWXMPWNi@?cAGeCGw@@KHMXMLY@W?}Ca@oAa@oAW{BWmAAQDCBRTPLBFDbAKjDKnBJ~AA|AE\\KPu@l@Q\\SrAKBICmAo@q@UuA]sBm@_Cc@qCc@kCg@_AMkAKsBYwAS{AIy@FgEe@qC]s@MoEoAaHyB",
       "source": "google_routes_live"
     },
-    "timestamp": 1790505350713
+    "timestamp": 1790616730733
   },
   "gplaces_tanah lot_NaN_NaN": {
     "data": [
@@ -59,5 +59,171 @@
       }
     ],
     "timestamp": 1790505354663
+  },
+  "gplaces_cafe_NaN_NaN": {
+    "data": [
+      {
+        "id": "ChIJNz1dVBdH0i0Rpn8u0cr9drY",
+        "name": "Cafe Bali",
+        "formattedAddress": "Jalan Laksmana (Kayu Aya Seminyak Kuta, Kerobokan Kelod, Kec. Kuta Utara, Kabupaten Badung, Bali 80361, Indonesia",
+        "lat": -8.684035,
+        "lon": 115.1594488,
+        "lng": 115.1594488,
+        "rating": 4.4,
+        "userRatingCount": 1957,
+        "category": "restaurant",
+        "distanceMeters": null,
+        "googleMapsUrl": "https://maps.google.com/?cid=13147975209689448358&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "googleMapsDirectionsUrl": "https://www.google.com/maps/dir/?api=1&destination=-8.684035,115.1594488",
+        "source": "google_places_live"
+      },
+      {
+        "id": "ChIJ9_2GaARB0i0RmozmozgNOFI",
+        "name": "Bali Sky Cafe",
+        "formattedAddress": "Bandara I Gusti Ngurah Rai International Airport Kuta, Tuban, Kec. Kuta, Kabupaten Badung, Bali 80361, Indonesia",
+        "lat": -8.7442297,
+        "lon": 115.16687539999998,
+        "lng": 115.16687539999998,
+        "rating": 4.8,
+        "userRatingCount": 3515,
+        "category": "coffee_shop",
+        "distanceMeters": null,
+        "googleMapsUrl": "https://maps.google.com/?cid=5924499846725012634&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "googleMapsDirectionsUrl": "https://www.google.com/maps/dir/?api=1&destination=-8.7442297,115.16687539999998",
+        "source": "google_places_live"
+      },
+      {
+        "id": "ChIJ9RgV6c7naC4RFa2HeJrbdt0",
+        "name": "Cafe Bali",
+        "formattedAddress": "Jl. L. L. R.E. Martadinata No.211-215, Cihapit, Kec. Bandung Wetan, Kota Bandung, Jawa Barat 40114, Indonesia",
+        "lat": -6.9138269999999995,
+        "lon": 107.62932099999999,
+        "lng": 107.62932099999999,
+        "rating": 4.4,
+        "userRatingCount": 5213,
+        "category": "cafe",
+        "distanceMeters": null,
+        "googleMapsUrl": "https://maps.google.com/?cid=15958183786127535381&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "googleMapsDirectionsUrl": "https://www.google.com/maps/dir/?api=1&destination=-6.9138269999999995,107.62932099999999",
+        "source": "google_places_live"
+      },
+      {
+        "id": "ChIJQ0xiS8hG0i0RFqmqdeRFPAQ",
+        "name": "KOPI ZEEN",
+        "formattedAddress": "Komplek Pertokoan Central Park, Jl. Patih Jelantik, Komp. Istana Kuta Galeria, Kuta, Kec. Kuta, Kabupaten Badung, Bali 80361, Indonesia",
+        "lat": -8.7117408,
+        "lon": 115.17994049999999,
+        "lng": 115.17994049999999,
+        "rating": 4.8,
+        "userRatingCount": 7275,
+        "category": "cafe",
+        "distanceMeters": null,
+        "googleMapsUrl": "https://maps.google.com/?cid=305195722283329814&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "googleMapsDirectionsUrl": "https://www.google.com/maps/dir/?api=1&destination=-8.7117408,115.17994049999999",
+        "source": "google_places_live"
+      },
+      {
+        "id": "ChIJv-pCBGtH0i0RtjgHkk_uF-g",
+        "name": "Livingstone",
+        "formattedAddress": "Jl. Petitenget No.88X, Kerobokan Kelod, Kec. Kuta Utara, Kabupaten Badung, Bali 80361, Indonesia",
+        "lat": -8.6717861,
+        "lon": 115.16142219999998,
+        "lng": 115.16142219999998,
+        "rating": 4.8,
+        "userRatingCount": 14631,
+        "category": "cafe",
+        "distanceMeters": null,
+        "googleMapsUrl": "https://maps.google.com/?cid=16724097766783400118&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "googleMapsDirectionsUrl": "https://www.google.com/maps/dir/?api=1&destination=-8.6717861,115.16142219999998",
+        "source": "google_places_live"
+      },
+      {
+        "id": "ChIJEXl_sixF0i0RNm-xk4Fldfg",
+        "name": "ASAI Cafe",
+        "formattedAddress": "ASAI Village, Jl. Pura Sekaang, Jimbaran, Kec. Kuta Sel., Kabupaten Badung, Bali 80361, Indonesia",
+        "lat": -8.785067999999999,
+        "lon": 115.1565522,
+        "lng": 115.1565522,
+        "rating": 4.7,
+        "userRatingCount": 1365,
+        "category": "cafe",
+        "distanceMeters": null,
+        "googleMapsUrl": "https://maps.google.com/?cid=17903327500884340534&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "googleMapsDirectionsUrl": "https://www.google.com/maps/dir/?api=1&destination=-8.785067999999999,115.1565522",
+        "source": "google_places_live"
+      },
+      {
+        "id": "ChIJfbmIOhr10S0RjngWf57yJ5k",
+        "name": "Ritatkala Cafe",
+        "formattedAddress": "P8RQ+92C, Jl. Raya Kintamani, Batur Sel., Kec. Kintamani, Kabupaten Bangli, Bali 80652, Indonesia",
+        "lat": -8.256483099999999,
+        "lon": 115.33656309999999,
+        "lng": 115.33656309999999,
+        "rating": 4.8,
+        "userRatingCount": 3664,
+        "category": "cafe",
+        "distanceMeters": null,
+        "googleMapsUrl": "https://maps.google.com/?cid=11036056174445623438&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "googleMapsDirectionsUrl": "https://www.google.com/maps/dir/?api=1&destination=-8.256483099999999,115.33656309999999",
+        "source": "google_places_live"
+      },
+      {
+        "id": "ChIJ4SckuX8j0i0R-H1aI1I6x6A",
+        "name": "Tis Cafe",
+        "formattedAddress": "Jl. Raya Tegallalang, Tegallalang, Kec. Tegallalang, Kabupaten Gianyar, Bali 80561, Indonesia",
+        "lat": -8.4307112,
+        "lon": 115.27857709999999,
+        "lng": 115.27857709999999,
+        "rating": 4.8,
+        "userRatingCount": 12781,
+        "category": "coffee_shop",
+        "distanceMeters": null,
+        "googleMapsUrl": "https://maps.google.com/?cid=11585292690888752632&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "googleMapsDirectionsUrl": "https://www.google.com/maps/dir/?api=1&destination=-8.4307112,115.27857709999999",
+        "source": "google_places_live"
+      },
+      {
+        "id": "ChIJfa0L6xBH0i0R5n4bJj--7vQ",
+        "name": "Sisterfields",
+        "formattedAddress": "Jl. Kayu Cendana No.7, Seminyak, Kec. Kuta Utara, Kabupaten Badung, Bali 80361, Indonesia",
+        "lat": -8.6830307,
+        "lon": 115.15755180000001,
+        "lng": 115.15755180000001,
+        "rating": 4.8,
+        "userRatingCount": 17565,
+        "category": "cafe",
+        "distanceMeters": null,
+        "googleMapsUrl": "https://maps.google.com/?cid=17649253168143105766&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "googleMapsDirectionsUrl": "https://www.google.com/maps/dir/?api=1&destination=-8.6830307,115.15755180000001",
+        "source": "google_places_live"
+      },
+      {
+        "id": "ChIJYS6HuTNB0i0RF4iKQmW0MmE",
+        "name": "Café Bloom Bali",
+        "formattedAddress": "Jl. Danau Toba No.12, Sanur, Denpasar Selatan, Kota Denpasar, Bali 80228, Indonesia",
+        "lat": -8.6834645,
+        "lon": 115.26038720000001,
+        "lng": 115.26038720000001,
+        "rating": 4.9,
+        "userRatingCount": 364,
+        "category": "coffee_shop",
+        "distanceMeters": null,
+        "googleMapsUrl": "https://maps.google.com/?cid=7003858717515614231&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "googleMapsDirectionsUrl": "https://www.google.com/maps/dir/?api=1&destination=-8.6834645,115.26038720000001",
+        "source": "google_places_live"
+      }
+    ],
+    "timestamp": 1790616829450
+  },
+  "route_-8.7481_115.1672_-8.8100_115.1200": {
+    "data": {
+      "distanceMeters": 16369,
+      "distanceKm": 16,
+      "durationSec": 2635,
+      "durationMins": 44,
+      "encodedPolyline": "~elt@qn|}T`CIHICwDEoBHe@L[D]SePIeBAkAfDpAMiAE[Y_Ag@wAKq@Gq@IWYuB[wE[iCKoC@aB@eACgB|NbCdM`Bn@RdEt@pBXbJzA~C\\~L`CbC^vE|@pA^vDh@rCf@|H`BnIxAzBXrFjApD~@jJtCpDvApCnALHvFhCLFVZbAvBb@dAl@l@~@b@lKlEb@L|Cb@pAd@VLp@PxIzDzAj@|@Sh@ONORALFr@e@VEb@YXITBHNB`@Gr@WrB@XLLTBZAxAWZ@|@Vz@`@lBdA~Ar@zBp@fEd@`ALfFp@\\@v@PdA`@bGdBr@TbCr@|@X`FfCtBdAlCvA\\HjERxBPnEPpBZxLdChDn@vB\\bDl@^L|Bd@XLzHbBbBZbEjAbB\\x@JlBJhDBjAFdALfB`@tARtCh@nATb@N`@ZxBdBZTzBrBdAr@jAdA`BjAz@`@nCbAxCrATl@hAnFj@rBh@`C^|Ab@nF`@dE^fED|@PlBJp@LdA`@`BnApEP\\z@z@`Ax@jGxFz@v@`EzC~DlCdCzAlC~AhAv@`Al@l@t@d@hA`@bArA~BZdAZlA^bAd@jBZx@pAjEh@rBp@~Df@`FCfCGpBExCO|C?x@I`A@v@GrEBb@DNXRb@FpBFa@dDEHG@sASkAAeBDmANmARuBR[FURKPc@dBeA`CONi@VmAd@kDxAwAh@yDNo@J_B`@{Aj@m@`@o@XaBk@yDwA{Ai@y@q@UE_ANaAJmBBWA{Ae@u@GY?a@FgBj@]Z}ChAi@ZQA_@Y]GYB]LU?c@EW?y@MkAQaAU}@Ca@KaBk@}A]SDc@h@Wl@?J_BlH?HHd@?NIf@KJI@cDCcBk@iDy@Q?GFYz@k@vC@PTP",
+      "source": "google_routes_live"
+    },
+    "timestamp": 1790692982513
   }
 }

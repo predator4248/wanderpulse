@@ -1402,6 +1402,10 @@ async function updateCommuteResults() {
     };
   }
 
+  // Encoded polylines contain backslashes, which break when pasted into an inline onclick,
+  // so the route is kept here and read by viewCommuteOnGoogleMap
+  lastCommutePolyline = (data.googleRoute && data.googleRoute.encodedPolyline) || null;
+
   displayContainer.innerHTML = `
     <!-- Top Metadata Bar with Google Maps Direct Link -->
     <div class="commute-meta-bar">
@@ -1417,7 +1421,7 @@ async function updateCommuteResults() {
           </svg>
           Open Turn-by-Turn in Google Maps
         </a>
-        <button type="button" class="btn btn-outline btn-sm" onclick="window.viewCommuteOnGoogleMap('${originKey}', '${destKey}', ${data.googleRoute && data.googleRoute.encodedPolyline ? `'${data.googleRoute.encodedPolyline}'` : 'null'})" style="padding: 6px 14px; font-size: 0.8rem; font-weight: 700; color: var(--accent-cyan); border-color: rgba(6, 182, 212, 0.4);">
+        <button type="button" class="btn btn-outline btn-sm" onclick="window.viewCommuteOnGoogleMap('${originKey}', '${destKey}')" style="padding: 6px 14px; font-size: 0.8rem; font-weight: 700; color: var(--accent-cyan); border-color: rgba(6, 182, 212, 0.4);">
           🗺️ Show Route on Google Map
         </button>
       </div>
@@ -2015,7 +2019,9 @@ window.pinPlaceOnGoogleMap = function(lat, lng, name) {
   }
 };
 
-window.viewCommuteOnGoogleMap = function(origKey, destKey, encodedPolyline) {
+let lastCommutePolyline = null;
+
+window.viewCommuteOnGoogleMap = function(origKey, destKey, encodedPolyline = lastCommutePolyline) {
   window.switchRegionalMapView('google');
   const mapElem = document.getElementById('regional-map');
   if (mapElem) {
