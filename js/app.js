@@ -1719,6 +1719,8 @@ window.initGoogleMapsPlatform = function() {
   const container = document.getElementById('googleMapCanvas');
   if (!container) return;
   if (typeof google === 'undefined' || !google.maps) return;
+  // A slow load may have shown the timeout notice already; the map is here now
+  container.querySelectorAll('.gmap-problem').forEach(el => el.remove());
 
   try {
     const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
@@ -1757,6 +1759,8 @@ window.initGoogleMapsPlatform = function() {
     }
   } catch (err) {
     console.warn('Failed to initialize Google Maps Platform SDK:', err);
+    googleMapInstance = null;
+    showGoogleMapProblem(`The map failed to start: ${err.message}`);
   }
 };
 
@@ -2267,22 +2271,58 @@ function fallbackCopyText(text, successMsg) {
   document.body.removeChild(ta);
 }
 
+// Shows why the Google map is missing instead of leaving an empty box
+function showGoogleMapProblem(message) {
+  const container = document.getElementById('googleMapCanvas');
+  if (!container || (typeof googleMapInstance !== 'undefined' && googleMapInstance && !window.__gmAuthFailed)) return;
+  container.innerHTML = `
+    <div class="gmap-problem" role="status">
+      <strong>Google Map couldn't load</strong>
+      <span>${escapeHtml(message)}</span>
+      <button type="button" class="btn btn-outline btn-sm" onclick="location.reload()">Try again</button>
+    </div>`;
+  const badge = document.getElementById('googleMapsStatusBadge');
+  if (badge) badge.textContent = 'Google Maps Offline';
+}
+
+// Google calls this when it rejects the key (wrong key, billing off, or domain not allowed)
+window.gm_authFailure = function() {
+  window.__gmAuthFailed = true;
+  showGoogleMapProblem(`Google rejected the Maps API key for ${location.host}. Check the key's allowed websites and that billing is enabled in Google Cloud.`);
+};
+
 // The Maps key is no longer hard-coded in index.html; fetch it from the server and load the SDK
 function loadGoogleMapsSdk() {
   if (typeof google !== 'undefined' && google.maps) {
     window.initGoogleMapsPlatform();
     return;
   }
-  fetch('/api/maps/config')
-    .then(r => r.json())
-    .then(cfg => {
-      if (!cfg || !cfg.browserKey) return;
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(cfg.browserKey)}&libraries=places,geometry&loading=async&callback=initGoogleMapsPlatform`;
-      script.async = true;
-      document.head.appendChild(script);
+  fetch('/api/maps/config', { cache: 'no-store' })
+    .then(r => {
+      if (!r.ok) throw new Error(`server answered ${r.status}`);
+      return r.json();
     })
-    .catch(err => console.warn('[WanderPulse] Google Maps unavailable:', err));
+    .then(cfg => {
+      const key = cfg && (cfg.browserKey || cfg.apiKey);
+      if (!key) {
+        showGoogleMapProblem('The server has no Google Maps key. Set GOOGLE_MAPS_API_KEY in .env (or your host settings) and restart the server.');
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places,geometry&loading=async&callback=initGoogleMapsPlatform`;
+      script.async = true;
+      script.onerror = () => showGoogleMapProblem('The Google Maps script was blocked or could not download. An ad blocker, privacy extension or network filter is the usual cause; allow maps.googleapis.com and reload.');
+      document.head.appendChild(script);
+      setTimeout(() => {
+        if (typeof googleMapInstance === 'undefined' || !googleMapInstance) {
+          showGoogleMapProblem('Google Maps did not finish loading after 15 seconds. Check your connection and reload.');
+        }
+      }, 15000);
+    })
+    .catch(err => {
+      console.warn('[WanderPulse] Google Maps unavailable:', err);
+      showGoogleMapProblem(`Couldn't get the map settings from the WanderPulse server (${err.message}). Open the site through the Node server (npm start, then http://localhost:3000).`);
+    });
 }
 
 function initMapInteractions() {

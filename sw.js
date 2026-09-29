@@ -4,18 +4,18 @@
  * Cache-First with background revalidation for static assets.
  */
 
-const CACHE_NAME = 'wanderpulse-bali-v3.5-maproute';
+const CACHE_NAME = 'wanderpulse-bali-v3.6-mapload';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/css/main.css?v=3.4.0',
-  '/css/components.css?v=3.4.0',
-  '/css/3d-effects.css?v=3.4.0',
-  '/css/responsive.css?v=3.4.0',
-  '/js/data.js?v=3.4.0',
-  '/js/app.js?v=3.4.0',
-  '/js/tilt3d.js?v=3.4.0',
-  '/js/three-scene.js?v=3.4.0',
+  '/css/main.css?v=3.5.0',
+  '/css/components.css?v=3.5.0',
+  '/css/3d-effects.css?v=3.5.0',
+  '/css/responsive.css?v=3.5.0',
+  '/js/data.js?v=3.5.0',
+  '/js/app.js?v=3.5.0',
+  '/js/tilt3d.js?v=3.5.0',
+  '/js/three-scene.js?v=3.5.0',
   '/manifest.json'
 ];
 

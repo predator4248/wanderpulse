@@ -444,3 +444,29 @@
     transform: none !important; /* Disable on mobile touch to avoid jitter */
   }
 }
+
+/* Shown inside the map box when Google Maps can't load */
+.gmap-problem {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.gmap-problem strong {
+  color: var(--text-primary);
+  font-size: 1.05rem;
+}
+.gmap-problem span {
+  max-width: 460px;
+}
+[data-theme="light"] .map-google-wrapper {
+  background: #E2E8F0;
+}
